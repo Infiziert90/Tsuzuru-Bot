@@ -1,0 +1,238 @@
+import argparse
+import tempfile
+import aiohttp
+import asyncio
+import time
+import vapoursynth
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot
+import fvsfunc_getnative as fvs
+from handle_messages import private_msg_file, private_msg, delete_user_message
+from cmd_manager.decorators import register_command, add_argument
+
+# TODO Fix memory problem
+core = vapoursynth.core
+core.add_cache = False
+imwri = core.imwri if hasattr(core, 'imwri') else core.imwrif
+
+
+class GetNative:
+    user_cooldown = set()
+    plot_index = 0
+
+    def __init__(self, message, filename=None, kernel=None, b=None, c=None, taps=None, ar=None, approx=None):
+        self.minHeight = 500
+        self.maxHeight = 1080
+        self.plotScaling = 'log'
+        self.ar = ar
+        self.message = message
+        self.b = b
+        self.c = c
+        self.taps = taps
+        self.approx = approx
+        self.kernel = kernel
+        self.plot_title = filename
+        self.txtOutput = ""
+        self.path = None
+        self.plot_i = self.plot_index
+        self.tmp_dir = tempfile.TemporaryDirectory()
+
+        self.plot_index += 1
+        self.user_cooldown.add(self.message.author.id)
+
+    async def run(self):
+        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.remove(self.message.author.id))
+        img_url = self.message.attachments[0]["url"]
+        filename = self.message.attachments[0]["filename"]
+        self.path = self.tmp_dir.name
+        image = await self.get_image(img_url, self.message, filename)
+
+        if image is None:
+            self.user_cooldown.remove(self.message.author.id)
+            return True, None
+
+        src = imwri.Read(image)
+        if src.height < self.maxHeight:
+            self.maxHeight = src.height
+
+        if src.height < self.minHeight:
+            if src.height <= 100:
+                await private_msg(self.message, "Picture is too small.")
+                return
+            else:
+                self.minHeight = 100
+
+        if self.ar is 0:
+            self.ar = src.width / src.height
+
+        src_luma32 = core.resize.Point(src, format=vapoursynth.YUV444PS, matrix_s="709")
+        src_luma32 = core.std.ShufflePlanes(src_luma32, 0, vapoursynth.GRAY)
+        src_luma32 = core.std.Cache(src_luma32)
+        try:
+            clip = core.std.BlankClip()
+            core.fmtc.resample(clip, kernel=self.kernel)
+        except vapoursynth.Error:
+            self.user_cooldown.remove(self.message.author.id)
+            await private_msg(self.message, "Unknown kernel.")
+            return True, None
+
+        # descale each individual frame
+        resizer = core.fmtc.resample if self.approx else fvs.Resize
+        clip_list = []
+        for h in range(self.minHeight, self.maxHeight + 1):
+            clip_list.append(resizer(src_luma32, self.getw(h), h, kernel=self.kernel, a1=self.b, a2=self.c,
+                                     invks=True, taps=self.taps))
+        full_clip = core.std.Splice(clip_list, mismatch=True)
+        full_clip = fvs.Resize(full_clip, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b,
+                               a2=self.c, taps=self.taps)
+        full_clip = core.std.Expr([src_luma32 * full_clip.num_frames, full_clip], 'x y - abs dup 0.015 > swap 0 ?')
+        full_clip = core.std.CropRel(full_clip, 5, 5, 5, 5)
+        full_clip = core.std.PlaneStats(full_clip)
+        full_clip = core.std.Cache(full_clip)
+
+        tasks_pending = set()
+        futures = []
+        for frame_index in range(len(full_clip)):
+            fut = asyncio.ensure_future(asyncio.wrap_future(full_clip.get_frame_async(frame_index)))
+            tasks_pending.add(fut)
+            futures.append(fut)
+            while len(tasks_pending) >= (30 if self.approx else (core.num_threads + 3)):
+                _, tasks_pending = await asyncio.wait(tasks_pending, return_when=asyncio.FIRST_COMPLETED)
+
+        vals = [val.props.PlaneStatsAverage for val in await asyncio.gather(*futures)]
+        ratios, vals, best_value = self.analyze_results(vals)
+        self.save_plot(vals)
+        self.txtOutput += 'Raw data:\n'
+        self.txtOutput += 'Resolution\t | Relative Error\t | Relative difference from last\n'
+        for i, error in enumerate(vals):
+            self.txtOutput += f'{i + self.minHeight:4d}\t\t | {error:.6f}\t\t\t | {ratios[i]:.2f}\n'
+
+        with open(f"{self.path}/{self.plot_i}.txt", "w") as file_open:
+            file_open.writelines(self.txtOutput)
+
+        await private_msg_file(self.message, f"{self.path}/{self.plot_i}.txt", "Output from getnative.")
+        return False, best_value
+
+    def getw(self, h, only_even=True):
+        w = h * self.ar
+        w = int(round(w))
+        if only_even:
+            w = w // 2 * 2
+        return w
+
+    def analyze_results(self, vals):
+        ratios = [0.0]
+        resolutions = []
+        for i in range(1, len(vals)):
+            last = vals[i - 1]
+            current = vals[i]
+            ratios.append(0.0 if current == 0 else last / current)
+        sorted_array = sorted(ratios, reverse=True)  # make a copy of the array. we need the unsorted array later
+        max_difference = sorted_array[0]
+
+        differences = [s for s in sorted_array if s - 1 > (max_difference - 1) * 0.33][:5]
+
+        for diff in differences:
+            current = ratios.index(diff)
+            # don't allow results within 20px of each other
+            for res in resolutions:
+                if res - 20 < current < res + 20:
+                    break
+            else:
+                resolutions.append(current)
+        if self.kernel == 'bicubic':
+            bicubic_params = 'Scaling parameters:\nb = {:.2f}\nc = {:.2f}\n'.format(self.b, self.c)
+        else:
+            bicubic_params = ''
+        self.txtOutput += u'Resize Kernel: {:s}\n{:s}Native resolution(s) (best guess): {:s}\nPlease check the graph ' \
+                          u'manually for more accurate results\n\n'.format(
+            self.kernel, bicubic_params, 'p, '.join([str(r + self.minHeight) for r in resolutions]) + 'p')
+
+        return ratios, vals, "Native resolution(s) (best guess): {:s}".format(
+            'p, '.join([str(r + self.minHeight) for r in resolutions]) + 'p')
+
+    def save_plot(self, vals):
+        matplotlib.pyplot.style.use('dark_background')
+        matplotlib.pyplot.plot(range(self.minHeight, self.maxHeight + 1), vals, '.w-')
+        matplotlib.pyplot.title(self.plot_title)
+        matplotlib.pyplot.ylabel('Relative error')
+        matplotlib.pyplot.xlabel('Resolution')
+        matplotlib.pyplot.yscale(self.plotScaling)
+        matplotlib.pyplot.savefig(self.path + f'/{self.plot_i}.png')
+        matplotlib.pyplot.clf()
+
+    async def get_image(self, img_url, author, filename):
+        with aiohttp.ClientSession() as sess:
+            async with sess.get(img_url) as resp:
+                if resp.status == 200:
+                    with open(self.path + f"/{filename}", 'wb') as f:
+                        f.write(await resp.read())
+                    return self.path + f"/{filename}"
+                else:
+                    await private_msg(author, "Error cant load the picture. Pls wait and try it again.")
+                    return None
+
+
+def to_float(str_value):
+    if set(str_value) - set("0123456789./"):
+        raise argparse.ArgumentTypeError("Invalid characters in float parameter")
+    try:
+        return eval(str_value) if "/" in str_value else float(str_value)
+    except (SyntaxError, ZeroDivisionError, TypeError, ValueError):
+        raise argparse.ArgumentTypeError("Exception while parsing float") from None
+
+
+@register_command('getnative', is_enabled=None,  # TODO make is_enabled
+                  description='Find the native resolution(s) of upscaled material (mostly anime)')
+@add_argument('--kernel', '-k', dest='kernel', type=str, default='bilinear', help='Resize kernel to be used')
+@add_argument('--bicubic-b', '-b', dest='b', type=to_float, default="1/3", help='B parameter of bicubic resize')
+@add_argument('--bicubic-c', '-c', dest='c', type=to_float, default="1/3", help='C parameter of bicubic resize')
+@add_argument('--lanczos-taps', '-t', dest='taps', type=int, default=3, help='Taps parameter of lanczos resize')
+@add_argument('--aspect-ratio', '-a', dest='ar', type=to_float, default=0,
+              help='Force aspect ratio. Only useful for anamorphic input')
+@add_argument('--no-approx', '-no-ap', dest="approx", action="store_false",
+              help="Use descale instead of fmtc for better accuracy [really slow]")
+async def getnative(client, message, args):
+    if not message.attachments:
+        await delete_user_message(message)
+        return await private_msg(message, "Picture as attachment is needed.")
+    elif "width" in message.attachments[0]:
+        if message.attachments[0]["width"] * message.attachments[0]["height"] > 8300000:
+            await delete_user_message(message)
+            return await private_msg(message, "Picture is too big.")
+    else:
+        await delete_user_message(message)
+        return await private_msg(message, "Filetype is not allowed!")
+
+    if message.author.id in GetNative.user_cooldown:
+        await delete_user_message(message)
+        return await private_msg(message, "Pls use this command only every 1min.")
+
+    delete_message = await client.send_message(message.channel, "Working ...")
+
+    starttime = time.time()
+
+    kwargs = args.__dict__.copy()
+    del kwargs["command"]
+    kwargs["filename"] = message.attachments[0]["filename"]
+
+    get_native = GetNative(message, **kwargs)
+    forbidden_error, best_value = await get_native.run()
+    print(time.time() - starttime)
+    if not forbidden_error:
+        content = ''.join([
+            f"<@!{message.author.id}>",
+            f"\nKernel: {args.kernel} ",
+            f"B: {args.b:.2f} C: {args.c:.2f} " if args.kernel == "bicubic" else "",
+            f"AR: {args.ar} " if args.ar else "",
+            f"Taps: {args.taps} " if args.kernel == "lanczos" else "",
+            f"\n{best_value}",
+            f"\n[approximation]" if args.approx else "",
+        ])
+        await client.delete_message(delete_message)
+        await client.send_file(message.channel, get_native.path + f'/{get_native.plot_i}.png', content=content)
+    else:
+        await delete_user_message(message)
+
+    get_native.tmp_dir.cleanup()
