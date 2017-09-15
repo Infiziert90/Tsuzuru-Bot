@@ -12,8 +12,8 @@ class FaggotAlias:
         self.client = None
         self.all_member = {}
         self.all_member_nick = {}
-        #glob.faggot = defaultdict(int)
-        #glob.alias = {}
+        # glob.faggot = defaultdict(int)
+        # glob.alias = {}
 
     def init_client(self, client):
         self.client = client
