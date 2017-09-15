@@ -2,8 +2,8 @@ import argparse
 import tempfile
 import aiohttp
 import asyncio
-import time
 import vapoursynth
+from config import config
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot
@@ -37,13 +37,19 @@ class GetNative:
         self.path = None
         self.tmp_dir = tempfile.TemporaryDirectory()
 
-        self.user_cooldown.add(self.msg_author)
-
     async def run(self):
-        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.remove(self.msg_author))
         self.path = self.tmp_dir.name
-        image = await self.get_image()
 
+        if not self.approx and self.kernel.lower() not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
+            return True, 'descale: Invalid kernel specified.'
+
+        try:
+            clip = core.std.BlankClip()
+            core.fmtc.resample(clip, kernel=self.kernel)
+        except vapoursynth.Error:
+            return True, "fmtc: Invalid kernel specified."
+
+        image = await self.get_image()
         if image is None:
             return True, "Can't load image. Pls try it again later."
 
@@ -52,10 +58,7 @@ class GetNative:
             self.maxHeight = src.height
 
         if src.height < self.minHeight:
-            if src.height <= 100:
-                return True, "Picture is too small."
-            else:
-                self.minHeight = 100
+            self.minHeight = 100
 
         if self.ar is 0:
             self.ar = src.width / src.height
@@ -63,11 +66,9 @@ class GetNative:
         src_luma32 = core.resize.Point(src, format=vapoursynth.YUV444PS, matrix_s="709")
         src_luma32 = core.std.ShufflePlanes(src_luma32, 0, vapoursynth.GRAY)
         src_luma32 = core.std.Cache(src_luma32)
-        try:
-            clip = core.std.BlankClip()
-            core.fmtc.resample(clip, kernel=self.kernel)
-        except vapoursynth.Error:
-            return True, "Unknown kernel."
+
+        self.user_cooldown.add(self.msg_author)
+        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.remove(self.msg_author))
 
         # descale each individual frame
         resizer = core.fmtc.resample if self.approx else fvs.Resize
@@ -171,34 +172,31 @@ def to_float(str_value):
         raise argparse.ArgumentTypeError("Exception while parsing float") from None
 
 
-@register_command('getnative', is_enabled=None,  # TODO make is_enabled
+@register_command('getnative', is_enabled=None,
                   description='Find the native resolution(s) of upscaled material (mostly anime)')
 @add_argument('--kernel', '-k', dest='kernel', type=str, default='bilinear', help='Resize kernel to be used')
 @add_argument('--bicubic-b', '-b', dest='b', type=to_float, default="1/3", help='B parameter of bicubic resize')
 @add_argument('--bicubic-c', '-c', dest='c', type=to_float, default="1/3", help='C parameter of bicubic resize')
 @add_argument('--lanczos-taps', '-t', dest='taps', type=int, default=3, help='Taps parameter of lanczos resize')
-@add_argument('--aspect-ratio', '-a', dest='ar', type=to_float, default=0,
-              help='Force aspect ratio. Only useful for anamorphic input')
-@add_argument('--no-approx', '-no-ap', dest="approx", action="store_false",
-              help="Use descale instead of fmtc for better accuracy [really slow]")
+@add_argument('--aspect-ratio', '-a', dest='ar', type=to_float, default=0, help='Force aspect ratio. Only useful for'
+                                                                                ' anamorphic input')
+@add_argument('--no-approx', '-no-ap', dest="approx", action="store_false", help='Use descale instead of fmtc for'
+                                                                                 ' better accuracy [really slow]')
 async def getnative(client, message, args):
     if not message.attachments:
-        await delete_user_message(message)
         return await private_msg(message, "Picture as attachment is needed.")
-    elif "width" in message.attachments[0]:
-        if message.attachments[0]["width"] * message.attachments[0]["height"] > 8300000:
-            await delete_user_message(message)
-            return await private_msg(message, "Picture is too big.")
-    else:
-        await delete_user_message(message)
+    elif "width" not in message.attachments[0]:
         return await private_msg(message, "Filetype is not allowed!")
 
+    if message.attachments[0]["width"] * message.attachments[0]["height"] > 8300000:
+        return await private_msg(message, "Picture is too big.")
+    elif not (message.attachments[0]["height"] > 100 and message.attachments[0]["width"] > 100):
+        return await private_msg(message, "Picture is too small.")
+
     if message.author.id in GetNative.user_cooldown:
-        await delete_user_message(message)
         return await private_msg(message, "Pls use this command only every 1min.")
 
-    delete_message = await client.send_message(message.channel, "Working ...")
-    starttime = time.time()
+    delete_message = await client.send_file(message.channel, config.PICTURE.spam + "tenor_loading.gif")
 
     kwargs = args.__dict__.copy()
     del kwargs["command"]
@@ -210,7 +208,7 @@ async def getnative(client, message, args):
     msg_author = message.author.id
     get_native = GetNative(msg_author, **kwargs)
     forbidden_error, best_value = await get_native.run()
-    print(time.time() - starttime)
+
     if not forbidden_error:
         content = ''.join([
             f"<@!{msg_author}>",
@@ -221,11 +219,12 @@ async def getnative(client, message, args):
             f"\n{best_value}",
             f"\n[approximation]" if args.approx else "",
         ])
-        await client.delete_message(delete_message)
         await private_msg_file(message, f"{get_native.path}/{filename}.txt", "Output from getnative.")
-        await client.send_file(message.channel, get_native.path + f'/{filename}.png', content=content)
+        await client.send_file(message.channel, get_native.path + f'/{filename}', content=content)
+        await client.send_file(message.channel, get_native.path + f'/{filename}.png')
     else:
-        getnative.user_cooldown.remove(msg_author)
         await private_msg(message, best_value)
-        await delete_user_message(message)
+
+    await delete_user_message(message)
+    await delete_user_message(delete_message)
     get_native.tmp_dir.cleanup()
