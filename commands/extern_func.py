@@ -23,7 +23,7 @@ translate = YandexTranslate(config.MAIN.yandex)
 # TODO Replace request with aiohttp
 
 
-def ddg_search(keywords, max_results=None):
+async def ddg_search(keywords, max_results=None):
     url = 'https://duckduckgo.com/html/'
     params = {'q': keywords, 's': '0', }
 
@@ -35,7 +35,7 @@ def ddg_search(keywords, max_results=None):
         results = [a.get('href') for a in doc.cssselect('#links .links_main a')]
         for result in results:
             yield result
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
             yielded += 1
             if max_results and yielded >= max_results:
                 return
@@ -92,7 +92,8 @@ async def google(client, message, args):
 @add_argument('keyword', help='Keyword for your search.')
 async def ddg(client, message, args):
     await delete_user_message(message)
-    results = list(ddg_search(args.keyword, max_results=5))
+    results =  [x async for x in ddg_search(args.keyword, max_results=5)]
+    results = list(results)
     if not results:
         await client.send_message(message.channel, 'Nothing Found')
     else:
@@ -179,7 +180,7 @@ async def dict_cc(client, message, args):
 @register_command('translate', is_enabled=None, description='Translate a message for you.')
 @add_argument('message_id', help="Message ID for translation.")
 @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
-async def dict_cc(client, message, args):
+async def translate(client, message, args):
     await delete_user_message(message)
 
     try:

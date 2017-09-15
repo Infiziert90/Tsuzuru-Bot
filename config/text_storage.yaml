@@ -39,66 +39,36 @@ bot_bot:
     **>>eng** für Englisch
     **>>ger** für Deutsch
     Beachte, dass du mit dem Ausloggen direkt gekickt wirst und nicht alle Channel sehen kannst, ohne in einer der beiden Gruppen zu sein.
-
-  channel_overview: |
-    __**English**__
-    __**Channel overview for the main channels**__
-
-    **#public_bot** -> Bot commands
-    **#public_ger** -> General discussions in German when there is no specific channel for them
-    **#public_eng** -> General discussions in English when there is no specific channel for them
-    **#japan_stuff** -> Discussions and questions about anime, manga, and related topics
-    **#pc_nerd_stuff** -> Discussions and questions about computers and programming
-    **#game_stuff** -> Discussions and questions about games (not necessary video games)
-    **#memes** -> Pictures and videos of memes and other internet stuff
-    **#music** -> Here you can post music
-    **#fuehls** -> Here you can let off your feels
-    **#waifus_and_husbandos** -> Here you can post your waifus and husbandos
-    **#voice** -> Text channel for the voice channels
-
-
-    __**Deutsch**__
-    __**Channel-Übersicht für die Hauptchannel**__
-
-    **#public_bot** -> Botkommandos
-    **#public_ger** -> Allgemeine Diskussionen auf deutsch, für die es keine Channel gibt
-    **#public_eng** -> Allgemeine Diskussionen auf englisch, für die es keine Channel gibt
-    **#japan_stuff** -> Diskussionen und Fragen zum Thema Anime, Manga und alles, was irgendwie damit zu tun hat
-    **#pc_nerd_stuff** -> Diskussionen und Fragen zum Thema Computer und Programmierung
-    **#game_stuff** -> Diskussionen und Fragen zum Thema Spiele (nicht zwingend Videospiele)
-    **#memes** -> Bilder und Videos zu Memes und anderem Internet-Kram
-    **#music** -> Hier kann Musik gepostet werden
-    **#fuehls** -> Hier kann man seine Fühls rauslassen
-    **#waifus_and_husbandos** -> Hier können Waifus und Husbandos gepostet werden
-    **#voice** -> Textchannel für die Sprachchannel
-
   command_overview: |
     __**English**__
-    Commands you can use in this channel to get permissions to view the following channels:
+    Commands you can use in this channel to get permissions to view the following channels/categories:
 
-    #encode-autism, #type_kfx-autism, #goethe_qc-autism, #language_training | **>>subs**
-    #nsfw-anime_manga, #nsfw-yuri, #nsfw-yaoi_x_gbtq-plus, #nsfw-feet_legs | **>>nsfw**
-    #nsfl_anime-manga_gore | **>>nsfl**
-    #dank_memes, #waifu_husbando_shitposting | **>>shitposting**
-    (Every other channel) | **>>eng**
+    #public_eng, "Basic" (#asian_content, #games etc.), "Releases", "Voice" | **>>eng**
+    #public_jap | **>>role jap**
+    "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
+    "NSFW" (#nsfw-anime_manga etc.) | **>>role nsfw**
+    #nsfl-anime-manga_gore | **>>role nsfl**
+    "Trash" (#logs etc.) | **>>role special**
+    "Archive" (Alte read-only Channel) | **>>role archive**
 
-    For example: **>>subs**
+    For example: **>>role subs**
 
 
     __**Deutsch**__
-    Befehle, die du in diesem Channel nutzen kannst, um die folgenden Channel zu sehen:
+    Befehle, die du in diesem Channel nutzen kannst, um die folgenden Channel/Kategorien zu sehen:
 
-    #encode-autism, #type_kfx-autism, #goethe_qc-autism, #language_training | **>>subs**
-    #nsfw-anime_manga, #nsfw-yuri, #nsfw-yaoi_x_gbtq-plus, #nsfw-feet_legs | **>>nsfw**
-    #nsfl_anime-manga_gore | **>>nsfl**
-    #dank_memes, #waifu_husbando_shitposting | **>>shitposting**
-    (Alle anderen Channel) | **>>ger**
+    #public_ger, "Basic" (#asian_content, #games etc.), "Releases", "Voice" | **>>ger**
+    #public_jap | **>>role jap**
+    "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
+    "NSFW" (#nsfw-anime_manga etc.) | **>>role nsfw**
+    #nsfl-anime-manga_gore | **>>role nsfl**
+    "Trash" (#logs etc.) | **>>role special**
+    "Archive" (Alte read-only Channel) | **>>role archive**
 
-    Als Beispiel: **>>subs**
-
+    Als Beispiel: **>>role subs**
   help_message: |
     __**Public link**__
     https://discord.gg/V5vaWwr
 
-    If you need any help, write "@Support" with your request in the "#help" channel.
-    Sofern du irgendwelche Hilfe brauchst, schreib "@Support" mit deinem Anliegen im "#help" Channel.
+    If you need any help, write "@Support" with your request in #welcome channel.
+    Sofern du irgendwelche Hilfe brauchst, schreib "@Support" mit deinem Anliegen im #welcome Channel.
