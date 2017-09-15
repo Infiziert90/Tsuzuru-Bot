@@ -1,3 +1,4 @@
+import gc
 import argparse
 import tempfile
 import aiohttp
@@ -32,16 +33,17 @@ class GetNative:
         self.taps = taps
         self.approx = approx
         self.kernel = kernel
-        self.filename = filename
         self.txtOutput = ""
-        self.path = None
+        self.filename = filename
         self.tmp_dir = tempfile.TemporaryDirectory()
-
-    async def run(self):
         self.path = self.tmp_dir.name
 
-        if not self.approx and self.kernel.lower() not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
-            return True, 'descale: Invalid kernel specified.'
+    async def run(self):
+        self.user_cooldown.add(self.msg_author)
+        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.discard(self.msg_author))
+
+        if not self.approx and self.kernel not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
+            return True, f'descale: kernel {self.kernel} only supports approximation.'
 
         try:
             clip = core.std.BlankClip()
@@ -67,9 +69,6 @@ class GetNative:
         src_luma32 = core.std.ShufflePlanes(src_luma32, 0, vapoursynth.GRAY)
         src_luma32 = core.std.Cache(src_luma32)
 
-        self.user_cooldown.add(self.msg_author)
-        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.remove(self.msg_author))
-
         # descale each individual frame
         resizer = core.fmtc.resample if self.approx else fvs.Resize
         clip_list = []
@@ -85,15 +84,18 @@ class GetNative:
         full_clip = core.std.Cache(full_clip)
 
         tasks_pending = set()
-        futures = []
+        futures = {}
+        vals = []
         for frame_index in range(len(full_clip)):
             fut = asyncio.ensure_future(asyncio.wrap_future(full_clip.get_frame_async(frame_index)))
             tasks_pending.add(fut)
-            futures.append(fut)
-            while len(tasks_pending) >= (30 if self.approx else (core.num_threads + 3)):
-                _, tasks_pending = await asyncio.wait(tasks_pending, return_when=asyncio.FIRST_COMPLETED)
+            futures[fut] = frame_index
+            while len(tasks_pending) >= core.num_threads * (2 if self.approx else 1) + 2:
+                tasks_done, tasks_pending = await asyncio.wait(
+                    tasks_pending, return_when=asyncio.FIRST_COMPLETED)
+                vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]
 
-        vals = [val.props.PlaneStatsAverage for val in await asyncio.gather(*futures)]
+        vals = [v for _, v in sorted(vals)]
         ratios, vals, best_value = self.analyze_results(vals)
         self.save_plot(vals)
         self.txtOutput += 'Raw data:\nResolution\t | Relative Error\t | Relative difference from last\n'
@@ -118,8 +120,8 @@ class GetNative:
         for i in range(1, len(vals)):
             last = vals[i - 1]
             current = vals[i]
-            ratios.append(0.0 if current == 0 else last / current)
-        sorted_array = sorted(ratios, reverse=True)  # make a copy of the array. we need the unsorted array later
+            ratios.append(current and last / current)
+        sorted_array = sorted(ratios, reverse=True)  # make a copy of the array because we need the unsorted array later
         max_difference = sorted_array[0]
 
         differences = [s for s in sorted_array if s - 1 > (max_difference - 1) * 0.33][:5]
@@ -132,10 +134,7 @@ class GetNative:
                     break
             else:
                 resolutions.append(current)
-        if self.kernel == 'bicubic':
-            bicubic_params = 'Scaling parameters:\nb = {:.2f}\nc = {:.2f}\n'.format(self.b, self.c)
-        else:
-            bicubic_params = ''
+        bicubic_params = self.kernel == 'bicubic' and f'Scaling parameters:\nb = {self.b:.2f}\nc = {self.c:.2f}\n' or ''
         best_values = f"{'p, '.join([str(r + self.minHeight) for r in resolutions])}p"
         self.txtOutput += f"Resize Kernel: {self.kernel}\n{bicubic_params}Native resolution(s) (best guess): " \
                           f"{best_values}\nPlease check the graph manually for more accurate results\n\n"
@@ -149,18 +148,17 @@ class GetNative:
         matplotlib.pyplot.ylabel('Relative error')
         matplotlib.pyplot.xlabel('Resolution')
         matplotlib.pyplot.yscale(self.plotScaling)
-        matplotlib.pyplot.savefig(self.path + f'/{self.filename}.png')
+        matplotlib.pyplot.savefig(f'{self.path}/{self.filename}.png')
         matplotlib.pyplot.clf()
 
     async def get_image(self):
         with aiohttp.ClientSession() as sess:
             async with sess.get(self.img_url) as resp:
-                if resp.status == 200:
-                    with open(self.path + f"/{self.filename}", 'wb') as f:
-                        f.write(await resp.read())
-                    return self.path + f"/{self.filename}"
-                else:
+                if resp.status != 200:
                     return None
+                with open(f"{self.path}/{self.filename}", 'wb') as f:
+                    f.write(await resp.read())
+                return f"{self.path}/{self.filename}"
 
 
 def to_float(str_value):
@@ -174,7 +172,7 @@ def to_float(str_value):
 
 @register_command('getnative', is_enabled=None,
                   description='Find the native resolution(s) of upscaled material (mostly anime)')
-@add_argument('--kernel', '-k', dest='kernel', type=str, default='bilinear', help='Resize kernel to be used')
+@add_argument('--kernel', '-k', dest='kernel', type=str.lower, default='bilinear', help='Resize kernel to be used')
 @add_argument('--bicubic-b', '-b', dest='b', type=to_float, default="1/3", help='B parameter of bicubic resize')
 @add_argument('--bicubic-c', '-c', dest='c', type=to_float, default="1/3", help='C parameter of bicubic resize')
 @add_argument('--lanczos-taps', '-t', dest='taps', type=int, default=3, help='Taps parameter of lanczos resize')
@@ -208,6 +206,7 @@ async def getnative(client, message, args):
     msg_author = message.author.id
     get_native = GetNative(msg_author, **kwargs)
     forbidden_error, best_value = await get_native.run()
+    gc.collect()
 
     if not forbidden_error:
         content = ''.join([
