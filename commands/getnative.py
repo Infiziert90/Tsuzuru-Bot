@@ -78,6 +78,9 @@ class GetNative:
         full_clip = core.std.Splice(clip_list, mismatch=True)
         full_clip = fvs.Resize(full_clip, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b, a2=self.c,
                                taps=self.taps)
+        if self.ar != src.width / src.height:
+            src_luma32 = resizer(src_luma32, self.getw(src.height), src.height, kernel=self.kernel,
+                                 a1=self.b, a2=self.c, taps=self.taps)
         full_clip = core.std.Expr([src_luma32 * full_clip.num_frames, full_clip], 'x y - abs dup 0.015 > swap 0 ?')
         full_clip = core.std.CropRel(full_clip, 5, 5, 5, 5)
         full_clip = core.std.PlaneStats(full_clip)
@@ -94,7 +97,8 @@ class GetNative:
                 tasks_done, tasks_pending = await asyncio.wait(
                     tasks_pending, return_when=asyncio.FIRST_COMPLETED)
                 vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]
-
+        tasks_done, _ = await asyncio.wait(tasks_pending)
+        vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]
         vals = [v for _, v in sorted(vals)]
         ratios, vals, best_value = self.analyze_results(vals)
         self.save_plot(vals)
