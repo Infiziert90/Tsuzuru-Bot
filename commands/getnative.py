@@ -1,3 +1,4 @@
+import gc
 import argparse
 import tempfile
 import aiohttp
@@ -11,7 +12,6 @@ import fvsfunc_getnative as fvs
 from handle_messages import private_msg_file, private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 
-# TODO Fix memory problem
 core = vapoursynth.core
 core.add_cache = False
 imwri = core.imwri if hasattr(core, 'imwri') else core.imwrif
