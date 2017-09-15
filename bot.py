@@ -30,6 +30,10 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    for role in message.role_mentions:
+        if role.id == "239175340180635649":  # ex support role
+            return
+
     if message.server is not None:
         server_id = message.server.id
         server_name = message.server.name
@@ -88,9 +92,9 @@ def main():
     logging.info("Start discord run")
     message_init(client)
     # bot-Bot
-    # client.run(config.MAIN.login_token)
+    client.run(config.MAIN.login_token)
     # Test-Bot
-    client.run(config.MAIN.test_token)
+    # client.run(config.MAIN.test_token)
 
 if __name__ == "__main__":
     main()
