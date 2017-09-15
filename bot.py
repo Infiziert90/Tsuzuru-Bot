@@ -84,8 +84,8 @@ async def on_member_join(mem):
         em = discord.Embed(description=help_text["bot_bot"]["member_join"], color=333333)
         member_message = await client.send_message(channel, embed=em)
         await client.wait_for_message(channel=channel, author=mem, timeout=300)
-        await client.delete_message(member_message)
-        await client.delete_message(mention)
+        await delete_user_message(member_message)
+        await delete_user_message(mention)
 
 
 def main():
