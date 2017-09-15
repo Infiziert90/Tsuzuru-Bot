@@ -3,10 +3,15 @@ from functools import partial
 
 core = vs.core
 
-# From https://github.com/Irrational-Encoding-Wizardry/fvsfunc/blob/master/fvsfunc.py
+'''
+This is shamelessly ripped from fvsfunc https://github.com/Irrational-Encoding-Wizardry/fvsfunc by frechdachs
+to remove unnecessary dependencies.
+'''
+
+
 # Wrapper with fmtconv syntax that tries to use the internal resizers whenever it is possible
 def Resize(src, w, h, sx=None, sy=None, sw=None, sh=None, kernel='spline36', taps=None, a1=None,
-             a2=None, a3=None, invks=None, invkstaps=None, fulls=None, fulld=None):
+           a2=None, a3=None, invks=None, invkstaps=None, fulls=None, fulld=None):
 
     bits = src.format.bits_per_sample
 
@@ -39,26 +44,6 @@ def Resize(src, w, h, sx=None, sy=None, sw=None, sh=None, kernel='spline36', tap
                                        src_left=sx, src_top=sy, src_width=sw, src_height=sh)
     return Depth(core.fmtc.resample(src, w, h, sx=sx, sy=sy, sw=sw, sh=sh, kernel=kernel, taps=taps,
                               a1=a1, a2=a2, a3=a3, invks=invks, invkstaps=invkstaps, fulls=fulls, fulld=fulld), bits)
-
-
-def Debilinear(src, width, height, yuv444=False, gray=False, chromaloc=None):
-    return descale_getnative(src, width, height, kernel='bilinear', b=None, c=None, taps=None, yuv444=yuv444, gray=gray, chromaloc=chromaloc)
-
-
-def Debicubic(src, width, height, b=1/3, c=1/3, yuv444=False, gray=False, chromaloc=None):
-    return descale_getnative(src, width, height, kernel='bicubic', b=b, c=c, taps=None, yuv444=yuv444, gray=gray, chromaloc=chromaloc)
-
-
-def Delanczos(src, width, height, taps=3, yuv444=False, gray=False, chromaloc=None):
-    return descale_getnative(src, width, height, kernel='lanczos', b=None, c=None, taps=taps, yuv444=yuv444, gray=gray, chromaloc=chromaloc)
-
-
-def Despline16(src, width, height, yuv444=False, gray=False, chromaloc=None):
-    return descale_getnative(src, width, height, kernel='spline16', b=None, c=None, taps=None, yuv444=yuv444, gray=gray, chromaloc=chromaloc)
-
-
-def Despline36(src, width, height, yuv444=False, gray=False, chromaloc=None):
-    return descale_getnative(src, width, height, kernel='spline36', b=None, c=None, taps=None, yuv444=yuv444, gray=gray, chromaloc=chromaloc)
 
 
 def descale_getnative(src, width, height, kernel='bilinear', b=1/3, c=1/3, taps=3, yuv444=False, gray=False, chromaloc=None):
@@ -97,10 +82,6 @@ def to_grays(src):
 
 def to_rgbs(src):
     return src.resize.Point(format=vs.RGBS)
-
-
-def get_plane(src, plane):
-    return core.std.ShufflePlanes(src, plane, vs.GRAY)
 
 
 def get_descale_getnative_filter(b, c, taps, kernel):
