@@ -22,14 +22,14 @@ To run this project you will need:
 * Python 3.6
 * Pip for Python
 * Your own set of Discord credentials to use with Bots
-* Moduls from requirements.txt
+* Modules from requirements.txt
 
 Bots can be copied freely from the source code if you just wish to make a bot. 
 However running this repository requires the above listed requirements.
 
 # Requirements for getnative
 
-To run this functions you will need:
+To run this function you will need:
 
 * Vapoursynth
 * [Descale](https://github.com/Infiziert90/vapoursynth-descale)

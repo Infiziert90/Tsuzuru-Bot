@@ -24,7 +24,7 @@ async def post_fansub(client, message, args):
 
     embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    channel = client.get_channel("325052412681256960")
+    channel = client.get_channel("221920731871707136")
     await client.send_message(channel, embed=embed)
 
 
@@ -48,5 +48,5 @@ async def multi_fansub(client, message, args):
 
     embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    channel = client.get_channel("325052412681256960")
+    channel = client.get_channel("221920731871707136")
     await client.send_message(channel, embed=embed)

@@ -68,7 +68,7 @@ class GetNative:
         src_luma32 = core.std.Cache(src_luma32)
 
         self.user_cooldown.add(self.msg_author)
-        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.remove(self.msg_author))
+        asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.discard(self.msg_author))
 
         # descale each individual frame
         resizer = core.fmtc.resample if self.approx else fvs.Resize
