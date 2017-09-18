@@ -41,10 +41,6 @@ async def on_message(message):
         server_id = "0"
         server_name = "Private Message"
 
-    if message.content.startswith(">>"):
-        today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-        logging.info("Date: {} User: {} Server: {} Command {} ".format(today, message.author, server_name, message.content[:50]))
-
     # TODO Deduplicate messages (or try to)
     # if not message.author.id == "292646750743691266":
     #     if not message.content.startswith(">>"):
@@ -66,11 +62,33 @@ async def on_message(message):
     if not message.content.startswith(">>"):
         return
 
+    if message.content.startswith(">>"):
+        today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
+        logging.info("Date: {} User: {} Server: {} Command {} ".format(today, message.author, server_name, message.content[:50]))
+
     arg_string = message.content[2:].split("\n", 1)[0]
     try:
         args = parser.parse_args(shlex.split(arg_string))
     except (argparse.ArgumentError, HelpException) as e:
         await delete_user_message(message)
+        return await private_msg_code(message, str(e))
+
+    return await dispatcher.handle(args.command, client, message, args)
+
+
+@client.event
+async def on_message_edit(_, message):
+    for role in message.role_mentions:
+        if role.id == "239175340180635649":  # ex support role
+            return
+
+    if not message.content.startswith(">>"):
+        return
+
+    arg_string = message.content[2:].split("\n", 1)[0]
+    try:
+        args = parser.parse_args(shlex.split(arg_string))
+    except (argparse.ArgumentError, HelpException) as e:
         return await private_msg_code(message, str(e))
 
     return await dispatcher.handle(args.command, client, message, args)

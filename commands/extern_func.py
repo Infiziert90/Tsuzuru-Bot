@@ -78,7 +78,7 @@ def lookup_merriam(query):
     return defs
 
 
-@register_command('google', is_enabled=None, description='Search a keyword with google')
+@register_command('google', description='Search a keyword with google')
 @add_argument('keyword', help='Keyword for your search.')
 async def google(client, message, args):
     await delete_user_message(message)
@@ -88,7 +88,7 @@ async def google(client, message, args):
     await client.send_message(message.channel, embed=em)
 
 
-@register_command('ddg', is_enabled=None, description='Search a keyword with duckduckgo')
+@register_command('ddg', description='Search a keyword with duckduckgo')
 @add_argument('keyword', help='Keyword for your search.')
 async def ddg(client, message, args):
     await delete_user_message(message)
@@ -102,7 +102,7 @@ async def ddg(client, message, args):
         await client.send_message(message.channel, embed=em)
 
 
-@register_command('jisho', is_enabled=None, description='Translate a keyword with jisho.')
+@register_command('jisho', description='Translate a keyword with jisho.')
 @add_argument('keyword', help='Keyword for translation.')
 async def jisho(client, message, args):
     await delete_user_message(message)
@@ -127,7 +127,7 @@ async def jisho(client, message, args):
     await client.send_message(message.channel, embed=embed)
 
 
-@register_command('define', is_enabled=None, description='Define a word with merriam.')
+@register_command('define', description='Define a word with merriam.')
 @add_argument('keyword', help='Keyword for defination.')
 @add_argument('--type', '-t', help="Only show definitions for this word type.")
 async def merriam(client, message, args):
@@ -177,7 +177,7 @@ async def dict_cc(client, message, args):
     await client.send_message(message.channel, embed=embed)
 
 
-@register_command('translate', is_enabled=None, description='Translate a message for you.')
+@register_command('translate', description='Translate a message for you.')
 @add_argument('message_id', help="Message ID for translation.")
 @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
 async def translate(client, message, args):

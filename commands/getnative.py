@@ -3,6 +3,7 @@ import argparse
 import tempfile
 import aiohttp
 import asyncio
+import logging
 import vapoursynth
 from config import config
 import matplotlib as mpl
@@ -20,10 +21,11 @@ imwri = core.imwri if hasattr(core, 'imwri') else core.imwrif
 class GetNative:
     user_cooldown = set()
 
-    def __init__(self, msg_author, img_url=None, filename=None, kernel=None, b=None, c=None, taps=None, ar=None, approx=None):
-        self.minHeight = 500
-        self.maxHeight = 1080
+    def __init__(self, msg_author, img_url=None, filename=None, kernel=None, b=None, c=None, taps=None, ar=None,
+                 approx=None, min_h=None, max_h=None):
         self.plotScaling = 'log'
+        self.minHeight = min_h
+        self.maxHeight = max_h
         self.ar = ar
         self.msg_author = msg_author
         self.img_url = img_url
@@ -42,7 +44,7 @@ class GetNative:
         asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.discard(self.msg_author))
 
         if not self.approx and self.kernel not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
-            return True, f'descale: kernel {self.kernel} only supports approximation.'
+            return True, f'descale: kernel is not {self.kernel} supported. Try -ap for approximation.'
 
         try:
             clip = core.std.BlankClip()
@@ -55,12 +57,6 @@ class GetNative:
             return True, "Can't load image. Pls try it again later."
 
         src = imwri.Read(image)
-        if src.height < self.maxHeight:
-            self.maxHeight = src.height
-
-        if src.height < self.minHeight:
-            self.minHeight = 100
-
         if self.ar is 0:
             self.ar = src.width / src.height
 
@@ -78,8 +74,8 @@ class GetNative:
         full_clip = fvs.Resize(full_clip, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b, a2=self.c,
                                taps=self.taps)
         if self.ar != src.width / src.height:
-            src_luma32 = resizer(src_luma32, self.getw(src.height), src.height, kernel=self.kernel,
-                                 a1=self.b, a2=self.c, taps=self.taps)
+            src_luma32 = resizer(src_luma32, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b,
+                                 a2=self.c, taps=self.taps)
         full_clip = core.std.Expr([src_luma32 * full_clip.num_frames, full_clip], 'x y - abs dup 0.015 > swap 0 ?')
         full_clip = core.std.CropRel(full_clip, 5, 5, 5, 5)
         full_clip = core.std.PlaneStats(full_clip)
@@ -96,6 +92,7 @@ class GetNative:
                 tasks_done, tasks_pending = await asyncio.wait(
                     tasks_pending, return_when=asyncio.FIRST_COMPLETED)
                 vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]
+
         tasks_done, _ = await asyncio.wait(tasks_pending)
         vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]
         vals = [v for _, v in sorted(vals)]
@@ -173,29 +170,40 @@ def to_float(str_value):
         raise argparse.ArgumentTypeError("Exception while parsing float") from None
 
 
-@register_command('getnative', is_enabled=None,
-                  description='Find the native resolution(s) of upscaled material (mostly anime)')
+@register_command('getnative', description='Find the native resolution(s) of upscaled material (mostly anime)')
 @add_argument('--kernel', '-k', dest='kernel', type=str.lower, default='bilinear', help='Resize kernel to be used')
 @add_argument('--bicubic-b', '-b', dest='b', type=to_float, default="1/3", help='B parameter of bicubic resize')
 @add_argument('--bicubic-c', '-c', dest='c', type=to_float, default="1/3", help='C parameter of bicubic resize')
 @add_argument('--lanczos-taps', '-t', dest='taps', type=int, default=3, help='Taps parameter of lanczos resize')
-@add_argument('--aspect-ratio', '-a', dest='ar', type=to_float, default=0, help='Force aspect ratio. Only useful for'
-                                                                                ' anamorphic input')
-@add_argument('--no-approx', '-no-ap', dest="approx", action="store_false", help='Use descale instead of fmtc for'
-                                                                                 ' better accuracy [really slow]')
+@add_argument('--aspect-ratio', '-ar', dest='ar', type=to_float, default=0, help='Force aspect ratio. Only useful for anamorphic input')
+@add_argument('--approx', '-ap', dest="approx", action="store_true", help='Use fmtc instead of descale [faster, loss of accuracy]')
+@add_argument('--minHeigth', '-min', dest="min_h", type=int, default=500, help='Minimum height to consider')
+@add_argument('--maxHeigth', '-max', dest="max_h", type=int, default=1000, help='Maximum height to consider [max 1080 atm]')
 async def getnative(client, message, args):
     if not message.attachments:
+        await delete_user_message(message)
         return await private_msg(message, "Picture as attachment is needed.")
     elif "width" not in message.attachments[0]:
+        await delete_user_message(message)
         return await private_msg(message, "Filetype is not allowed!")
-
-    if message.attachments[0]["width"] * message.attachments[0]["height"] > 8300000:
-        return await private_msg(message, "Picture is too big.")
-    elif not (message.attachments[0]["height"] > 100 and message.attachments[0]["width"] > 100):
-        return await private_msg(message, "Picture is too small.")
 
     if message.author.id in GetNative.user_cooldown:
         return await private_msg(message, "Pls use this command only every 1min.")
+
+    width = message.attachments[0]["width"]
+    height = message.attachments[0]["height"]
+    if width * height > 8300000:
+        await delete_user_message(message)
+        return await private_msg(message, "Picture is too big.")
+    elif args.min_h >= height:
+        return await private_msg(message, f"Picture is to small or equal for min height {args.min_h}.")
+    elif args.min_h >= args.max_h:
+        return await private_msg(message, f"Your min height is bigger or equal to max height.")
+    elif args.max_h - args.min_h > 1000:
+        return await private_msg(message, f"Max - min height bigger than 1000 is not allowed")
+    elif args.max_h > height:
+        await private_msg(message, f"Your max height cant be bigger than your image dimensions. New max height is {height}")
+        args.max_h = height
 
     delete_message = await client.send_file(message.channel, config.PICTURE.spam + "tenor_loading.gif")
 
@@ -208,7 +216,12 @@ async def getnative(client, message, args):
 
     msg_author = message.author.id
     get_native = GetNative(msg_author, **kwargs)
-    forbidden_error, best_value = await get_native.run()
+    try:
+        forbidden_error, best_value = await get_native.run()
+    except BaseException as err:
+        forbidden_error = True
+        best_value = "Error in Getnative, can't process your picture."
+        logging.info(f"Error in getnative: {err}")
     gc.collect()
 
     if not forbidden_error:
@@ -219,7 +232,7 @@ async def getnative(client, message, args):
             f"AR: {args.ar} " if args.ar else "",
             f"Taps: {args.taps} " if args.kernel == "lanczos" else "",
             f"\n{best_value}",
-            f"\n[approximation]" if args.approx else "",
+            f"" if not args.approx else "\n[approximation]",
         ])
         await private_msg_file(message, f"{get_native.path}/{filename}.txt", "Output from getnative.")
         await client.send_file(message.channel, get_native.path + f'/{filename}', content=content)
