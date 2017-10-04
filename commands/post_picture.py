@@ -2,7 +2,7 @@ import os
 import discord
 from config import config
 from handle_messages import delete_user_message
-from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel
+from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel, command_not_allowed
 from cmd_manager.decorators import register_command
 
 yuri_folder = config.PICTURE.yuri
@@ -41,13 +41,13 @@ async def yaoi(client, message, args):
     await send_picture(client, yaoi_folder, "328942447784624128")
 
 
-@register_command('miles', description='Post the miles picture.')
+@register_command('miles', is_enabled=command_not_allowed, description='Post the miles picture.')
 async def miles(client, message, args):
     await delete_user_message(message)
     await client.send_file(message.channel, spam_folder + "miles.jpg", content=f"From: {message.author.display_name}")
 
 
-@register_command('paid', description='Post the getting_paid picture.')
+@register_command('paid', is_enabled=command_not_allowed, description='Post the getting_paid picture.')
 async def paid(client, message, args):
     await delete_user_message(message)
     await client.send_file(message.channel, spam_folder + "getting_paid.jpg", content=f"From: {message.author.display_name}")

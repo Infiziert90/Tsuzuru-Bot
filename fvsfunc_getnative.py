@@ -22,8 +22,6 @@ def Resize(src, w, h, sx=None, sy=None, sw=None, sh=None, kernel='spline36', tap
         kernel = 'spline36'
     kernel = kernel.lower()
 
-    if invks and kernel == 'bilinear' and hasattr(core, 'unresize') and invkstaps is None:
-        return core.unresize.Unresize(src, w, h, src_left=sx, src_top=sy)
     if invks and kernel in ['bilinear', 'bicubic', 'lanczos', 'spline16', 'spline36'] and hasattr(core, 'descale_getnative') and invkstaps is None:
         return descale_getnative(src, w, h, kernel=kernel, b=a1, c=a2, taps=taps)
     if not invks:
@@ -42,8 +40,8 @@ def Resize(src, w, h, sx=None, sy=None, sw=None, sh=None, kernel='spline36', tap
         if kernel == 'lanczos':
             return core.resize.Lanczos(src, w, h, range=fulld, range_in=fulls, filter_param_a=taps,
                                        src_left=sx, src_top=sy, src_width=sw, src_height=sh)
-    return Depth(core.fmtc.resample(src, w, h, sx=sx, sy=sy, sw=sw, sh=sh, kernel=kernel, taps=taps,
-                              a1=a1, a2=a2, a3=a3, invks=invks, invkstaps=invkstaps, fulls=fulls, fulld=fulld), bits)
+    return Depth(core.fmtc.resample(src, w, h, sx=sx, sy=sy, sw=sw, sh=sh, kernel=kernel, taps=taps, a1=a1, a2=a2,
+                                    a3=a3, invks=invks, invkstaps=invkstaps, fulls=fulls, fulld=fulld), bits)
 
 
 def descale_getnative(src, width, height, kernel='bilinear', b=1/3, c=1/3, taps=3, yuv444=False, gray=False, chromaloc=None):

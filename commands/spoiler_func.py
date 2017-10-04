@@ -11,7 +11,7 @@ from handle_messages import private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 import tempfile
 
-path_font = "/home/infi/OpenSans-Regular.ttf"
+path_font = "/home/encode/OpenSans-Regular.ttf"
 # TODO Rewrite with Wand
 
 

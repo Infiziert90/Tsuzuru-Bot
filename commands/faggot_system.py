@@ -63,7 +63,8 @@ class FaggotAlias:
         faggot_text = []
         for i, j in glob.alias.items():
             user_obj = self.get_user_obj(j)
-            faggot_text.append(f"{i} = {user_obj.display_name}\n")
+            if user_obj:
+                faggot_text.append(f"{i} = {user_obj.display_name}\n")
         faggot_text = ''.join(faggot_text)
         if len(faggot_text) > 1800:
             faggot_text = faggot_text[:1790] + "......."

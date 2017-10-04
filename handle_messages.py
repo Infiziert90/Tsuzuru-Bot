@@ -16,7 +16,7 @@ async def handle_msg(message, content=None, embed=None, func=None):
         msg_answer = await client.start_private_message(message.author)
         await func(msg_answer, content=content, embed=embed)
     except (AttributeError, discord.Forbidden):
-        del_message = await func(message.channel, content=f"{content or ''}\n\nThis Message will getting deleted in 5min.",  embed=embed)
+        del_message = await func(message.channel, content=f"{content or ''}\n\nThis Message will be deleted in 5min.",  embed=embed)
         asyncio.get_event_loop().call_later(300, lambda: asyncio.ensure_future(delete_user_message(del_message)))
 
 

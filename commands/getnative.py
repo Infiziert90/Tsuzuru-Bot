@@ -24,8 +24,8 @@ class GetNative:
     def __init__(self, msg_author, img_url=None, filename=None, kernel=None, b=None, c=None, taps=None, ar=None,
                  approx=None, min_h=None, max_h=None):
         self.plotScaling = 'log'
-        self.minHeight = min_h
-        self.maxHeight = max_h
+        self.min_h = min_h
+        self.max_h = max_h
         self.ar = ar
         self.msg_author = msg_author
         self.img_url = img_url
@@ -67,7 +67,7 @@ class GetNative:
         # descale each individual frame
         resizer = core.fmtc.resample if self.approx else fvs.Resize
         clip_list = []
-        for h in range(self.minHeight, self.maxHeight + 1):
+        for h in range(self.min_h, self.max_h + 1):
             clip_list.append(resizer(src_luma32, self.getw(h), h, kernel=self.kernel, a1=self.b, a2=self.c, invks=True,
                                      taps=self.taps))
         full_clip = core.std.Splice(clip_list, mismatch=True)
@@ -100,7 +100,7 @@ class GetNative:
         self.save_plot(vals)
         self.txtOutput += 'Raw data:\nResolution\t | Relative Error\t | Relative difference from last\n'
         for i, error in enumerate(vals):
-            self.txtOutput += f'{i + self.minHeight:4d}\t\t | {error:.6f}\t\t\t | {ratios[i]:.2f}\n'
+            self.txtOutput += f'{i + self.min_h:4d}\t\t | {error:.6f}\t\t\t | {ratios[i]:.2f}\n'
 
         with open(f"{self.path}/{self.filename}.txt", "w") as file_open:
             file_open.writelines(self.txtOutput)
@@ -135,7 +135,7 @@ class GetNative:
             else:
                 resolutions.append(current)
         bicubic_params = self.kernel == 'bicubic' and f'Scaling parameters:\nb = {self.b:.2f}\nc = {self.c:.2f}\n' or ''
-        best_values = f"{'p, '.join([str(r + self.minHeight) for r in resolutions])}p"
+        best_values = f"{'p, '.join([str(r + self.min_h) for r in resolutions])}p"
         self.txtOutput += f"Resize Kernel: {self.kernel}\n{bicubic_params}Native resolution(s) (best guess): " \
                           f"{best_values}\nPlease check the graph manually for more accurate results\n\n"
 
@@ -143,7 +143,7 @@ class GetNative:
 
     def save_plot(self, vals):
         matplotlib.pyplot.style.use('dark_background')
-        matplotlib.pyplot.plot(range(self.minHeight, self.maxHeight + 1), vals, '.w-')
+        matplotlib.pyplot.plot(range(self.min_h, self.max_h + 1), vals, '.w-')
         matplotlib.pyplot.title(self.filename)
         matplotlib.pyplot.ylabel('Relative error')
         matplotlib.pyplot.xlabel('Resolution')
@@ -177,8 +177,8 @@ def to_float(str_value):
 @add_argument('--lanczos-taps', '-t', dest='taps', type=int, default=3, help='Taps parameter of lanczos resize')
 @add_argument('--aspect-ratio', '-ar', dest='ar', type=to_float, default=0, help='Force aspect ratio. Only useful for anamorphic input')
 @add_argument('--approx', '-ap', dest="approx", action="store_true", help='Use fmtc instead of descale [faster, loss of accuracy]')
-@add_argument('--minHeigth', '-min', dest="min_h", type=int, default=500, help='Minimum height to consider')
-@add_argument('--maxHeigth', '-max', dest="max_h", type=int, default=1000, help='Maximum height to consider [max 1080 atm]')
+@add_argument('--min-height', '-min', dest="min_h", type=int, default=500, help='Minimum height to consider')
+@add_argument('--max-heigth', '-max', dest="max_h", type=int, default=1000, help='Maximum height to consider [max 1080 atm]')
 async def getnative(client, message, args):
     if not message.attachments:
         await delete_user_message(message)
