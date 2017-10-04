@@ -7,14 +7,14 @@ from cmd_manager.decorators import register_command, add_argument
 @register_command('x264', description='Post some links for x264')
 async def x264(client, message, args):
     await delete_user_message(message)
-    em = discord.Embed(title="You need Help for x264?", description=help_text["bot_bot"]["x264_links"])
+    em = discord.Embed(title="You need help for x264?", description=help_text["bot_bot"]["x264_links"])
     await client.send_message(message.channel, embed=em)
 
 
 @register_command('avisynth', description='Post some links for Avisynth')
 async def avisynth(client, message, args):
     await delete_user_message(message)
-    em = discord.Embed(title="You need Help for Avisynth?", description=help_text["bot_bot"]["avs_links"])
+    em = discord.Embed(title="You need help for Avisynth?", description=help_text["bot_bot"]["avs_links"])
     await client.send_message(message.channel, embed=em)
 
 
@@ -28,7 +28,14 @@ async def vapoursynth(client, message, args):
 @register_command('yuuno', description='Post some links for Yuuno')
 async def yuuno(client, message, args):
     await delete_user_message(message)
-    em = discord.Embed(title="You need Help for Yuuno?", description=help_text["bot_bot"]["yuuno_links"])
+    em = discord.Embed(title="You need help for Yuuno?", description=help_text["bot_bot"]["yuuno_links"])
+    await client.send_message(message.channel, embed=em)
+
+
+@register_command('getn', description='Post some links for getnative')
+async def yuuno(client, message, args):
+    await delete_user_message(message)
+    em = discord.Embed(title="You need help for getnative?", description=help_text["bot_bot"]["getnative_links"])
     await client.send_message(message.channel, embed=em)
 
 

@@ -27,6 +27,16 @@ bot_bot:
     http://x264.janhum.alfahosting.org/fullhelp.txt
     https://kageru.moe/
     https://iamscum.wordpress.com/encoding-stuff/
+  getnative_links: |
+    Ask `#`encode-autism
+    Bot:
+    You can test getnative with the bot.
+    For more information use ">>getnative --help"
+
+    Links:
+    https://github.com/Infiziert90/getnative
+    https://kageru.moe/article.php?p=resolutions
+    https://ddl.kageru.moe/kbz12.pdf
   member_join: |
     __**English**__
     Hello, please choose your language (only one of them):
