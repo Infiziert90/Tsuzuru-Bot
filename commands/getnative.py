@@ -9,13 +9,13 @@ from config import config
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot
-import fvsfunc_getnative as fvs
+from functools import partial
 from handle_messages import private_msg_file, private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 
 core = vapoursynth.core
 core.add_cache = False
-imwri = core.imwri if hasattr(core, 'imwri') else core.imwrif
+imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
 
 
 class GetNative:
@@ -34,7 +34,8 @@ class GetNative:
         self.taps = taps
         self.approx = approx
         self.kernel = kernel
-        self.txtOutput = ""
+        self.txt_output = ""
+        self.resolutions = []
         self.filename = filename
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.path = self.tmp_dir.name
@@ -42,15 +43,6 @@ class GetNative:
     async def run(self):
         self.user_cooldown.add(self.msg_author)
         asyncio.get_event_loop().call_later(60, lambda: self.user_cooldown.discard(self.msg_author))
-
-        if not self.approx and self.kernel not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
-            return True, f'descale: kernel is not {self.kernel} supported. Try -ap for approximation.'
-
-        try:
-            clip = core.std.BlankClip()
-            core.fmtc.resample(clip, kernel=self.kernel)
-        except vapoursynth.Error:
-            return True, "fmtc: Invalid kernel specified."
 
         image = await self.get_image()
         if image is None:
@@ -60,24 +52,22 @@ class GetNative:
         if self.ar is 0:
             self.ar = src.width / src.height
 
-        src_luma32 = core.resize.Point(src, format=vapoursynth.YUV444PS, matrix_s="709")
+        matrix_s = '709' if src.format.color_family == vapoursynth.RGB else None
+        src_luma32 = core.resize.Point(src, format=vapoursynth.YUV444PS, matrix_s=matrix_s)
         src_luma32 = core.std.ShufflePlanes(src_luma32, 0, vapoursynth.GRAY)
         src_luma32 = core.std.Cache(src_luma32)
 
         # descale each individual frame
-        resizer = core.fmtc.resample if self.approx else fvs.Resize
+        resizer = descale_approx if self.approx else descale_accurate
         clip_list = []
         for h in range(self.min_h, self.max_h + 1):
-            clip_list.append(resizer(src_luma32, self.getw(h), h, kernel=self.kernel, a1=self.b, a2=self.c, invks=True,
-                                     taps=self.taps))
+            clip_list.append(resizer(src_luma32, self.getw(h), h, self.kernel, self.b, self.c, self.taps))
         full_clip = core.std.Splice(clip_list, mismatch=True)
-        full_clip = fvs.Resize(full_clip, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b, a2=self.c,
-                               taps=self.taps)
+        full_clip = upscale(full_clip, self.getw(src.height), src.height, self.kernel, self.b, self.c, self.taps)
         if self.ar != src.width / src.height:
-            src_luma32 = resizer(src_luma32, self.getw(src.height), src.height, kernel=self.kernel, a1=self.b,
-                                 a2=self.c, taps=self.taps)
-        full_clip = core.std.Expr([src_luma32 * full_clip.num_frames, full_clip], 'x y - abs dup 0.015 > swap 0 ?')
-        full_clip = core.std.CropRel(full_clip, 5, 5, 5, 5)
+            src_luma32 = upscale(src_luma32, self.getw(src.height), src.height, self.kernel, self.b, self.c, self.taps)
+        expr_full = core.std.Expr([src_luma32 * full_clip.num_frames, full_clip], 'x y - abs dup 0.015 > swap 0 ?')
+        full_clip = core.std.CropRel(expr_full, 5, 5, 5, 5)
         full_clip = core.std.PlaneStats(full_clip)
         full_clip = core.std.Cache(full_clip)
 
@@ -98,12 +88,12 @@ class GetNative:
         vals = [v for _, v in sorted(vals)]
         ratios, vals, best_value = self.analyze_results(vals)
         self.save_plot(vals)
-        self.txtOutput += 'Raw data:\nResolution\t | Relative Error\t | Relative difference from last\n'
+        self.txt_output += 'Raw data:\nResolution\t | Relative Error\t | Relative difference from last\n'
         for i, error in enumerate(vals):
-            self.txtOutput += f'{i + self.min_h:4d}\t\t | {error:.6f}\t\t\t | {ratios[i]:.2f}\n'
+            self.txt_output += f'{i + self.min_h:4d}\t\t | {error:.10f}\t\t\t | {ratios[i]:.2f}\n'
 
         with open(f"{self.path}/{self.filename}.txt", "w") as file_open:
-            file_open.writelines(self.txtOutput)
+            file_open.writelines(self.txt_output)
 
         return False, best_value
 
@@ -112,11 +102,11 @@ class GetNative:
         w = int(round(w))
         if only_even:
             w = w // 2 * 2
+
         return w
 
     def analyze_results(self, vals):
         ratios = [0.0]
-        resolutions = []
         for i in range(1, len(vals)):
             last = vals[i - 1]
             current = vals[i]
@@ -129,15 +119,16 @@ class GetNative:
         for diff in differences:
             current = ratios.index(diff)
             # don't allow results within 20px of each other
-            for res in resolutions:
+            for res in self.resolutions:
                 if res - 20 < current < res + 20:
                     break
             else:
-                resolutions.append(current)
+                self.resolutions.append(current)
+
         bicubic_params = self.kernel == 'bicubic' and f'Scaling parameters:\nb = {self.b:.2f}\nc = {self.c:.2f}\n' or ''
-        best_values = f"{'p, '.join([str(r + self.min_h) for r in resolutions])}p"
-        self.txtOutput += f"Resize Kernel: {self.kernel}\n{bicubic_params}Native resolution(s) (best guess): " \
-                          f"{best_values}\nPlease check the graph manually for more accurate results\n\n"
+        best_values = f"{'p, '.join([str(r + self.min_h) for r in self.resolutions])}p"
+        self.txt_output += f"Resize Kernel: {self.kernel}\n{bicubic_params}Native resolution(s) (best guess): " \
+                           f"{best_values}\nPlease check the graph manually for more accurate results\n\n"
 
         return ratios, vals, f"Native resolution(s) (best guess): {best_values}"
 
@@ -159,6 +150,35 @@ class GetNative:
                 with open(f"{self.path}/{self.filename}", 'wb') as f:
                     f.write(await resp.read())
                 return f"{self.path}/{self.filename}"
+
+
+def upscale(src, width, height, kernel, b, c, taps):
+    resizer = getattr(src.resize, kernel.title())
+    if not resizer:
+        return src.fmtc.resample(width, height, kernel=kernel, a1=b, a2=c, taps=taps)
+    if kernel == 'bicubic':
+        resizer = partial(resizer, filter_param_a=b, filter_param_b=c)
+    elif kernel == 'lanczos':
+        resizer = partial(resizer, filter_param_a=taps)
+
+    return resizer(width, height)
+
+
+def descale_accurate(src, width, height, kernel, b, c, taps):
+    descale = getattr(src, 'descale_getnative', None)
+    if descale is None:
+        descale = getattr(src, 'descale')
+    descale = getattr(descale, 'De' + kernel)
+    if kernel == 'bicubic':
+        descale = partial(descale, b=b, c=c)
+    elif kernel == 'lanczos':
+        descale = partial(descale, taps=taps)
+
+    return descale(width, height)
+
+
+def descale_approx(src, width, height, kernel, b, c, taps):
+    return src.fmtc.resample(width, height, kernel=kernel, taps=taps, a1=b, a2=c, invks=True, invkstaps=taps)
 
 
 def to_float(str_value):
@@ -188,6 +208,7 @@ async def getnative(client, message, args):
         return await private_msg(message, "Filetype is not allowed!")
 
     if message.author.id in GetNative.user_cooldown:
+        await delete_user_message(message)
         return await private_msg(message, "Pls use this command only every 1min.")
 
     width = message.attachments[0]["width"]
@@ -204,6 +225,15 @@ async def getnative(client, message, args):
     elif args.max_h > height:
         await private_msg(message, f"Your max height cant be bigger than your image dimensions. New max height is {height}")
         args.max_h = height
+
+    if args.approx:
+        try:
+            core.fmtc.resample(core.std.BlankClip(), kernel=args.kernel)
+        except vapoursynth.Error:
+            return await private_msg(message, 'fmtc: Invalid kernel specified.')
+    else:
+        if args.kernel not in ['spline36', 'spline16', 'lanczos', 'bicubic', 'bilinear']:
+            return await private_msg(message, f'descale: {args.kernel} is not a supported kernel. Try -ap for approximation.')
 
     delete_message = await client.send_file(message.channel, config.PICTURE.spam + "tenor_loading.gif")
 
@@ -226,13 +256,12 @@ async def getnative(client, message, args):
 
     if not forbidden_error:
         content = ''.join([
-            f"<@!{msg_author}>",
-            f"\nKernel: {args.kernel} ",
-            f"B: {args.b:.2f} C: {args.c:.2f} " if args.kernel == "bicubic" else "",
-            f"AR: {args.ar} " if args.ar else "",
-            f"Taps: {args.taps} " if args.kernel == "lanczos" else "",
-            f"\n{best_value}",
-            f"" if not args.approx else "\n[approximation]",
+        f"\nKernel: {args.kernel} ",
+        f"AR: {args.ar:.2f} ",
+        f"B: {args.b:.2f} C: {args.c:.2f} " if args.kernel == "bicubic" else "",
+        f"Taps: {args.taps} " if args.kernel == "lanczos" else "",
+        f"\n{best_value}",
+        f"\n[approximation]" if args.approx else "",
         ])
         await private_msg_file(message, f"{get_native.path}/{filename}.txt", "Output from getnative.")
         await client.send_file(message.channel, get_native.path + f'/{filename}', content=content)
