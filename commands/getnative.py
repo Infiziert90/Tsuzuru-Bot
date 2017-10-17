@@ -256,12 +256,12 @@ async def getnative(client, message, args):
 
     if not forbidden_error:
         content = ''.join([
-        f"\nKernel: {args.kernel} ",
-        f"AR: {args.ar:.2f} ",
-        f"B: {args.b:.2f} C: {args.c:.2f} " if args.kernel == "bicubic" else "",
-        f"Taps: {args.taps} " if args.kernel == "lanczos" else "",
+        f"\nKernel: {get_native.kernel} ",
+        f"AR: {get_native.ar:.2f} ",
+        f"B: {get_native.b:.2f} C: {get_native.c:.2f} " if get_native.kernel == "bicubic" else "",
+        f"Taps: {get_native.taps} " if get_native.kernel == "lanczos" else "",
         f"\n{best_value}",
-        f"\n[approximation]" if args.approx else "",
+        f"\n[approximation]" if get_native.approx else "",
         ])
         await private_msg_file(message, f"{get_native.path}/{filename}.txt", "Output from getnative.")
         await client.send_file(message.channel, get_native.path + f'/{filename}', content=content)
