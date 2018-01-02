@@ -135,17 +135,6 @@ def upscale(src, width, height, scaler):
     return upsizer(width, height)
 
 
-def change_bitdepth(src, bits=8, dither_type='error_diffusion'):
-    src_f = src.format
-    out_f = core.register_format(src_f.color_family,
-                                 vapoursynth.INTEGER,
-                                 bits,
-                                 src_f.subsampling_w,
-                                 src_f.subsampling_h)
-
-    return core.resize.Point(src, format=out_f.id, dither_type=dither_type)
-
-
 def get_attr(obj, attr, default=None):
     for ele in attr.split('.'):
         obj = getattr(obj, ele, default)
