@@ -51,3 +51,33 @@ async def miles(client, message, args):
 async def paid(client, message, args):
     await delete_user_message(message)
     await client.send_file(message.channel, spam_folder + "getting_paid.jpg", content=f"From: {message.author.display_name}")
+
+
+@register_command('masterrace', description='Arch == Masterrace.')
+async def masterrace(client, message, args):
+    await delete_user_message(message)
+    await client.send_file(message.channel, spam_folder + "arch.png", content=f"From: {message.author.display_name}")
+
+
+@register_command('bestunion', description='sowjet == bestunion.')
+async def bestunion(client, message, args):
+    await delete_user_message(message)
+    await client.send_file(message.channel, spam_folder + "sowjet.png", content=f"From: {message.author.display_name}")
+
+
+@register_command('linux', description='linux == linux.')
+async def linux(client, message, args):
+    await delete_user_message(message)
+    await client.send_file(message.channel, spam_folder + "linux.png", content=f"From: {message.author.display_name}")
+
+
+@register_command('yuriislove', description='yuri == yuri is love.')
+async def yuriislove(client, message, args):
+    await delete_user_message(message)
+    await client.send_file(message.channel, spam_folder + "yuri.jpeg", content=f"From: {message.author.display_name}")
+
+
+@register_command('kevin', description='kevin == kevin')
+async def kevin(client, message, args):
+    await delete_user_message(message)
+    await client.send_file(message.channel, spam_folder + "kevin.jpeg", content=f"From: {message.author.display_name}")

@@ -15,6 +15,7 @@ from cmd_manager.decorators import register_command, add_argument
 
 core = vapoursynth.core
 core.add_cache = False
+core.accept_lowercase = True
 imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
 
 
@@ -246,6 +247,8 @@ async def getnative(client, message, args):
 
     msg_author = message.author.id
     get_native = GetNative(msg_author, **kwargs)
+    import time
+    starttime = time.time()
     try:
         forbidden_error, best_value = await get_native.run()
     except BaseException as err:
@@ -253,6 +256,7 @@ async def getnative(client, message, args):
         best_value = "Error in Getnative, can't process your picture."
         logging.info(f"Error in getnative: {err}")
     gc.collect()
+    print(time.time() - starttime)
 
     if not forbidden_error:
         content = ''.join([

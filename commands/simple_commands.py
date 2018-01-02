@@ -1,7 +1,10 @@
 import discord
+import asyncio
 from config import help_text
-from handle_messages import delete_user_message
+from utils import get_role_by_id
 from cmd_manager.decorators import register_command, add_argument
+from cmd_manager.filters import is_ex_mod_channel
+from handle_messages import delete_user_message
 
 
 @register_command('x264', description='Post some links for x264')
@@ -54,3 +57,43 @@ async def send_message(client, message, args):
     em = discord.Embed(description=help_text["bot_bot"][args.name], color=333333)
     await client.send_message(channel, embed=em)
     await delete_user_message(message)
+
+
+@register_command('prison', is_enabled=is_ex_mod_channel, description='Assign prison.')
+@add_argument('userid', help='UserID from the user.')
+@add_argument('reason', help='Reason for prison.')
+@add_argument('--prison-type', '-pt', dest="prison_type", type=int, default=0, help='0 is Ger, 1 is Eng')
+@add_argument('--prison-length', '-pl', dest="prison_length", type=int, default=30, help='Lenght for the prison in minutes.')
+async def send_message(client, message, args):
+    await delete_user_message(message)
+
+    if args.prison_type == 0:
+        role = get_role_by_id(message.channel.server, "385475870770331650")
+    elif args.prison_type == 1:
+        role = get_role_by_id(message.channel.server, "385478966955343873")
+    else:
+        await client.send_message(message.channel, "Wrong number for prison_type.")
+        return
+
+    server = client.get_server("221919789017202688")
+    user = server.get_member(args.userid)
+    if user:
+        await client.add_roles(user, role)
+        await client.send_message(message.channel, f"Username: {user.name}\nTime: {args.prison_length}min"
+                                                   f"\nReason: {args.reason}\nBy: {message.author.name}")
+        asyncio.ensure_future(delete_role(client, args, user, role))
+        try:
+            msg_answer = await client.start_private_message(user)
+            await client.send_message(msg_answer, content=f"Prison is now active\n Time: {args.prison_length}min\nReason: {args.reason}")
+        except:
+            pass
+    else:
+        client.send_message(message.channel, "User not found.")
+
+
+async def delete_role(client, args, user, role):
+    await asyncio.sleep(args.prison_length * 60)
+    try:
+        await client.remove_roles(user, role)
+    except (discord.Forbidden, discord.HTTPException):
+        pass
