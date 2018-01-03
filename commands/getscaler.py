@@ -52,7 +52,6 @@ class GetNative:
         self.native_height = native_height
         self.msg_author = msg_author
         self.img_url = img_url
-        self.txt_output = ""
         self.filename = filename
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.path = self.tmp_dir.name
@@ -77,23 +76,21 @@ class GetNative:
         for scaler in scalers:
             error = self.geterror(src_luma32, self.native_height, scaler)
             results_bin[scaler.name] = error
-        best = min(results_bin, key=results_bin.get)
-        sorted_result = sorted(results_bin, key=results_bin.get)
+
+        sorted_results = list(sorted(results_bin.items(), key=lambda x: x[1]))
+        best_result = sorted_results[0]
         longest_key = max(map(len, results_bin))
 
-        for result in sorted_result:
-            if len(result) != longest_key:
-                scaler_name = result + (" " * (longest_key - len(result)))
-            else:
-                scaler_name = result
-            self.txt_output += f"{scaler_name}\t\t{results_bin[result]:.10f}\n"
+        txt_output = "\n".join(f"{scaler_name:{longest_key}}  {value / best_result[1]:7.1%}  {value:.10f}"
+                               for scaler_name, value in sorted_results)
 
         for scaler in scalers:
-            if scaler.name == best:
+            if scaler.name == best_result[0]:
                 self.save_images(src, scaler, self.native_height)
 
-        end_text = f"Native height: {self.native_height}\n```{self.txt_output}```\n" \
-                   f"Smallest error achieved by \"{best}\" ({results_bin[best]:.10f})"
+        end_text = f"Testing scalers for native height: {self.native_height}\n```{txt_output}```\n" \
+                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.10f})"
+
         return False, end_text
 
     def getw(self, h, only_even=True):
