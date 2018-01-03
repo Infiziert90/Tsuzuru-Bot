@@ -20,7 +20,6 @@ imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
 Scaler = namedtuple("scaler", "name kernel params descaler")
 scalers = [
     Scaler(name="Bilinear", kernel="bilinear", params={}, descaler=core.descale.Debilinear),
-
     Scaler(name="Bicubic (b=1/3, c=1/3)", kernel="bicubic", params=dict(a1=1 / 3, a2=1 / 3),
            descaler=partial(core.descale.Debicubic, b=1 / 3, c=1 / 3)),
     Scaler(name="Bicubic (b=0.5, c=0)", kernel="bicubic", params=dict(a1=0.5, a2=0),
@@ -76,17 +75,23 @@ class GetNative:
         for scaler in scalers:
             error = self.geterror(src_luma32, self.native_height, scaler)
             results_bin[scaler.name] = error
-            self.txt_output += "{}: {:.10f}\n".format(scaler.name, error)
         best = min(results_bin, key=results_bin.get)
+        sorted_result = sorted(results_bin, key=results_bin.get)
+        longest_key = max(map(len, results_bin))
+
+        for result in sorted_result:
+            if len(result) != longest_key:
+                scaler_name = result + (" " * (longest_key - len(result)))
+            else:
+                scaler_name = result
+            self.txt_output += f"{scaler_name}\t\t{results_bin[result]:.10f}\n"
 
         for scaler in scalers:
             if scaler.name == best:
                 self.save_images(src, scaler, self.native_height)
 
-        end_text = ""
-        end_text += f"Native height: {self.native_height}\n"
-        end_text += f"```{self.txt_output}```\n"
-        end_text += f"Smallest error achieved by \"{best}\" ({results_bin[best]:.10f})"
+        end_text = f"Native height: {self.native_height}\n```{self.txt_output}```\n" \
+                   f"Smallest error achieved by \"{best}\" ({results_bin[best]:.10f})"
         return False, end_text
 
     def getw(self, h, only_even=True):
