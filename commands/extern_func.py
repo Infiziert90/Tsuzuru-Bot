@@ -115,7 +115,7 @@ async def jisho(client, message, args):
     embed.set_author(name="Master Jisho", url=f'http://jisho.org/search/{quote}')
     for result in result_list[:4]:
         jap = result['japanese'][:3]
-        jap_words = [item.get('word', '-') for item in jap]
+        jap_words = [item.get('word', item.get('reading', '-')) for item in jap]
         jap_readings = [item.get('reading', '-') for item in jap]
         senses = result['senses'][:3]
         eng_meanings = []
