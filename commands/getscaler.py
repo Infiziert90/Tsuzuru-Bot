@@ -30,6 +30,8 @@ scalers = [
            descaler=partial(core.descale.Debicubic, b=1, c=0)),
     Scaler(name="Bicubic (b=0, c=1)", kernel="bicubic", params=dict(a1=0, a2=1),
            descaler=partial(core.descale.Debicubic, b=0, c=1)),
+    Scaler(name="Bicubic (b=0.2, c=0.5)", kernel="bicubic", params=dict(a1=0.2, a2=0.5),
+           descaler=partial(core.descale.Debicubic, b=0.2, c=0.5)),
     Scaler(name="Lanczos (3 Taps)", kernel="lanczos", params=dict(taps=3),
            descaler=partial(core.descale.Delanczos, taps=3)),
     Scaler(name="Lanczos (4 Taps)", kernel="lanczos", params=dict(taps=4),
