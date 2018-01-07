@@ -34,21 +34,20 @@ bot_bot:
     For more information use ">>getnative --help"
 
     Links:
-    https://github.com/Infiziert90/getnative
-    https://kageru.moe/article.php?p=resolutions
-    https://ddl.kageru.moe/kbz12.pdf
+    https://github.com/Infiziert90/getnative (standalone)
+    https://ddl.kageru.moe/kbz12.pdf (WIP)
   member_join: |
     __**English**__
     Hello, please choose your language (only one of them):
     **>>eng** for English
     **>>ger** for German
-    Keep in mind that you'll get kicked with log out and that you can't see all channels without being in one of the two groups.
+    Please note that you'll get kicked after 30 minutes and that you won’t have access to most channels without being in one of the two groups.
 
     __**Deutsch:**__
     Hallo, bitte wähle deine Sprache (nur eine davon):
     **>>eng** für Englisch
     **>>ger** für Deutsch
-    Beachte, dass du mit dem Ausloggen direkt gekickt wirst und nicht alle Channel sehen kannst, ohne in einer der beiden Gruppen zu sein.
+    Beachte, dass du nach 30 Minuten gekickt wirst und nicht alle Channel sehen kannst, ohne in einer der beiden Gruppen zu sein.
   command_overview: |
     __**English**__
     Commands you can use in this channel to get permissions to view the following channels/categories:

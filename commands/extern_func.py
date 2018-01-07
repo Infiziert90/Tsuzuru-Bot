@@ -81,7 +81,6 @@ def lookup_merriam(query):
 @register_command('google', description='Search a keyword with google')
 @add_argument('keyword', help='Keyword for your search.')
 async def google(client, message, args):
-    await delete_user_message(message)
     results = google_search(f'{args.keyword}:en.wikipedia.org', num=1)
     em = discord.Embed(title=f"{results[0]['link']}", description=f"\n{results[0]['snippet']}")
     em.set_author(name="Master Google's answer:")
@@ -91,7 +90,6 @@ async def google(client, message, args):
 @register_command('ddg', description='Search a keyword with duckduckgo')
 @add_argument('keyword', help='Keyword for your search.')
 async def ddg(client, message, args):
-    await delete_user_message(message)
     results =  [x async for x in ddg_search(args.keyword, max_results=5)]
     results = list(results)
     if not results:
@@ -105,7 +103,6 @@ async def ddg(client, message, args):
 @register_command('jisho', description='Translate a keyword with jisho.')
 @add_argument('keyword', help='Keyword for translation.')
 async def jisho(client, message, args):
-    await delete_user_message(message)
     result_list = lookup_jisho(args.keyword)
     if not result_list:
         return await client.send_message(message.channel, 'Nothing Found')
@@ -131,7 +128,6 @@ async def jisho(client, message, args):
 @add_argument('keyword', help='Keyword for defination.')
 @add_argument('--type', '-t', help="Only show definitions for this word type.")
 async def merriam(client, message, args):
-    await delete_user_message(message)
     defs = lookup_merriam(args.keyword)
     if not defs:
         return await client.send_message(message.channel, 'Master Merriam says:\nNothing Found')
@@ -163,7 +159,6 @@ lang_str = ", ".join(lang_list)
 @add_argument('--in-lang', '-i', default="de", choices=lang_list, help='Input language.')
 @add_argument('--out-lang', '-o', default="en", choices=lang_list, help="Output language.")
 async def dict_cc(client, message, args):
-    await delete_user_message(message)
     trans_tuples = run_dict(args.keyword, args.in_lang, args.out_lang)
 
     if not trans_tuples:
@@ -181,8 +176,6 @@ async def dict_cc(client, message, args):
 @add_argument('message_id', help="Message ID for translation.")
 @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
 async def translate(client, message, args):
-    await delete_user_message(message)
-
     try:
         mes_trans = await client.get_message(message.channel, args.message_id)
     except discord.NotFound:

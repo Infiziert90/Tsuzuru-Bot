@@ -246,33 +246,28 @@ async def getnative(client, message, args):
     kwargs["filename"] = filename
 
     msg_author = message.author.id
-    get_native = GetNative(msg_author, **kwargs)
-    import time
-    starttime = time.time()
+    getnative = GetNative(msg_author, **kwargs)
     try:
-        forbidden_error, best_value = await get_native.run()
+        forbidden_error, best_value = await getnative.run()
     except BaseException as err:
         forbidden_error = True
         best_value = "Error in Getnative, can't process your picture."
         logging.info(f"Error in getnative: {err}")
     gc.collect()
-    print(time.time() - starttime)
 
     if not forbidden_error:
         content = ''.join([
-        f"\nKernel: {get_native.kernel} ",
-        f"AR: {get_native.ar:.2f} ",
-        f"B: {get_native.b:.2f} C: {get_native.c:.2f} " if get_native.kernel == "bicubic" else "",
-        f"Taps: {get_native.taps} " if get_native.kernel == "lanczos" else "",
+        f"\nKernel: {getnative.kernel} ",
+        f"AR: {getnative.ar:.2f} ",
+        f"B: {getnative.b:.2f} C: {getnative.c:.2f} " if getnative.kernel == "bicubic" else "",
+        f"Taps: {getnative.taps} " if getnative.kernel == "lanczos" else "",
         f"\n{best_value}",
-        f"\n[approximation]" if get_native.approx else "",
+        f"\n[approximation]" if getnative.approx else "",
         ])
-        await private_msg_file(message, f"{get_native.path}/{filename}.txt", "Output from getnative.")
-        await client.send_file(message.channel, get_native.path + f'/{filename}', content=content)
-        await client.send_file(message.channel, get_native.path + f'/{filename}.png')
+        await private_msg_file(message, f"{getnative.path}/{filename}.txt", "Output from getnative.")
+        await client.send_file(message.channel, getnative.path + f'/{filename}.png', content=content)
     else:
         await private_msg(message, best_value)
 
-    await delete_user_message(message)
     await delete_user_message(delete_message)
-    get_native.tmp_dir.cleanup()
+    getnative.tmp_dir.cleanup()

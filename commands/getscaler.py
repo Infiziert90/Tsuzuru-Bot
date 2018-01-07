@@ -43,7 +43,7 @@ scalers = [
 ]
 
 
-class GetNative:
+class GetScaler:
     user_cooldown = set()
 
     def __init__(self, msg_author, img_url=None, native_height=None, filename=None):
@@ -147,15 +147,6 @@ def get_attr(obj, attr, default=None):
     return obj
 
 
-def to_float(str_value):
-    if set(str_value) - set("0123456789./"):
-        raise argparse.ArgumentTypeError("Invalid characters in float parameter")
-    try:
-        return eval(str_value) if "/" in str_value else float(str_value)
-    except (SyntaxError, ZeroDivisionError, TypeError, ValueError):
-        raise argparse.ArgumentTypeError("Exception while parsing float") from None
-
-
 @register_command('getscaler', description='Find the best inverse scaler (mostly anime)')
 @add_argument("--native_height", "-nh", dest="native_height", type=int, default=720, help="Approximated native height. Default is 720")
 async def getnative(client, message, args):
@@ -166,7 +157,7 @@ async def getnative(client, message, args):
         await delete_user_message(message)
         return await private_msg(message, "Filetype is not allowed!")
 
-    if message.author.id in GetNative.user_cooldown:
+    if message.author.id in GetScaler.user_cooldown:
         await delete_user_message(message)
         return await private_msg(message, "Pls use this command only every 1min.")
 
@@ -185,9 +176,9 @@ async def getnative(client, message, args):
     kwargs["filename"] = message.attachments[0]["filename"]
 
     msg_author = message.author.id
-    get_native = GetNative(msg_author, **kwargs)
+    getscaler = GetScaler(msg_author, **kwargs)
     try:
-        forbidden_error, best_value = await get_native.run()
+        forbidden_error, best_value = await getscaler.run()
     except BaseException as err:
         forbidden_error = True
         best_value = "Error in Getscaler, can't process your picture."
@@ -195,11 +186,9 @@ async def getnative(client, message, args):
     gc.collect()
 
     if not forbidden_error:
-        await client.send_file(message.channel, get_native.path + f'/{filename}', content=best_value)
-        await client.send_file(message.channel, get_native.path + f'/{filename}_source0.png')
+        await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png', content=best_value)
     else:
         await private_msg(message, best_value)
 
-    await delete_user_message(message)
     await delete_user_message(delete_message)
-    get_native.tmp_dir.cleanup()
+    getscaler.tmp_dir.cleanup()

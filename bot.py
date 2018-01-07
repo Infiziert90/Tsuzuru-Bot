@@ -41,19 +41,6 @@ async def on_message(message):
         server_id = "0"
         server_name = "Private Message"
 
-    # TODO Deduplicate messages (or try to)
-    # if not message.author.id == "292646750743691266":
-    #     if not message.content.startswith(">>"):
-    #         message_content = message.content
-    #         second_mes = await client.wait_for_message(author=message.author, timeout=10, content=message_content)
-    #         try:
-    #             if second_mes.attachments:
-    #                 second_mes = None
-    #         except AttributeError:
-    #             return
-    #         if second_mes:
-    #             await client.delete_message(second_mes)
-
     if server_id == "221919789017202688":  # eX Server
         if message.channel.id == "338273467483029515":  # welcome
             if message.author.id != client.user.id:  # own bot
@@ -70,7 +57,7 @@ async def on_message(message):
     try:
         args = parser.parse_args(shlex.split(arg_string))
     except (argparse.ArgumentError, HelpException) as e:
-        await delete_user_message(message)
+        #  Disabled because of complaints
         return await private_msg_code(message, str(e))
 
     return await dispatcher.handle(args.command, client, message, args)
@@ -113,6 +100,7 @@ def main():
     client.run(config.MAIN.login_token)
     # Test-Bot
     # client.run(config.MAIN.test_token)
+
 
 if __name__ == "__main__":
     main()
