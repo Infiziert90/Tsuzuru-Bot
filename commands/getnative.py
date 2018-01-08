@@ -49,7 +49,7 @@ class GetNative:
         if image is None:
             return True, "Can't load image. Pls try it again later."
 
-        src = imwri.Read(image)
+        src = core.ffms2.Source(image)
         if self.ar is 0:
             self.ar = src.width / src.height
 
@@ -246,6 +246,8 @@ async def getnative(client, message, args):
     kwargs["filename"] = filename
 
     msg_author = message.author.id
+    import time
+    starttime = time.time()
     getnative = GetNative(msg_author, **kwargs)
     try:
         forbidden_error, best_value = await getnative.run()
@@ -254,9 +256,11 @@ async def getnative(client, message, args):
         best_value = "Error in Getnative, can't process your picture."
         logging.info(f"Error in getnative: {err}")
     gc.collect()
+    print('done in {:.2f} s'.format(time.time() - starttime))
 
     if not forbidden_error:
         content = ''.join([
+        f"{message.author}: \"{message.content}\""
         f"\nKernel: {getnative.kernel} ",
         f"AR: {getnative.ar:.2f} ",
         f"B: {getnative.b:.2f} C: {getnative.c:.2f} " if getnative.kernel == "bicubic" else "",
@@ -265,9 +269,11 @@ async def getnative(client, message, args):
         f"\n[approximation]" if getnative.approx else "",
         ])
         await private_msg_file(message, f"{getnative.path}/{filename}.txt", "Output from getnative.")
-        await client.send_file(message.channel, getnative.path + f'/{filename}.png', content=content)
+        await client.send_file(message.channel, getnative.path + f'/{filename}', content=content)
+        await client.send_file(message.channel, getnative.path + f'/{filename}.png')
     else:
         await private_msg(message, best_value)
 
+    await delete_user_message(message)
     await delete_user_message(delete_message)
     getnative.tmp_dir.cleanup()

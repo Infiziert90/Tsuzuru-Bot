@@ -10,7 +10,7 @@ import commands
 import datetime
 from cmd_manager import dispatcher
 from config import config, help_text
-from cmd_manager.bot_args import parser, HelpException
+from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, message_init
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -51,14 +51,17 @@ async def on_message(message):
 
     if message.content.startswith(">>"):
         today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-        logging.info("Date: {} User: {} Server: {} Command {} ".format(today, message.author, server_name, message.content[:50]))
+        logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {message.channel.name} "
+                     f"Command: {message.content[:50]}")
 
     arg_string = message.content[2:].split("\n", 1)[0]
     try:
         args = parser.parse_args(shlex.split(arg_string))
-    except (argparse.ArgumentError, HelpException) as e:
-        #  Disabled because of complaints
+    except HelpException as e:
+        await delete_user_message(message)
         return await private_msg_code(message, str(e))
+    except (UnkownCommandException, argparse.ArgumentError):
+        return
 
     return await dispatcher.handle(args.command, client, message, args)
 

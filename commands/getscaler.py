@@ -186,9 +186,11 @@ async def getnative(client, message, args):
     gc.collect()
 
     if not forbidden_error:
-        await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png', content=best_value)
+        await client.send_file(message.channel, getscaler.path + f'/{filename}', content=f"{message.author}: \"{message.content}\"\n{best_value}")
+        await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png')
     else:
         await private_msg(message, best_value)
 
+    await delete_user_message(message)
     await delete_user_message(delete_message)
     getscaler.tmp_dir.cleanup()
