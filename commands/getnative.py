@@ -260,7 +260,7 @@ async def getnative(client, message, args):
 
     if not forbidden_error:
         content = ''.join([
-        f"{message.author}: \"{message.content}\""
+        f"Output:"
         f"\nKernel: {getnative.kernel} ",
         f"AR: {getnative.ar:.2f} ",
         f"B: {getnative.b:.2f} C: {getnative.c:.2f} " if getnative.kernel == "bicubic" else "",
@@ -269,8 +269,8 @@ async def getnative(client, message, args):
         f"\n[approximation]" if getnative.approx else "",
         ])
         await private_msg_file(message, f"{getnative.path}/{filename}.txt", "Output from getnative.")
-        await client.send_file(message.channel, getnative.path + f'/{filename}', content=content)
-        await client.send_file(message.channel, getnative.path + f'/{filename}.png')
+        await client.send_file(message.channel, getnative.path + f'/{filename}', content=f"Input\n{message.author}: \"{message.content}\"")
+        await client.send_file(message.channel, getnative.path + f'/{filename}.png', content=content)
     else:
         await private_msg(message, best_value)
 

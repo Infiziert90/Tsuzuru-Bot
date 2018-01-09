@@ -186,8 +186,8 @@ async def getnative(client, message, args):
     gc.collect()
 
     if not forbidden_error:
-        await client.send_file(message.channel, getscaler.path + f'/{filename}', content=f"{message.author}: \"{message.content}\"\n{best_value}")
-        await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png')
+        await client.send_file(message.channel, getscaler.path + f'/{filename}', content=f"Input\n{message.author}: \"{message.content}\"su")
+        await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png', content=f"Output\n{best_value}")
     else:
         await private_msg(message, best_value)
 
