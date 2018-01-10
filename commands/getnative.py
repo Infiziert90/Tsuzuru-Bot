@@ -49,7 +49,7 @@ class GetNative:
         if image is None:
             return True, "Can't load image. Pls try it again later."
 
-        src = core.ffms2.Source(image)
+        src = imwri.Read(image)
         if self.ar is 0:
             self.ar = src.width / src.height
 

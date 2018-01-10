@@ -1,5 +1,4 @@
 import gc
-import argparse
 import tempfile
 import aiohttp
 import asyncio
@@ -64,7 +63,7 @@ class GetScaler:
         if image is None:
             return True, "Can't load image. Pls try it again later."
 
-        src = imwri.Read(image)
+        src = imwri.Read(image, float_output=True)
         self.ar = src.width / src.height
 
         matrix_s = '709' if src.format.color_family == vapoursynth.RGB else None
@@ -186,7 +185,7 @@ async def getnative(client, message, args):
     gc.collect()
 
     if not forbidden_error:
-        await client.send_file(message.channel, getscaler.path + f'/{filename}', content=f"Input\n{message.author}: \"{message.content}\"su")
+        await client.send_file(message.channel, getscaler.path + f'/{filename}', content=f"Input\n{message.author}: \"{message.content}\"")
         await client.send_file(message.channel, getscaler.path + f'/{filename}_source0.png', content=f"Output\n{best_value}")
     else:
         await private_msg(message, best_value)
