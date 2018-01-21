@@ -3,15 +3,13 @@ import asyncio
 import discord
 import requests
 import urllib.parse
-
-import time
 from lxml import html
 from dictcc import Dict
 from config import config
 from collections import defaultdict
 from googleapiclient.discovery import build
 from yandex_translate import YandexTranslate
-from handle_messages import private_msg, delete_user_message
+from handle_messages import private_msg
 from cmd_manager.decorators import register_command, add_argument
 from merriam_api import (CollegiateDictionary, WordNotFoundException)
 
@@ -21,8 +19,6 @@ translate = YandexTranslate(config.MAIN.yandex)
 
 
 # TODO Replace request with aiohttp
-
-
 async def ddg_search(keywords, max_results=None):
     url = 'https://duckduckgo.com/html/'
     params = {'q': keywords, 's': '0', }
@@ -175,7 +171,7 @@ async def dict_cc(client, message, args):
 @register_command('translate', description='Translate a message for you.')
 @add_argument('message_id', help="Message ID for translation.")
 @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
-async def translate(client, message, args):
+async def yandex_translate(client, message, args):
     try:
         mes_trans = await client.get_message(message.channel, args.message_id)
     except discord.NotFound:

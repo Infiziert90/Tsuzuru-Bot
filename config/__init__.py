@@ -7,7 +7,7 @@ import configparser
 config = dicts.AttrDict()
 def load_config():
     ini_conf = configparser.ConfigParser()
-    ini_conf.read("bot.ini")
+    ini_conf.read(["bot.ini", "bot_example.ini"])
 
     for key, val in ini_conf.items():
         if isinstance(val, (dict, configparser.SectionProxy)):

@@ -55,12 +55,16 @@ async def on_message(message):
                      f"Command: {message.content[:50]}")
 
     arg_string = message.content[2:].split("\n", 1)[0]
+    arg_string = shlex.split(arg_string)
     try:
-        args = parser.parse_args(shlex.split(arg_string))
-    except HelpException as e:
+        args = parser.parse_args(arg_string)
+    except HelpException as err:
         await delete_user_message(message)
-        return await private_msg_code(message, str(e))
-    except (UnkownCommandException, argparse.ArgumentError):
+        return await private_msg_code(message, str(err))
+    except (UnkownCommandException, argparse.ArgumentError) as err:
+        if arg_string[0] in dispatcher.commands:
+            await delete_user_message(message)
+            return await private_msg_code(message, str(err))
         return
 
     return await dispatcher.handle(args.command, client, message, args)
