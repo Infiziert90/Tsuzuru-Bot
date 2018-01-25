@@ -8,14 +8,11 @@ from dictcc import Dict
 from config import config
 from collections import defaultdict
 from googleapiclient.discovery import build
-from yandex_translate import YandexTranslate
-from handle_messages import private_msg
 from cmd_manager.decorators import register_command, add_argument
 from merriam_api import (CollegiateDictionary, WordNotFoundException)
 
 collkey = config.MAIN.coll_key
 my_api_key, my_cse_id = config.MAIN.google_api, config.MAIN.google_cse
-translate = YandexTranslate(config.MAIN.yandex)
 
 
 # TODO Replace request with aiohttp
@@ -168,15 +165,19 @@ async def dict_cc(client, message, args):
     await client.send_message(message.channel, embed=embed)
 
 
-@register_command('translate', description='Translate a message for you.')
-@add_argument('message_id', help="Message ID for translation.")
-@add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
-async def yandex_translate(client, message, args):
-    try:
-        mes_trans = await client.get_message(message.channel, args.message_id)
-    except discord.NotFound:
-        return await private_msg(message, "Message not found")
-
-    trans_end = translate.translate(mes_trans.content, args.direction)
-    trans_end = f"{trans_end['text'][0]}\n{mes_trans.author}"
-    await private_msg(message, trans_end)
+# TODO Fix error handling in yandex
+# @register_command('translate', description='Translate a message for you.')
+# @add_argument('message_id', help="Message ID for translation.")
+# @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
+# async def yandex_translate(client, message, args):
+#     try:
+#         mes_trans = await client.get_message(message.channel, args.message_id)
+#     except discord.NotFound:
+#         return await private_msg(message, "Message not found")
+#
+#     try:
+#         trans_end = translate.translate(mes_trans.content, args.direction)
+#         trans_end = f"{trans_end['text'][0]}\n{mes_trans.author}"
+#         await private_msg(message, trans_end)
+#     except:
+#         logging.info(f"Error in Yandex: Message from user {message.author}\n")
