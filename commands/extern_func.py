@@ -1,45 +1,20 @@
 import json
-import asyncio
 import discord
 import requests
 import urllib.parse
-from lxml import html
 from dictcc import Dict
 from config import config
 from collections import defaultdict
 from googleapiclient.discovery import build
 from cmd_manager.decorators import register_command, add_argument
 from merriam_api import (CollegiateDictionary, WordNotFoundException)
+import duckduckgo
 
 collkey = config.MAIN.coll_key
 my_api_key, my_cse_id = config.MAIN.google_api, config.MAIN.google_cse
 
 
-# TODO Replace request with aiohttp
-async def ddg_search(keywords, max_results=None):
-    url = 'https://duckduckgo.com/html/'
-    params = {'q': keywords, 's': '0', }
-
-    yielded = 0
-    while True:
-        res = requests.post(url, data=params)
-        doc = html.fromstring(res.text)
-
-        results = [a.get('href') for a in doc.cssselect('#links .links_main a')]
-        for result in results:
-            yield result
-            await asyncio.sleep(0.1)
-            yielded += 1
-            if max_results and yielded >= max_results:
-                return
-
-        try:
-            form = doc.cssselect('.results_links_more form')[-1]
-        except IndexError:
-            return
-        params = dict(form.fields)
-
-
+# TODO Replace requests with aiohttp
 def lookup_jisho(query):
     data = json.loads(requests.get(
         "http://jisho.org/api/v1/search/words?keyword={}".format(query)).text)
@@ -81,16 +56,45 @@ async def google(client, message, args):
 
 
 @register_command('ddg', description='Search a keyword with duckduckgo')
-@add_argument('keyword', help='Keyword for your search.')
+@add_argument('query', help='Your search query. Can use bangs, e.g. `!unicode EXCLAMATION MARK`.')
 async def ddg(client, message, args):
-    results =  [x async for x in ddg_search(args.keyword, max_results=5)]
-    results = list(results)
-    if not results:
-        await client.send_message(message.channel, 'Nothing Found')
+    # https://github.com/strinking/python-duckduckgo
+    # https://duckduckgo.com/api
+    answer = await duckduckgo.query(args.query, safesearch=False)
+    if answer.type == 'exclusive' and answer.redirect.url:
+        # Let discord build the embed for the redirect
+        await client.send_message(message.channel, f"Redirected to: {answer.redirect.url}")
+        return
+
+    embed = discord.Embed(title=answer.heading)
+    embed.set_author(name="DuckDuckGo Instant Answer", icon_url="https://duckduckgo.com/favicon.png")
+    if answer.type == 'nothing' or answer.type == 'name' and not answer.abstract.text:
+        embed.description = "No results."
     else:
-        em = discord.Embed(description=f"\n{results[0]}")
-        em.set_author(name="Mister Duck's answer:")
-        await client.send_message(message.channel, embed=em)
+        if answer.answer.text:
+            embed.add_field(name=f"Answer ({answer.answer.type})", value=str(answer.answer.text))
+        if answer.abstract.text or answer.abstract.url:
+            abs_ = answer.abstract
+            embed.add_field(name="Abstract", value=f"{abs_.text} (<{abs_.url}>; {abs_.source})")
+            if answer.image.url:
+                embed.set_image(url=answer.image.url)
+        if answer.results:
+            for result in answer.results[:2]:
+                embed.add_field(name="Result", value=f"{result.text} (<{result.url}>)")
+                if result.icon and not embed.thumbnail:
+                    embed.set_thumbnail(url=result.icon.url)
+        if answer.related:
+            for result in answer.related[:2]:
+                if result.topics:
+                    result = result.topics[0]  # just pick the first here
+                embed.add_field(name="Related", value=f"{result.text} (<{result.url}>)")
+                if result.icon and not embed.thumbnail:
+                    embed.set_thumbnail(url=result.icon.url)
+        if answer.definition.text:
+            def_ = answer.definition
+            embed.add_field(name="Definition", value=f"{def_.text} (<{def_.url}>; {def_.source})")
+
+    await client.send_message(message.channel, embed=embed)
 
 
 @register_command('jisho', description='Translate a keyword with jisho.')
