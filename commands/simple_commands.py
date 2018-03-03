@@ -60,7 +60,7 @@ async def send_message(client, message, args):
 
 
 @register_command('prison', is_enabled=is_ex_mod_channel, description='Assign prison.')
-@add_argument('userid', help='UserID from the user.')
+@add_argument('user', help='UserID from the user.')
 @add_argument('reason', help='Reason for prison.')
 @add_argument('--prison-type', '-pt', dest="prison_type", type=int, default=0, help='0 is Ger, 1 is Eng')
 @add_argument('--prison-length', '-pl', dest="prison_length", type=int, default=30, help='Lenght for the prison in minutes.')
@@ -69,14 +69,16 @@ async def send_message(client, message, args):
 
     if args.prison_type == 0:
         role = get_role_by_id(message.channel.server, "385475870770331650")
-    elif args.prison_type == 1:
-        role = get_role_by_id(message.channel.server, "385478966955343873")
     else:
-        await client.send_message(message.channel, "Wrong number for prison_type.")
-        return
+        role = get_role_by_id(message.channel.server, "385478966955343873")
+
+    if args.prison_length > 180:
+        await client.send_message(message.channel, f"Prison lenght max. is 180min")
 
     server = client.get_server("221919789017202688")
-    user = server.get_member(args.userid)
+    user = server.get_member_named(args.user)
+    if user is None:
+        user = server.get_member(args.user)
     if user:
         await client.add_roles(user, role)
         await client.send_message(message.channel, f"Username: {user.name}\nTime: {args.prison_length}min"
@@ -88,7 +90,7 @@ async def send_message(client, message, args):
         except:
             pass
     else:
-        client.send_message(message.channel, "User not found.")
+        await client.send_message(message.channel, "User not found.")
 
 
 async def delete_role(client, args, user, role):

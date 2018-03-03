@@ -47,7 +47,7 @@ async def miles(client, message, args):
     await client.send_file(message.channel, spam_folder + "miles.jpg", content=f"From: {message.author.display_name}")
 
 
-@register_command('paid', is_enabled=command_not_allowed, description='Post the getting_paid picture.')
+@register_command('paid', description='Post the getting_paid picture.')
 async def paid(client, message, args):
     await delete_user_message(message)
     await client.send_file(message.channel, spam_folder + "getting_paid.jpg", content=f"From: {message.author.display_name}")
