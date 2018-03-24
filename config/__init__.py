@@ -1,8 +1,8 @@
 import os
-import yaml
 import dicts
 import logging
 import configparser
+from . import load_help
 
 config = dicts.AttrDict()
 def load_config():
@@ -28,10 +28,8 @@ def load_config():
     logging.basicConfig(level=log_level)
     logging.getLogger('').addHandler(logging.FileHandler("output.log"))
 
-    with open("config/text_storage.yaml", "r") as stream:
-        help_text = yaml.load(stream)
 
-    return help_text
-help_text = load_config()
+load_config()
+help_text = load_help.get_help_text
 
 __all__ = ['config', 'help_text']

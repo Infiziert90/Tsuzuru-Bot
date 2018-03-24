@@ -100,7 +100,7 @@ async def on_member_join(mem):
     if mem.server.id == "221919789017202688":
         channel = client.get_channel("338273467483029515")
         mention = await client.send_message(channel, f"<@!{mem.id}>")
-        em = discord.Embed(description=help_text["bot_bot"]["member_join"], color=333333)
+        em = discord.Embed(description=help_text("bot_bot", "member_join"), color=333333)
         member_message = await client.send_message(channel, embed=em)
         await client.wait_for_message(channel=channel, author=mem, timeout=300)
         await delete_user_message(member_message)
