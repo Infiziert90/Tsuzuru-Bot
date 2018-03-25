@@ -2,7 +2,7 @@ from . import dispatcher
 from .bot_args import subparsers
 
 
-def register_command(name, is_enabled=None, **kwargs):
+def register_command(name, is_enabled=None, is_admin=None, **kwargs):
     def decorator(func):
         # TODO check if formatter_class needs to be provided here
         parser = subparsers.add_parser(name, **kwargs)
@@ -10,7 +10,7 @@ def register_command(name, is_enabled=None, **kwargs):
             for arg_args, arg_kwargs in func._cmd_args:
                 parser.add_argument(*arg_args, **arg_kwargs)
 
-        dispatcher.register(name, func, is_enabled)
+        dispatcher.register(name, func, is_enabled, is_admin)
         return func
 
     return decorator

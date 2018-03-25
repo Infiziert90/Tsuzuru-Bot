@@ -1,4 +1,11 @@
 import aiohttp
+import discord
+import asyncio
+import random
+from handle_messages import private_msg_user
+
+
+prison_inmates = []
 
 
 def get_role_by_id(server, role_id):
@@ -20,3 +27,28 @@ async def get_file(url, path, filename):
             with open(f"{path}/{filename}", 'wb') as f:
                 f.write(await resp.read())
             return f"{path}/{filename}"
+
+
+async def delete_role(client, prison_length, user, role):
+    await asyncio.sleep(prison_length * 60)
+    prison_inmates.remove(user.id)
+    try:
+        await client.remove_roles(user, role)
+    except (discord.Forbidden, discord.HTTPException):
+        return
+
+
+async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=random.randint(30, 230)):
+    if message.channel.is_private:
+        return
+
+    user = user or message.author
+    prison_inmates.append(user.id)
+    if has_role(user, "221920178940805120"):
+        role = get_role_by_id(message.channel.server, "385475870770331650")
+    else:
+        role = get_role_by_id(message.channel.server, "385478966955343873")
+
+    await client.add_roles(user, role)
+    asyncio.ensure_future(delete_role(client, prison_length, user, role))
+    await private_msg_user(message, f"Prison is now active\n Time: {prison_length}min\nReason: {reason}", user)

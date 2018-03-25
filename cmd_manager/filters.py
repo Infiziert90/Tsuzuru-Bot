@@ -1,4 +1,5 @@
 import asyncio
+from utils import punish_user
 from handle_messages import private_msg, delete_user_message
 
 
@@ -60,11 +61,8 @@ def command_not_allowed(message):
     return False
 
 
-def is_ex_mod_channel(message):
+def is_admin_command(client, message):
     if message.channel.id == "246368272327507979":
         return True
-    asyncio.ensure_future(delete_user_message(message))
-    asyncio.ensure_future(private_msg(message, "Stop using this command!"))
-
-
-
+    asyncio.ensure_future(punish_user(client, message))
+    return False

@@ -142,7 +142,7 @@ async def spoiler_create_image(message, attachments, tmp_path, error_message):
                 return True
 
 
-@register_command('spoiler', description='Convert your message content to GIF with spoiler warning.')
+@register_command('spoiler', is_enabled=False, description='Convert your message content to GIF with spoiler warning.')
 @add_argument('title', help='Spoiler title.')
 async def spoiler(client, message, args):
     forbidden_error = False
