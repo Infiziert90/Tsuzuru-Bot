@@ -6,6 +6,7 @@ from handle_messages import private_msg_user
 
 
 prison_inmates = []
+user_cooldown = set()
 
 
 def get_role_by_id(server, role_id):
@@ -52,3 +53,8 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
     await client.add_roles(user, role)
     asyncio.ensure_future(delete_role(client, prison_length, user, role))
     await private_msg_user(message, f"Prison is now active\n Time: {prison_length}min\nReason: {reason}", user)
+
+
+def set_user_cooldown(author, time):
+    user_cooldown.add(author)
+    asyncio.get_event_loop().call_later(time, lambda: user_cooldown.discard(author))

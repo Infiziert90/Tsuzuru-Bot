@@ -54,8 +54,12 @@ async def on_message(message):
         logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {message.channel.name} "
                      f"Command: {message.content[:50]}")
 
-    arg_string = message.content[2:].split("\n", 1)[0]
-    arg_string = shlex.split(arg_string)
+    arg_string = message.clean_content[2:].split("\n", 1)[0]
+    try:
+        arg_string = shlex.split(arg_string)
+    except ValueError as err:
+        return await private_msg_code(message, str(err))
+
     try:
         args = parser.parse_args(arg_string)
     except HelpException as err:
@@ -79,8 +83,12 @@ async def on_message_edit(_, message):
     if not message.content.startswith(">>"):
         return
 
-    arg_string = message.content[2:].split("\n", 1)[0]
-    arg_string = shlex.split(arg_string)
+    arg_string = message.clean_content[2:].split("\n", 1)[0]
+    try:
+        arg_string = shlex.split(arg_string)
+    except ValueError as err:
+        return await private_msg_code(message, str(err))
+
     try:
         args = parser.parse_args(arg_string)
     except HelpException as err:
