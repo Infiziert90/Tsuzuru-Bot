@@ -20,6 +20,7 @@ async def add_role(client, message, input_group):
             await client.add_roles(message.author, group)
             await private_msg(message, "Thanks for telling me that!")
 
+
 async def remove_role(client, message, input_group):
     role_to_remove = get_role_by_id(message.channel.server, settings['group'][input_group])
     await client.remove_roles(message.author, role_to_remove)

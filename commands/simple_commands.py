@@ -14,14 +14,14 @@ async def x264(client, message, args):
     await client.send_message(message.channel, embed=em)
 
 
-@register_command('avisynth', description='Post some links for Avisynth')
+@register_command('avi', description='Post some links for Avisynth')
 async def avisynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Avisynth?", description=help_text("bot_bot", "avs_links"))
     await client.send_message(message.channel, embed=em)
 
 
-@register_command('vapoursynth', description='Post some links for Vapoursynth')
+@register_command('vs', description='Post some links for Vapoursynth')
 async def vapoursynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need Help for Vapoursynth?", description=help_text("bot_bot", "vs_links"))
@@ -54,6 +54,9 @@ reg = re.compile("<:(\w+):(\d+)>")
 @add_argument('text', help='Text too convert.')
 async def memefont(client, message, args):
     await delete_user_message(message)
+    if len(args.text) > 25:
+        return await private_msg(message, "Max. 25 chars.")
+
     emoji = re.search(reg, args.text)
     if emoji:
         return await private_msg(message, "Emojis not allowed in the text.")
@@ -62,10 +65,14 @@ async def memefont(client, message, args):
 
     set_user_cooldown(message.author, 300)
 
+    chars = {"ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss"}
     alpha = [chr(x) for x in range(ord("a"), ord("z") + 1)]
     num2words = {"1": 'one', "2": 'two', "3": 'three', "4": 'four', "5": 'five', "6": 'six', "7": 'seven',
                  "8": 'eight', "9": 'nine', "0": "zero"}
     text = args.text.lower()
+    for i, j in chars.items():
+        text = text.replace(i, j)
+
     emoji_text = ""
     for c in text:
         if c in alpha:
