@@ -1,5 +1,7 @@
 import os
+import random
 import discord
+import logging
 from config import config
 from handle_messages import delete_user_message
 from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel, command_not_allowed
@@ -12,15 +14,17 @@ spam_folder = config.PICTURE.spam
 
 
 async def send_picture(client, folder, channel_id):
-    for i in os.listdir(folder):
+    pictures = os.listdir(folder)
+    for _ in pictures:
+        picture = folder + pictures[random.randint(0, len(pictures))]
         channel = client.get_channel(channel_id)
         try:
-            await client.send_file(channel, folder + i)
-            os.remove(folder + i)
+            await client.send_file(channel, picture)
+            os.remove(picture)
             return
         except discord.HTTPException:
-            os.remove(folder + i)
-            print("Error: File to large")
+            os.remove(picture)
+            logging.info("Error: File to large")
 
 
 @register_command('yuri', is_enabled=is_ex_yuri_channel, description='Post a yuri picture.')
