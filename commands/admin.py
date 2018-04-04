@@ -24,7 +24,10 @@ async def send_message(client, message, args):
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:
-        return
+        return await client.send_message(message.channel, f"User in prison can't use this command!")
+
+    if len(args.user) == 0:
+        return await client.send_message(message.channel, f"Empty username is not allowed.")
 
     if args.prison_length > 180:
         return await client.send_message(message.channel, f"Prison lenght max. is 180min")
@@ -53,7 +56,6 @@ async def purge_channel(client, message, args):
 async def send_welcome(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel("338273467483029515")
-    await client.purge_from(channel, limit=100)
     em = discord.Embed(description=help_text("bot_bot", "command_overview"), color=333333)
     em1 = discord.Embed(description=help_text("bot_bot", "help_message"), color=333333)
     em2 = discord.Embed(description=help_text("bot_bot", "member_join"), color=333333)

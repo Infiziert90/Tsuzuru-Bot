@@ -39,9 +39,15 @@ async def delete_role(client, prison_length, user, role):
         return
 
 
-async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=random.randint(30, 230)):
+async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
     if message.channel.is_private:
         return
+
+    if message.author.id in prison_inmates:
+        return await client.send_message(message.channel, f"User in prison can't use this command!")
+
+    if prison_length is None:
+        prison_length = random.randint(30, 230)
 
     user = user or message.author
     prison_inmates.append(user.id)

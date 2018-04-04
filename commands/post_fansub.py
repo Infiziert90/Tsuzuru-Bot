@@ -26,27 +26,3 @@ async def post_fansub(client, message, args):
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     channel = client.get_channel("221920731871707136")
     await client.send_message(channel, embed=embed)
-
-
-# TODO Rewrite for new arg_parse system.
-# TODO atm disabled.
-@register_command('multi_fansub', is_enabled=command_not_allowed, description='Post your release in #release_fansubs.')
-@add_argument('name', help='Your group + anime name.')
-@add_argument('--episode', '-e', nargs="+", action="append", help='Episode + Names/Links ....... Names/Links')
-async def multi_fansub(client, message, args):
-    await delete_user_message(message)
-
-    title = f"{args.name}"
-    description = f"{args.episode}"
-    for lname, link in args.links:
-        if len(lname) > 6:
-            lname = lname[:6]
-        if not link.startswith("http"):
-            await private_msg(message, "Cant find http link.")
-            return
-        description += f" [{lname}]({link}) ||"
-
-    embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
-    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    channel = client.get_channel("221920731871707136")
-    await client.send_message(channel, embed=embed)

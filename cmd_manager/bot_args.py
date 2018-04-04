@@ -10,7 +10,6 @@ class HelpException(Exception):
 
 
 class UnkownCommandException(Exception):
-    # TODO Rewrite error handling for non bot messages
     def __init__(self, message):
         self.message = message
 
@@ -29,5 +28,5 @@ class BotArgParse(argparse.ArgumentParser):
         raise UnkownCommandException(f'Error: {message}')
 
 
-parser = BotArgParse(prog=">>", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=35, width=100))
+parser = BotArgParse(prog=">>", usage=">>", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 subparsers = parser.add_subparsers(dest="command")

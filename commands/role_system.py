@@ -29,10 +29,8 @@ async def remove_role(client, message, input_group):
 
 @register_command('ger', is_enabled=is_ex_server, description='Self-assign the Ger role.')
 async def ger(client, message, args):
-    group_id_german = settings['group']['ger']
-    group_id_english = settings['group']['eng']
-    group_ger = get_role_by_id(message.channel.server, group_id_german)
-    group_eng = get_role_by_id(message.channel.server, group_id_english)
+    group_ger = get_role_by_id(message.channel.server, settings['group']['ger'])
+    group_eng = get_role_by_id(message.channel.server, settings['group']['eng'])
     await client.add_roles(message.author, group_ger)
     await asyncio.sleep(5)
     await client.remove_roles(message.author, group_eng)
@@ -42,10 +40,8 @@ async def ger(client, message, args):
 
 @register_command('eng', is_enabled=is_ex_server, description='Self-assign the Eng role.')
 async def eng(client, message, args):
-    group_id_german = settings['group']['ger']
-    group_id_english = settings['group']['eng']
-    group_ger = get_role_by_id(message.channel.server, group_id_german)
-    group_eng = get_role_by_id(message.channel.server, group_id_english)
+    group_ger = get_role_by_id(message.channel.server, settings['group']['ger'])
+    group_eng = get_role_by_id(message.channel.server, settings['group']['eng'])
     await client.add_roles(message.author, group_eng)
     await asyncio.sleep(5)
     await client.remove_roles(message.author, group_ger)
