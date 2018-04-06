@@ -1,5 +1,5 @@
 # Tsuzuru-Bot
-Discord-Bot with spoiler function and other stuff.
+Discord-Bot for the "Weeb Autism" server.
 
 # Work in Progress 
 

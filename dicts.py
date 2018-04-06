@@ -31,4 +31,5 @@ class AttrDict(dict):
         # what we actually do:
         # return self.setdefault(item, AttrDict())
 
+
 __all__ = ['AttrDict', 'BiDict']

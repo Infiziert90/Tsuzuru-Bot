@@ -1,8 +1,7 @@
 import discord
-from handle_messages import private_msg
-from handle_messages import delete_user_message
+from handle_messages import private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
-from cmd_manager.filters import is_ex_fan_release_channel, command_not_allowed
+from cmd_manager.filters import is_ex_fan_release_channel
 
 
 @register_command('post_fansub', is_enabled=is_ex_fan_release_channel, description='Post your release in #release_fansubs.')
@@ -18,11 +17,10 @@ async def post_fansub(client, message, args):
         if len(lname) > 6:
             lname = lname[:6]
         if not link.startswith("http"):
-            await private_msg(message, "Cant find http link.")
+            await private_msg(message, "Can't find http link.")
             return
         description += f" [{lname}]({link}) ||"
 
     embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
-    channel = client.get_channel("221920731871707136")
-    await client.send_message(channel, embed=embed)
+    await message.channel.send(embed=embed)

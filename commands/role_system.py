@@ -11,40 +11,39 @@ with open("./config/role-settings.json") as f:
 role_list = list(settings["group"].keys())
 
 
-async def add_role(client, message, input_group):
+async def add_role(client, message, input_role):
     ger_eng = [settings["group"]["ger"], settings["group"]["eng"]]
-    for x in message.author.roles:
-        if x.id in ger_eng:
-            group_id = settings['group'][input_group]
-            group = get_role_by_id(message.channel.server, group_id)
-            await client.add_roles(message.author, group)
+    for role in message.author.roles:
+        if role.id in ger_eng:
+            guild_role = get_role_by_id(message.guild, settings['group'][input_role])
+            await message.author.add_roles(guild_role)
             await private_msg(message, "Thanks for telling me that!")
 
 
-async def remove_role(client, message, input_group):
-    role_to_remove = get_role_by_id(message.channel.server, settings['group'][input_group])
-    await client.remove_roles(message.author, role_to_remove)
+async def remove_role(client, message, input_role):
+    guild_role = get_role_by_id(message.guild, settings['group'][input_role])
+    await message.author.remove_roles(guild_role)
     await private_msg(message, "Role removed.")
 
 
 @register_command('ger', is_enabled=is_ex_server, description='Self-assign the Ger role.')
 async def ger(client, message, args):
-    group_ger = get_role_by_id(message.channel.server, settings['group']['ger'])
-    group_eng = get_role_by_id(message.channel.server, settings['group']['eng'])
-    await client.add_roles(message.author, group_ger)
+    role_ger = get_role_by_id(message.guild, settings['group']['ger'])
+    role_eng = get_role_by_id(message.guild, settings['group']['eng'])
+    await message.author.add_roles(role_ger)
     await asyncio.sleep(5)
-    await client.remove_roles(message.author, group_eng)
+    await message.author.remove_roles(role_eng)
     await private_msg(message, "Danke!")
     await delete_user_message(message)
 
 
 @register_command('eng', is_enabled=is_ex_server, description='Self-assign the Eng role.')
 async def eng(client, message, args):
-    group_ger = get_role_by_id(message.channel.server, settings['group']['ger'])
-    group_eng = get_role_by_id(message.channel.server, settings['group']['eng'])
-    await client.add_roles(message.author, group_eng)
+    role_ger = get_role_by_id(message.guild, settings['group']['ger'])
+    role_eng = get_role_by_id(message.guild, settings['group']['eng'])
+    await message.author.add_roles(role_eng)
     await asyncio.sleep(5)
-    await client.remove_roles(message.author, group_ger)
+    await message.author.remove_roles(role_ger)
     await private_msg(message, "Thanks for telling me that!")
     await delete_user_message(message)
 
@@ -53,8 +52,8 @@ async def eng(client, message, args):
 @add_argument("role", choices=role_list, help="Name of the role to add.")
 @add_argument("--remove", action="store_true", help="Remove the role")
 async def role_add_remove(client, message, args):
+    await delete_user_message(message)
     if not args.remove:
         await add_role(client, message, args.role)
     else:
         await remove_role(client, message, args.role)
-    await delete_user_message(message)

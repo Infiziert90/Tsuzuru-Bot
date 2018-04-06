@@ -42,6 +42,6 @@ async def memefont(client, message, args):
             emoji_text += "  "
 
     if len(emoji_text) > 1950:
-        await client.send_message(message.channel, f"From: {message.author.display_name}\n{emoji_text[:1950]} .........truncated")
+        await message.channel.send(f"From: {message.author.display_name}\n{emoji_text[:1950]} .........truncated")
     else:
-        await client.send_message(message.channel, f"From: {message.author.display_name}\n{emoji_text}")
+        await message.channel.send(f"From: {message.author.display_name}\n{emoji_text}")
