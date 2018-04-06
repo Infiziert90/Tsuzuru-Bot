@@ -31,9 +31,11 @@ async def on_message(message):
     if isinstance(message.channel, discord.abc.GuildChannel):
         server_id = message.guild.id
         server_name = message.guild.name
+        channel_name = message.channel.name
     else:
         server_id = 0
         server_name = "Private Message"
+        channel_name = None
 
     if server_id == 221919789017202688:  # eX Server
         if message.channel.id == 338273467483029515:  # welcome
@@ -45,7 +47,7 @@ async def on_message(message):
 
     if message.content.startswith(">>"):
         today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-        logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {message.channel.name} "
+        logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
                      f"Command: {message.content[:50]}")
 
     arg_string = message.clean_content[2:].split("\n", 1)[0]

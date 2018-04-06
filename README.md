@@ -1,8 +1,6 @@
 # Tsuzuru-Bot
 Discord-Bot for the "Weeb Autism" server.
 
-# Work in Progress 
-
 # Usage
 
 Start with installing the depdencies through ``pip``.

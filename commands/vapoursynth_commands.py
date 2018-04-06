@@ -451,6 +451,6 @@ async def grain(client, message, args):
 
 @register_command('showscaler', description='Grain.')
 async def showscaler(client, message, args):
-    content = ",".join(scaler_dict.keys())
+    content = ",\n".join(scaler_dict.keys())
     await delete_user_message(message)
     await private_msg(message, content)

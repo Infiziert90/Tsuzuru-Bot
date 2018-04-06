@@ -39,4 +39,4 @@ async def delete_user_message(message):
     try:
         await message.delete()
     except (discord.Forbidden, discord.NotFound):
-        logging.info("Can't delete message")
+        pass
