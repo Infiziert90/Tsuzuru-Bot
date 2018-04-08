@@ -7,6 +7,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from urllib.parse import quote, quote_plus
 from urllib.request import urlopen
 
+
 class WordNotFoundException(KeyError):
     def __init__(self, word, suggestions=None, *args, **kwargs):
         self.word = word
@@ -18,6 +19,7 @@ class WordNotFoundException(KeyError):
             message = "{0} Try: {1}".format(message, ", ".join(suggestions))
         KeyError.__init__(self, message, *args, **kwargs)
 
+
 class InvalidResponseException(WordNotFoundException):
     def __init__(self, word, *args, **kwargs):
         self.word = word
@@ -25,8 +27,10 @@ class InvalidResponseException(WordNotFoundException):
         message = "{0} not found. (Malformed XML from server).".format(word)
         KeyError.__init__(self, message, *args, **kwargs)
 
+
 class InvalidAPIKeyException(Exception):
     pass
+
 
 class MWApiWrapper:
     """ Defines an interface for wrappers to Merriam Webster web APIs. """
@@ -66,7 +70,7 @@ class MWApiWrapper:
         if self.key is None:
             raise InvalidAPIKeyException("API key not set")
         qstring = "{0}?key={1}".format(quote(word), quote_plus(self.key))
-        return ("{0}/xml/{1}").format(self.base_url, qstring)
+        return "{0}/xml/{1}".format(self.base_url, qstring)
 
     def lookup(self, word):
         response = self.urlopen(self.request_url(word))
@@ -109,8 +113,9 @@ class MWApiWrapper:
         return parts
 
     def _stringify_tree(self, *args, **kwargs):
-        " Returns a string of the concatenated results from _flatten_tree "
+        """ Returns a string of the concatenated results from _flatten_tree """
         return ''.join(self._flatten_tree(*args, **kwargs))
+
 
 class LearnersDictionary(MWApiWrapper):
 
@@ -199,10 +204,12 @@ class LearnersDictionary(MWApiWrapper):
         example = self._stringify_tree(root)
         return re.sub(r'\s*\[=.*?\]', '', example)
 
+
 class Inflection(object):
     def __init__(self, label, forms):
         self.label = label
         self.forms = forms
+
 
 class WordSense(object):
     def __init__(self, definition, examples):
@@ -218,6 +225,7 @@ class WordSense(object):
     def __iter__(self):
         yield self.definition
         yield self.examples
+
 
 class MWDictionaryEntry(object):
     def build_sound_url(self, fragment):
@@ -251,6 +259,7 @@ class LearnersDictionaryEntry(MWDictionaryEntry):
         fragment = re.sub(r'\.(tif|eps)', '.gif', fragment)
         return "{0}/{1}".format(base_url, fragment)
 
+
 class CollegiateDictionaryEntry(MWDictionaryEntry):
     def __init__(self, word, attrs):
         self.word = word
@@ -263,7 +272,6 @@ class CollegiateDictionaryEntry(MWDictionaryEntry):
                       attrs.get("sound_fragments")]
         self.illustrations = [self.build_illustration_url(f) for f in
                               attrs.get("illustration_fragments")]
-
 
     def build_illustration_url(self, fragment):
         base_url = 'http://www.merriam-webster.com/art/dict'

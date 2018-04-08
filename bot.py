@@ -42,57 +42,16 @@ async def on_message(message):
             if message.author.id != client.user.id:  # own bot
                 await delete_user_message(message)  # no return here
 
-    if not message.content.startswith(">>"):
-        return
+    today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
+    logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
+                 f"Command: {message.content[:50]}")
 
-    if message.content.startswith(">>"):
-        today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-        logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
-                     f"Command: {message.content[:50]}")
-
-    arg_string = message.clean_content[2:].split("\n", 1)[0]
-    try:
-        arg_string = shlex.split(arg_string)
-    except ValueError as err:
-        return await private_msg_code(message, str(err))
-
-    try:
-        args = parser.parse_args(arg_string)
-    except HelpException as err:
-        await delete_user_message(message)
-        return await private_msg_code(message, str(err))
-    except (UnkownCommandException, argparse.ArgumentError) as err:
-        if arg_string[0] in dispatcher.commands:
-            await delete_user_message(message)
-            return await private_msg_code(message, str(err))
-        return
-
-    return await dispatcher.handle(args.command, client, message, args)
+    await handle_commands(message)
 
 
 @client.event
 async def on_message_edit(_, message):
-    if not message.content.startswith(">>"):
-        return
-
-    arg_string = message.clean_content[2:].split("\n", 1)[0]
-    try:
-        arg_string = shlex.split(arg_string)
-    except ValueError as err:
-        return await private_msg_code(message, str(err))
-
-    try:
-        args = parser.parse_args(arg_string)
-    except HelpException as err:
-        await delete_user_message(message)
-        return await private_msg_code(message, str(err))
-    except (UnkownCommandException, argparse.ArgumentError) as err:
-        if arg_string[0] in dispatcher.commands:
-            await delete_user_message(message)
-            return await private_msg_code(message, str(err))
-        return
-
-    return await dispatcher.handle(args.command, client, message, args)
+    await handle_commands(message)
 
 
 @client.event
@@ -108,6 +67,30 @@ async def on_member_join(mem):
             pass
         await delete_user_message(member_message)
         await delete_user_message(mention)
+
+
+async def handle_commands(message):
+    if not message.content.startswith(">>"):
+        return
+
+    arg_string = message.clean_content[2:].split("\n", 1)[0]
+    try:
+        arg_string = shlex.split(arg_string)
+    except ValueError as err:
+        return await private_msg_code(message, str(err))
+
+    try:
+        args = parser.parse_args(arg_string)
+    except HelpException as err:
+        await delete_user_message(message)
+        return await private_msg_code(message, str(err))
+    except (UnkownCommandException, argparse.ArgumentError) as err:
+        if arg_string[0] in dispatcher.commands:
+            await delete_user_message(message)
+            return await private_msg_code(message, str(err))
+        return
+
+    return await dispatcher.handle(args.command, client, message, args)
 
 
 def main():
