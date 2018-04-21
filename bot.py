@@ -1,4 +1,5 @@
 import shlex
+import aiohttp
 import uvloop
 import asyncio
 import discord
@@ -10,6 +11,7 @@ from cmd_manager import dispatcher
 from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message
+from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 loop = uvloop.new_event_loop()
@@ -28,24 +30,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if isinstance(message.channel, discord.abc.GuildChannel):
-        server_id = message.guild.id
-        server_name = message.guild.name
-        channel_name = message.channel.name
-    else:
-        server_id = 0
-        server_name = "Private Message"
-        channel_name = None
-
-    if server_id == 221919789017202688:  # eX Server
-        if message.channel.id == 338273467483029515:  # welcome
-            if message.author.id != client.user.id:  # own bot
-                await delete_user_message(message)  # no return here
-
-    today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-    logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
-                 f"Command: {message.content[:50]}")
-
     await handle_commands(message)
 
 
@@ -69,9 +53,47 @@ async def on_member_join(mem):
         await delete_user_message(mention)
 
 
+@client.event
+async def on_reaction_remove(reaction, user):
+    if not reaction.me or user.id == client.user.id:
+        return
+
+    if reaction.message.id in ongoing_votes:
+        await remove_vote(reaction, user, ongoing_votes)
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if not reaction.me or user.id == client.user.id:
+        return
+
+    if reaction.message.id in ongoing_votes:
+        await add_vote(reaction, user, ongoing_votes)
+    elif reaction.message.id in anon_votes:
+        await add_vote(reaction, user, anon_votes)
+
+
 async def handle_commands(message):
+    if isinstance(message.channel, discord.abc.GuildChannel):
+        server_id = message.guild.id
+        server_name = message.guild.name
+        channel_name = message.channel.name
+    else:
+        server_id = 0
+        server_name = "Private Message"
+        channel_name = None
+
+    if server_id == 221919789017202688:  # eX Server
+        if message.channel.id == 338273467483029515:  # welcome
+            if message.author.id != client.user.id:  # own bot
+                await delete_user_message(message)  # no return here
+
     if not message.content.startswith(">>"):
         return
+
+    today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
+    logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
+                 f"Command: {message.content[:50]}")
 
     arg_string = message.clean_content[2:].split("\n", 1)[0]
     try:
@@ -94,11 +116,15 @@ async def handle_commands(message):
 
 
 def main():
-    logging.info("Start discord run")
-    # bot-Bot
-    client.run(config.MAIN.login_token)
-    # Test-Bot
-    # client.run(config.MAIN.test_token)
+    while True:
+        try:
+            logging.info("Start discord run")
+            # bot-Bot
+            client.run(config.MAIN.login_token)
+            # Test-Bot
+            # client.run(config.MAIN.test_token)
+        except aiohttp.client_exceptions.ClientConnectorError:
+            continue
 
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ async def prison(client, message, args):
 async def purge_channel(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel(args.channel_id)
-    await client.purge_from(channel, limit=args.number)
+    await channel.purge(limit=args.number)
     await message.channel.send(f"Channel: {channel.name}\nNumber: {args.number}\nReason: {args.reason}\nBy: {message.author.name}")
 
 
