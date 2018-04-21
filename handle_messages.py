@@ -17,22 +17,27 @@ async def handle_msg(message, content=None, embed=None, file=None, user=None):
 
 async def private_msg(message, answer):
     await handle_msg(message, content=answer)
+    return True
 
 
 async def private_msg_embed(message, answer):
     await handle_msg(message, embed=answer)
+    return True
 
 
 async def private_msg_code(message, answer):
     await handle_msg(message, content=f"```\n{answer}```")
+    return True
 
 
 async def private_msg_file(message, file, content=None):
     await handle_msg(message, file=discord.File(file), content=content)
+    return True
 
 
 async def private_msg_user(message, answer, user):
     await handle_msg(message, content=answer, user=user)
+    return True
 
 
 async def delete_user_message(message):

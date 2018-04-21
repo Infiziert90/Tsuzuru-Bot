@@ -6,8 +6,12 @@ from cmd_manager.decorators import register_command, add_argument
 
 ongoing_votes = {"anon": False}
 anon_votes = {"anon": True}
-num2emo = {1: "1⃣", 2: "2⃣", 3: "3⃣", 4: "4⃣", 5: "5⃣", 6: "6⃣", 7: "7⃣", 8: "8⃣", 9: "9⃣", 0: "0⃣"}
+num2emo = {0: "🇦", 1: "🇧", 2: "🇨", 3: "🇩", 4: "🇪", 5: "🇫", 6: "🇬", 7: "🇭", 8: "🇮", 9: "🇯"}
 emo2num = {v: k for k, v in num2emo.items()}
+language = {
+    "en": ["And the winner of", "is", "And the winners of", "are"],
+    "de": ["Der Sieger von", "ist", "Die Sieger von", "sind"],
+    }
 
 
 @register_command('vote', description='Post a poll.')
@@ -15,15 +19,11 @@ emo2num = {v: k for k, v in num2emo.items()}
 @add_argument('time', type=int, default=30, help='Time')
 @add_argument('--multi', '-m', dest='multi', action='store_true', default=False, help='Allow multiple votes')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
+@add_argument('--language', '-l', dest='lang', default="en", choices=language.keys(), help='Set the language for the end text')
+@add_argument('--own-text', '-own', dest='own', action='append', default=None, help='Set your own evaluation text')
 async def vote(_, message, args):
-    if len(ongoing_votes) == 3:
-        return await private_msg(message, "Too many ongoing votes. Please wait until one is over.")
-
-    if args.time > 1440 or args.time < 10:
-        return await private_msg(message, "Time must be between 10 and 1440.")
-
-    if len(args.options) > 10:
-        return await private_msg(message, "You cannot add more than 10 options.")
+    if await check_message(message, args, ongoing_votes):
+        return
 
     embed = discord.Embed(title=args.topic, description="Cast a vote by clicking one of the reactions.", color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
@@ -42,22 +42,18 @@ async def vote(_, message, args):
     for number in range(len(args.options)):
         await ongoing_votes[mes.id]["m"].add_reaction(num2emo[number])
 
-    await vote_timer(args.time, mes.id, ongoing_votes)
+    await vote_timer(args.time, mes.id, ongoing_votes, args.own, args.lang)
 
 
 @register_command('anon_vote', description='Post an anonymous poll.')
 @add_argument('topic', help='Question')
 @add_argument('time', type=int, default=30, help='Time')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
+@add_argument('--language', '-l', dest='lang', default="en", choices=language.keys(), help='Set the language for the end text')
+@add_argument('--own-text', '-own', dest='own', action='append', default=None, help='Set your own evaluation text')
 async def anon_vote(_, message, args):
-    if len(anon_votes) == 3:
-        return await private_msg(message, "Too many ongoing anonymous votes. Please wait until one is over.")
-
-    if args.time > 1440 or args.time < 10:
-        return await private_msg(message, "Time must be between 10 and 1440.")
-
-    if len(args.options) > 10:
-        return await private_msg(message, "You cannot add more than 10 options.")
+    if await check_message(message, args, anon_votes):
+        return
 
     embed = discord.Embed(title=args.topic, description="Cast a vote secretly by clicking one of the reactions.", color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
@@ -77,56 +73,87 @@ async def anon_vote(_, message, args):
     for number in range(len(args.options)):
         await anon_votes[mes.id]["m"].add_reaction(num2emo[number])
 
-    await vote_timer(args.time, mes.id, anon_votes)
+    await vote_timer(args.time, mes.id, anon_votes, args.own, args.lang)
+
+
+async def check_message(message, args, vo):
+    if len(vo) == 5:
+        return await private_msg(message, "Too many ongoing votes. Please wait until one is over.")
+
+    if args.time > 1440 or args.time < 5:
+        return await private_msg(message, "Time must be between 5 and 1440.")
+
+    if len(args.options) > 10 or len(args.options) < 1:
+        return await private_msg(message, "Options must be between 2 and 10.")
+
+    options = [x.lower() for x in args.options]
+    if len(set(options)) != len(options):
+        return await private_msg(message, "Options must be unique.")
+
+    if args.own is not None and len(args.own) != 2:
+        return await private_msg(message, "Own must be 2 sentences")
+
+    return False
 
 
 async def get_message(mes_id, vo):
     vo[mes_id]["m"] = await vo[mes_id]["m"].channel.get_message(mes_id)
 
 
-async def vote_timer(time, mes_id, vo):
-    time_left = time
-    for _ in range(0, time, 1):
-        await asyncio.sleep(60)
+async def vote_timer(time, mes_id, vo, own, lang):
+    try:
+        time_left = time
+        for _ in range(0, time, 1):
+            await asyncio.sleep(60)
+            await get_message(mes_id, vo)
+            time_left -= 1
+            embed = vo[mes_id]["m"].embeds[0].set_footer(text=f"Time left: {time_left}mins")
+            await vo[mes_id]["m"].edit(embed=embed)
+
         await get_message(mes_id, vo)
-        time_left -= 1
-        embed = vo[mes_id]["m"].embeds[0].set_footer(text=f"Time left: {time_left}mins")
-        await vo[mes_id]["m"].edit(embed=embed)
+        m = vo[mes_id]["m"]
 
-    await get_message(mes_id, vo)
-    m = vo[mes_id]["m"]
-
-    winner = 0
-    winners = []
-    if not vo["anon"]:
-        for reaction in m.reactions:
-            if reaction.me:
-                if reaction.count == winner:
-                    winners.append(m.embeds[0]._fields[emo2num[reaction.emoji]]["name"])
-                elif reaction.count > winner:
+        winner = 0
+        winners = []
+        if not vo["anon"]:
+            for reaction in m.reactions:
+                if reaction.me:
+                    if reaction.count == winner:
+                        winners.append(m.embeds[0]._fields[emo2num[reaction.emoji]]["name"])
+                    elif reaction.count > winner:
+                        winners.clear()
+                        winners.append(m.embeds[0]._fields[emo2num[reaction.emoji]]["name"])
+                        winner = reaction.count
+        else:
+            for k, v in vo[mes_id]["options"].items():
+                if v == winner:
+                    winners.append(m.embeds[0]._fields[k]["name"])
+                elif v > winner:
                     winners.clear()
-                    winners.append(m.embeds[0]._fields[emo2num[reaction.emoji]]["name"])
-                    winner = reaction.count
-    else:
-        for k, v in vo[mes_id]["options"].items():
-            if v == winner:
-                winners.append(m.embeds[0]._fields[k]["name"])
-            elif v > winner:
-                winners.clear()
-                winners.append(m.embeds[0]._fields[k]["name"])
-                winner = v
+                    winners.append(m.embeds[0]._fields[k]["name"])
+                    winner = v
 
-    if len(winners) == 1:
-        content = f"And the winner of **{m.embeds[0].title}** is **{winners[0]}**"
-    else:
-        content = f"And the winners of **{m.embeds[0].title}** are "
-        for winner in winners:
-            content += f"**{winner}**, "
+        if own is None:
+            if len(winners) == 1:
+                content = f"{language[lang][0]} **{m.embeds[0].title}** {language[lang][1]} **{winners[0]}**"
+            else:
+                content = f"{language[lang][2]} **{m.embeds[0].title}** {language[lang][3]} "
+                for winner in winners:
+                    content += f"**{winner}**, "
+        else:
+            if len(winners) == 1:
+                content = f"{own[0]} **{winners[0]}**"
+            else:
+                content = f"{own[1]} "
+                for winner in winners:
+                    content += f"**{winner}**, "
 
-    vo.pop(mes_id)
-    embed = m.embeds[0].set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
-    await m.edit(content=content, embed=embed)
-    await m.channel.send(content)
+        vo.pop(mes_id)
+        embed = m.embeds[0].set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
+        await m.edit(content=content, embed=embed)
+        await m.channel.send(content)
+    except discord.errors.NotFound:
+        return vo.pop(mes_id)
 
 
 async def remove_vote(reaction, user, vo):
