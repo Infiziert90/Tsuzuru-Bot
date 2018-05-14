@@ -370,8 +370,8 @@ async def getnative(client, message, args):
         f"\n{best_value}",
         ])
         await private_msg_file(message, f"{getn.path}/{filename}.txt", "Output from getnative.")
-        await message.channel.send(file=discord.File(getn.path + f'/{filename}'), content=f"Input\n{message.author}: \"{message.content}\"")
-        await message.channel.send(file=discord.File(getn.path + f'/{filename}.png'), content=content)
+        await message.channel.send(file=discord.File(f'{getn.path}/{filename}'), content=f"Input\n{message.author}: \"{message.content}\"")
+        await message.channel.send(file=discord.File(f'{getn.path}/{filename}.png'), content=content)
     else:
         await private_msg(message, best_value)
 
@@ -404,8 +404,8 @@ async def getscaler(client, message, args):
     gc.collect()
 
     if not forbidden_error:
-        await message.channel.send(file=discord.File(gets.path + f'/{filename}'), content=f"Input\n{message.author}: \"{message.content}\"")
-        await message.channel.send(file=discord.File(gets.path + f'/{filename}_source0.png'), content=f"Output\n{best_value}")
+        await message.channel.send(file=discord.File(f'{gets.path}/{filename}'), content=f"Input\n{message.author}: \"{message.content}\"")
+        await message.channel.send(file=discord.File(f'{gets.path}/{filename}_source0.png'), content=f"Output\n{best_value}")
     else:
         await private_msg(message, best_value)
 
@@ -438,7 +438,7 @@ async def grain(client, message, args):
 
     if not forbidden_error:
         try:
-            await message.channel.send(file=discord.File(gra.path + f'/{filename}_grain0.png'), content=f"Grain <:diGG:302631286118285313>\n{best_value}")
+            await message.channel.send(file=discord.File(f'{gra.path}/{filename}_grain0.png'), content=f"Grain <:diGG:302631286118285313>\n{best_value}")
         except discord.HTTPException:
             await message.channel.send("Too much grain <:notlikemiya:328621519037005826>")
     else:

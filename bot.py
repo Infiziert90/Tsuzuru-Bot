@@ -95,7 +95,7 @@ async def handle_commands(message):
     logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
                  f"Command: {message.content[:50]}")
 
-    arg_string = message.clean_content[2:].split("\n", 1)[0]
+    arg_string = message.clean_content[2:]
     try:
         arg_string = shlex.split(arg_string)
     except ValueError as err:
@@ -108,7 +108,6 @@ async def handle_commands(message):
         return await private_msg_code(message, str(err))
     except (UnkownCommandException, argparse.ArgumentError) as err:
         if arg_string[0] in dispatcher.commands:
-            await delete_user_message(message)
             return await private_msg_code(message, str(err))
         return
 
@@ -125,6 +124,8 @@ def main():
             # client.run(config.MAIN.test_token)
         except aiohttp.client_exceptions.ClientConnectorError:
             continue
+        except KeyboardInterrupt:
+            return loop.close()
 
 
 if __name__ == "__main__":

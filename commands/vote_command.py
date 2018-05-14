@@ -1,11 +1,12 @@
+import aiohttp
 import discord
 import asyncio
 from handle_messages import private_msg_user, private_msg
 from cmd_manager.decorators import register_command, add_argument
 
 
-ongoing_votes = {"anon": False}
-anon_votes = {"anon": True}
+ongoing_votes = {}
+anon_votes = {}
 num2emo = {0: "🇦", 1: "🇧", 2: "🇨", 3: "🇩", 4: "🇪", 5: "🇫", 6: "🇬", 7: "🇭", 8: "🇮", 9: "🇯"}
 emo2num = {v: k for k, v in num2emo.items()}
 language = {
@@ -16,10 +17,10 @@ language = {
 
 @register_command('vote', description='Post a poll.')
 @add_argument('topic', help='Question')
-@add_argument('time', type=int, default=30, help='Time')
+@add_argument('--time', '-t', type=int, default=30, help='Time [Minutes]')
 @add_argument('--multi', '-m', dest='multi', action='store_true', default=False, help='Allow multiple votes')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
-@add_argument('--language', '-l', dest='lang', default="en", choices=language.keys(), help='Set the language for the end text')
+@add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=language.keys(), help='Set the language for the end text')
 @add_argument('--own-text', '-own', dest='own', action='append', default=None, help='Set your own evaluation text')
 async def vote(_, message, args):
     if await check_message(message, args, ongoing_votes):
@@ -37,6 +38,7 @@ async def vote(_, message, args):
         "multi": args.multi,
         "voted_user": set(),
         "overflow": [],
+        "anon": False,
     }
 
     for number in range(len(args.options)):
@@ -47,9 +49,9 @@ async def vote(_, message, args):
 
 @register_command('anon_vote', description='Post an anonymous poll.')
 @add_argument('topic', help='Question')
-@add_argument('time', type=int, default=30, help='Time')
+@add_argument('--time', '-t', type=int, default=30, help='Time [Minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
-@add_argument('--language', '-l', dest='lang', default="en", choices=language.keys(), help='Set the language for the end text')
+@add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=language.keys(), help='Set the language for the end text')
 @add_argument('--own-text', '-own', dest='own', action='append', default=None, help='Set your own evaluation text')
 async def anon_vote(_, message, args):
     if await check_message(message, args, anon_votes):
@@ -68,6 +70,7 @@ async def anon_vote(_, message, args):
         "options": {k: 0 for k in range(len(args.options))},
         "voted_user": set(),
         "overflow": [],
+        "anon": True,
     }
 
     for number in range(len(args.options)):
@@ -97,7 +100,11 @@ async def check_message(message, args, vo):
 
 
 async def get_message(mes_id, vo):
-    vo[mes_id]["m"] = await vo[mes_id]["m"].channel.get_message(mes_id)
+    try:
+        vo[mes_id]["m"] = await vo[mes_id]["m"].channel.get_message(mes_id)
+    except aiohttp.client_exceptions.ClientConnectorError:
+        await asyncio.sleep(1)
+        get_message(mes_id, vo)
 
 
 async def vote_timer(time, mes_id, vo, own, lang):
@@ -115,7 +122,7 @@ async def vote_timer(time, mes_id, vo, own, lang):
 
         winner = 0
         winners = []
-        if not vo["anon"]:
+        if not vo[mes_id]["anon"]:
             for reaction in m.reactions:
                 if reaction.me:
                     if reaction.count == winner:
@@ -189,7 +196,7 @@ async def add_vote(reaction, user, vo):
     vo[reaction.message.id]["voted_user"].add(user.id)
     i = emo2num[reaction.emoji]
     m = reaction.message
-    if vo["anon"]:
+    if vo[m.id]["anon"]:
         await reaction.message.remove_reaction(reaction, user)
         vo[m.id]["options"][i] += 1
         embed = m.embeds[0].set_field_at(i, name=m.embeds[0]._fields[i]["name"], value=f"Votes: {vo[m.id]['options'][i]}", inline=False)

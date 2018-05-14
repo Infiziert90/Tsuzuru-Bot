@@ -24,11 +24,11 @@ async def send_message(client, message, args):
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:
-        return await client.send_message(message.channel, f"User in prison can't use this command!")
-    if len(args.user) == 0:
-        return await client.send_message(message.channel, f"Empty username is not allowed.")
-    if args.prison_length > 180:
-        return await client.send_message(message.channel, f"Prison lenght max. is 180min")
+        return await message.channel.send(f"User in prison can't use this command!")
+    elif len(args.user) == 0:
+        return await message.channel.send(f"Empty username is not allowed.")
+    elif not (180 >= args.prison_length >= 0):
+        return await message.channel.send(f"Prison lenght max. is 180min [0 reset]")
 
     server = client.get_guild(221919789017202688)
     user = server.get_member_named(args.user) or server.get_member(args.user)
@@ -36,7 +36,9 @@ async def prison(client, message, args):
         return await message.channel.send("User not found.")
 
     await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
-    await message.channel.send(f"Username: {user.name}\nTime: {args.prison_length}min\nReason: {args.reason}\nBy: {message.author.name}")
+    await message.channel.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
+                               f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
+                               f"{args.reason}\nBy: {message.author.name}")
 
 
 @register_command('purge_channel', is_admin=is_admin_command, description='Purge channel messages.')
