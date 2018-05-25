@@ -4,12 +4,12 @@ import discord
 import tempfile
 import itertools
 import subprocess
+from config import config
 from handle_messages import private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 
 
-FONT_PATH = "/home/encode/OpenSans-Regular.ttf"  # Path to OpenSans-Regular.ttf
-# FONT_PATH = "/usr/share/fonts/TTF/DejaVuSans.ttf"
+FONT_PATH = config.MAIN.font
 CHAR_WIDTH = 28.24  # for OpenSans 55
 CHAR_HEIGHT = 62  # for OpenSans 55
 TEST_WIDTH = 1920
@@ -121,6 +121,13 @@ def spoiler_create(header, content, tmp_path):
     test_height = float(ffmpeg_output.split()[1])
     surface = TEST_WIDTH * test_height
 
+    if surface > 8300000:
+        return False
+    elif test_height > 5000:
+        return False
+    elif test_height < 50:
+        return False
+
     width, height = dimensions(surface)
     char_count = int(width / CHAR_WIDTH)
 
@@ -130,13 +137,7 @@ def spoiler_create(header, content, tmp_path):
     cmd = ffmpeg_output_cmd.format(user_header=header, user_text=text, width=width, height=height, font=FONT_PATH,
                                    pad=PADDING, out_path=tmp_path)
     subprocess.call(cmd, universal_newlines=True, shell=True)
-
-    """
-    s=(x+2p+h)*(x/r+2p)
-    s=(ry+2p+h)*(y+2p)
-    s=ry²+ry2p+2py+4p²+hy+2ph
-    s=ry²+ry2p+2py+4p²+hy+2ph
-    """
+    return True
 
 
 @register_command('spoiler', description='Create webm with spoiler warning.')
@@ -149,7 +150,10 @@ async def spoiler(_, message, args):
     await private_msg(message, f"```{message.content}```")
 
     spoiler_title = f"Spoiler: {args.title} (by {message.author.display_name})"
-    spoiler_create(spoiler_title, args.content, tmp_path)
     content = f"**Spoiler: {args.title}** (by <@!{message.author.id}>)"
+    check = spoiler_create(spoiler_title, args.content, tmp_path)
 
-    await message.channel.send(file=discord.File(f'{tmp_path}/spoiler.webm'), content=content)
+    if check:
+        await message.channel.send(file=discord.File(f'{tmp_path}/spoiler.webm'), content=content)
+    else:
+        await private_msg(message, f"Text is to long.")
