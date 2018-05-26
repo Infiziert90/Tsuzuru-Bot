@@ -3,7 +3,7 @@ Discord-Bot for the "Weeb Autism" server.
 
 # Usage
 
-Start with installing the depdencies through ``pip``.
+Start with installing the dependencies through ``pip``.
 
 config file (see ``bot_example.ini``).
 
