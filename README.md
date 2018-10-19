@@ -14,9 +14,9 @@ Start the bot by executing::
 That's it.
 
 # Requirements
-
 To run this project you will need:
 
+* Linux
 * Python 3.6
 * Pip for Python
 * Your own set of Discord credentials to use with Bots

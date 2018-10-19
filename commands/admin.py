@@ -1,7 +1,7 @@
 import discord
 from config import help_text
 from cmd_manager.filters import is_admin_command
-from utils import get_file, punish_user, prison_inmates
+from utils import get_file, punish_user, prison_inmates, user_roles
 from handle_messages import delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 
@@ -20,15 +20,15 @@ async def send_message(client, message, args):
 @register_command('prison', is_admin=is_admin_command, description='Assign prison.')
 @add_argument('--user', '-u', help='UserID from the user.')
 @add_argument('--reason', '-r', help='Reason for prison.')
-@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Lenght for the prison in minutes.')
+@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Lenght for the prison in minutes. [0 reset]')
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
+    if message.author.id in user_roles:
+        return await message.channel.send(f"User in prison can't use this command!")
     elif len(args.user) == 0:
         return await message.channel.send(f"Empty username is not allowed.")
-    elif not (180 >= args.prison_length >= 0):
-        return await message.channel.send(f"Prison lenght max. is 180min [0 reset]")
 
     server = client.get_guild(221919789017202688)
     user = server.get_member_named(args.user) or server.get_member(args.user)
@@ -37,6 +37,10 @@ async def prison(client, message, args):
 
     await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
     await message.channel.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
+                               f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
+                               f"{args.reason}\nBy: {message.author.name}")
+    infi = client.get_user(134750562062303232)
+    await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
                                f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
                                f"{args.reason}\nBy: {message.author.name}")
 

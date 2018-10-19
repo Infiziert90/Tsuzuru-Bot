@@ -2,10 +2,10 @@ import aiohttp
 import discord
 import asyncio
 import random
-from handle_messages import private_msg_user
-
+from handle_messages import private_msg_user, delete_user_message
 
 prison_inmates = {}
+user_roles = {}
 user_cooldown = set()
 
 
@@ -20,11 +20,13 @@ def has_role(user, role_id):
     return get_role_by_id(user, role_id) is not None
 
 
-async def get_file(url, path, filename):
-    with aiohttp.ClientSession() as sess:
+async def get_file(url, path, filename, message=None):
+    async with aiohttp.ClientSession() as sess:
         async with sess.get(url) as resp:
             if resp.status != 200:
                 return None
+            if message is not None:
+                await delete_user_message(message)
             with open(f"{path}/{filename}", 'wb') as f:
                 f.write(await resp.read())
             return f"{path}/{filename}"
@@ -40,12 +42,20 @@ async def delete_role(user, role):
         await user.remove_roles(role)
     except (discord.Forbidden, discord.HTTPException):
         return
+    try:
+        await user.edit(roles=user_roles[user.id])
+    except KeyError:
+        return
+
+    user_roles.pop(user.id)
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
     if isinstance(message.channel, discord.abc.PrivateChannel):
         return
 
+    if message.author.id in user_roles:
+        return await message.channel.send(f"User in prison can't use this command!")
     if message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
 
@@ -56,20 +66,22 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
     if user.id in prison_inmates:
         if prison_length == 0:
             prison_inmates[user.id] = 0
+            return
         else:
             prison_inmates[user.id] += prison_length
         return await private_msg_user(message, f"New Time: {prison_inmates[user.id]}min\nReason: {reason}", user)
     else:
         prison_inmates[user.id] = prison_length
 
-    if has_role(user, 221920178940805120):
-        role = get_role_by_id(message.guild, 385475870770331650)
-    else:
-        role = get_role_by_id(message.guild, 385478966955343873)
+    user_roles[user.id] = user.roles[1:]
+    await user.edit(roles=[], reason="Ultimate Prison")
+
+    role = get_role_by_id(message.guild, 451076667377582110)
 
     await user.add_roles(role)
     asyncio.ensure_future(delete_role(user, role))
-    await private_msg_user(message, f"Prison is now active\n Time: {prison_inmates[user.id]}min\nReason: {reason}", user)
+    await private_msg_user(message, f"Prison is now active\n Time: {prison_inmates[user.id]}min\nReason: {reason}",
+                           user)
 
 
 def set_user_cooldown(author, time):

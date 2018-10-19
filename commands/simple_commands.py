@@ -29,13 +29,20 @@ async def avisynth(client, message, args):
 async def vapoursynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need Help for Vapoursynth?", description=help_text("bot_bot", "vs_links"))
-    await message.channel.send(message, embed=em)
+    await message.channel.send(embed=em)
 
 
 @register_command('yuuno', description='Post some links for Yuuno')
 async def yuuno(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Yuuno?", description=help_text("bot_bot", "yuuno_links"))
+    await message.channel.send(embed=em)
+
+
+@register_command('ffmpeg', description='Post some links for ffmpeg')
+async def ffmpeg(client, message, args):
+    await delete_user_message(message)
+    em = discord.Embed(title="ffmpeg?", description=help_text("bot_bot", "ffmpeg_links"))
     await message.channel.send(embed=em)
 
 
@@ -50,4 +57,7 @@ async def getn(client, message, args):
 @add_argument('server_id', type=int, help='Server where you will check the ids.')
 async def lolz(client, message, args):
     server = client.get_guild(args.server_id)
-    await message.channel.send(repr(tuple((role.name, role.id) for role in server.roles)))
+    roles = repr(tuple((role.name, role.id) for role in server.roles))
+    roles = [roles[i:i+1900] for i in range(0, len(roles), 1900)]
+    for x in roles:
+        await message.channel.send(x)

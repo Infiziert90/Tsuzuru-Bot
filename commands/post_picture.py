@@ -79,3 +79,21 @@ async def yuriislove(client, message, args):
 async def kevin(client, message, args):
     await delete_user_message(message)
     await message.channel.send(file=discord.File(spam_folder + "kevin.jpeg"), content=f"From: {message.author.display_name}")
+
+
+@register_command('capi', description='Capitalism')
+async def capi(client, message, args):
+    await delete_user_message(message)
+    await message.channel.send(file=discord.File(spam_folder + "capi.jpg"), content=f"From: {message.author.display_name}")
+
+
+@register_command('autism', description='Autism!')
+async def autism(client, message, args):
+    await delete_user_message(message)
+    await message.channel.send(file=discord.File(spam_folder + "autism.gif"), content=f"From: {message.author.display_name}")
+
+
+@register_command('jail', description='Jail is over there!')
+async def jail(client, message, args):
+    await delete_user_message(message)
+    await message.channel.send(file=discord.File(spam_folder + "jail.gif"), content=f"From: {message.author.display_name}")

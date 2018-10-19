@@ -10,8 +10,9 @@ import datetime
 from cmd_manager import dispatcher
 from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
-from handle_messages import private_msg_code, delete_user_message
+from handle_messages import private_msg_code, delete_user_message, send_log_message
 from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
+from utils import user_roles
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 loop = uvloop.new_event_loop()
@@ -41,6 +42,7 @@ async def on_message_edit(_, message):
 @client.event
 async def on_member_join(mem):
     if mem.guild.id == 221919789017202688:
+        await send_log_message(f"{mem.display_name} has joined the server", discord.Embed.Empty, mem, discord.Colour.green(), client)
         channel = client.get_channel(338273467483029515)
         mention = await channel.send(f"<@!{mem.id}>")
         em = discord.Embed(description=help_text("bot_bot", "member_join"), color=333333)
@@ -51,6 +53,23 @@ async def on_member_join(mem):
             pass
         await delete_user_message(member_message)
         await delete_user_message(mention)
+
+
+@client.event
+async def on_member_remove(mem):
+    if mem.guild.id == 221919789017202688:
+        await send_log_message(f"{mem.display_name} has left the server", discord.Embed.Empty, mem, discord.Colour.red(), client)
+
+
+@client.event
+async def on_member_update(before, after):
+    if after.guild.id == 221919789017202688:
+        if before.nick != after.nick:
+            if before.nick is None:
+                before.nick = before.display_name
+            await send_log_message(f"{before.nick} changed their nickname", f"New nickname {after.nick}", after, discord.Colour.blue(), client)
+        elif before.name != after.name:
+            await send_log_message(f"{before.name} changed their username", f"New username {after.name}", after, discord.Colour.orange(), client)
 
 
 @client.event
@@ -74,6 +93,9 @@ async def on_reaction_add(reaction, user):
 
 
 async def handle_commands(message):
+    if message.author.id in user_roles:
+        return
+
     if isinstance(message.channel, discord.abc.GuildChannel):
         server_id = message.guild.id
         server_name = message.guild.name
@@ -89,6 +111,9 @@ async def handle_commands(message):
                 await delete_user_message(message)  # no return here
 
     if not message.content.startswith(">>"):
+        return
+
+    if len(message.content) == 2:
         return
 
     today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")

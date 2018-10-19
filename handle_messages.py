@@ -1,9 +1,7 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import asyncio
 import logging
 import discord
+import datetime
 
 
 async def handle_msg(message, content=None, embed=None, file=None, user=None):
@@ -41,7 +39,19 @@ async def private_msg_user(message, answer, user):
 
 
 async def delete_user_message(message):
-    try:
-        await message.delete()
-    except (discord.Forbidden, discord.NotFound):
-        pass
+    if isinstance(message.channel, discord.abc.GuildChannel):
+        try:
+            await message.delete()
+        except discord.Forbidden as err:
+            logging.warning(f"Exception while deleting a message: {err}")
+        except discord.NotFound as err:
+            logging.debug(f"Exception while deleting a message: {err}")
+
+
+async def send_log_message(title, desc, member, colour, client):
+    channel = client.get_channel(338293663677546496)
+    embed = discord.Embed(title=" ", description=desc, colour=colour)
+    embed.set_author(name=title, icon_url=member.avatar_url)
+    embed.set_footer(text=datetime.datetime.now().strftime('%H:%M:%S %Y-%m-%d'))
+    await channel.send(embed=embed)
+

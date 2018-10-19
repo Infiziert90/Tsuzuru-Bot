@@ -1,34 +1,40 @@
 bot_bot:
   avs_links: |
-    Ask `@`AVS-Expert
+    Ask <#224104675031384065> or <@109369346740015104>
     Links:
     http://avisynth.nl/index.php/Main_Page
     https://en.wikipedia.org/wiki/AviSynth
     http://www.avs-plus.net/
     https://iamscum.wordpress.com/encoding-stuff/
   vs_links: |
-    Ask `@`VS-Expert
+    Ask <#224104675031384065> or <@137780880344088576>
     Links:
     http://www.vapoursynth.com/doc/avisynthcomp.html
     https://github.com/vapoursynth/vapoursynth
-    https://kageru.moe/
-    https://iamscum.wordpress.com/encoding-stuff/
+    https://kageru.moe/blog/encode/
+    https://guide.encode.moe
   yuuno_links: |
-    Ask `@`VS-Expert
+    Ask <#224104675031384065> or <@147060397881425920>
     Links:
     https://pypi.python.org/pypi/yuuno
     https://github.com/stuxcrystal/yuuno
     https://myanimelist.net/character/32939/Arashiko_Yuuno
   x264_links: |
-    Ask `#`encode-autism
+    Ask <#224104675031384065> or <@109355116917743616>
     Links:
     https://dewikipedia.org/wiki/X264
     https://en.wikibooks.org/wiki/MeGUI/x264_Settings
     http://x264.janhum.alfahosting.org/fullhelp.txt
     https://kageru.moe/
     https://iamscum.wordpress.com/encoding-stuff/
+    https://guide.encode.moe
+  ffmpeg_links: |
+    Ask <#224104675031384065> or <@206853964405145600>
+    Links:
+    https://www.ffmpeg.org
+    https://thebombzen.com/articles/ffmpeg/index.html
   getnative_links: |
-    Ask `#`encode-autism
+    Ask <#224104675031384065> or <@134750562062303232>
     Bot:
     You can test getnative with the bot.
     For more information use ">>getnative --help"
@@ -37,47 +43,39 @@ bot_bot:
     https://github.com/Infiziert90/getnative (standalone)
     https://ddl.kageru.moe/kbz12.pdf (WIP)
   member_join: |
-    __**English**__
-    Hello, please choose your language (only one of them):
-    **>>eng** for English
-    **>>ger** for German
-    Please note that you'll get kicked after 30 minutes and that you won’t have access to most channels without being in one of the two groups.
+    Welcome to our server.
+    Please take your time to read all the info above.
 
-    __**Deutsch:**__
-    Hallo, bitte wähle deine Sprache (nur eine davon):
-    **>>eng** für Englisch
-    **>>ger** für Deutsch
-    Beachte, dass du nach 30 Minuten gekickt wirst und nicht alle Channel sehen kannst, ohne in einer der beiden Gruppen zu sein.
+    Willkommen auf unserem Server.
+    Bitte nimm dir Zeit, um alle Info oben durchzulesen.
   command_overview: |
     __**English**__
-    Commands you can use in this channel to get permissions to view the following channels/categories:
+    First, make sure to give yourself a language group:
+    Write **>>eng** in this channel.
 
-    #public_eng, "Basic" (#asian_content, #games etc.), "Releases", "Voice" | **>>eng**
+    Please note that you'll get kicked after 30 minutes and that you won’t have access to most channels without being in this group.
+
+    Commands you can write in this channel to get permissions for other channels/categories:
     #public_jap | **>>role jap**
     "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
-    "NSFW" (#nsfw-anime_manga etc.) | **>>role nsfw**
-    #nsfl-anime-manga_gore | **>>role nsfl**
-    "Trash" (#logs etc.) | **>>role special**
-    "Archive" (Alte read-only Channel) | **>>role archive**
+    "NSFW" and "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
 
-    For example: **>>role subs**
+    An example: **>>eng**
 
 
     __**Deutsch**__
-    Befehle, die du in diesem Channel nutzen kannst, um die folgenden Channel/Kategorien zu sehen:
+    Wilkommen auf unserem Server.
+    Zuallererst, musst du dir eine Sprachgruppe geben:
+    Schreib **>>ger** in diesen Channel.
 
-    #public_ger, "Basic" (#asian_content, #games etc.), "Releases", "Voice" | **>>ger**
+    Beachte, dass du nach 30 Minuten gekickt wirst und nicht alle Channel sehen kannst, ohne in dieser Gruppe zu sein.
+
+    Befehle, die du in diesem Channel schreiben kannst, um Rechte zu folgenden Channel/Kategorien zu erhalten:
     #public_jap | **>>role jap**
     "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
-    "NSFW" (#nsfw-anime_manga etc.) | **>>role nsfw**
-    #nsfl-anime-manga_gore | **>>role nsfl**
-    "Trash" (#logs etc.) | **>>role special**
-    "Archive" (Alte read-only Channel) | **>>role archive**
+    "NSFW" und "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
 
-    Als Beispiel: **>>role subs**
+    Ein Beispiel: **>>ger**
   help_message: |
-    __**Public link**__
-    https://discord.gg/V5vaWwr
-
-    If you need any help, write "@Support" with your request in #welcome channel.
-    Sofern du irgendwelche Hilfe brauchst, schreib "@Support" mit deinem Anliegen im #welcome Channel.
+    __**Invite**__
+    https://discord.gg/ZB7ZXbN

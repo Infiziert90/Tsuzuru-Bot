@@ -7,11 +7,12 @@ import itertools
 import subprocess
 from config import config
 from handle_messages import private_msg, delete_user_message
-from cmd_manager.decorators import register_command, add_argument
+from cmd_manager.decorators import register_command, add_argument, add_group
 
-
+tmp_path_dir = tempfile.TemporaryDirectory()
+tmp_path = tmp_path_dir.name
 FONT_PATH = config.MAIN.font
-CHAR_WIDTH = 28.24  # for OpenSans 55
+CHAR_WIDTH = 30.24  # for OpenSans 55 (value+2)
 CHAR_HEIGHT = 62  # for OpenSans 55
 TEST_WIDTH = 1920
 RATIO = 1.35  # 1920x1420
@@ -23,7 +24,8 @@ ffmpeg_generate_height = """-loglevel error
 -vf drawtext=\
 fontsize=55\
 :fontfile={font}\
-:text='%{{eif\\:print(th,16)\\:}}{user_text}'
+:text='%{{eif\\:print(th,16)\\:}}{user_text}\
+:x={pad}:y={pad}'
 -f null
 -""".replace("\n", " ")
 
@@ -66,6 +68,10 @@ enable='between(t,0,0.5)'\
 :enable='between(t,0,0)'
 -r 2
 {out_path}/spoiler.webm""".replace("\n", " ")
+
+
+class ImageFailed(BaseException):
+    pass
 
 
 def replace_chars(text):
@@ -132,7 +138,7 @@ def spoiler_create(header, content, tmp_path):
     # determine required height and surface
     char_count = int(TEST_WIDTH / CHAR_WIDTH)
     text = split_spoiler_lines(content, char_count)
-    cmd = [x.format(user_text=text, font=FONT_PATH) for x in ffmpeg_generate_height.split(" ")]
+    cmd = [x.format(user_text=text, font=FONT_PATH, pad=PADDING) for x in ffmpeg_generate_height.split(" ")]
     ffmpeg_output = subprocess.run(["ffmpeg"] + cmd, universal_newlines=True, stderr=subprocess.PIPE)
     test_height = float(ffmpeg_output.stderr.split()[1])
     surface = TEST_WIDTH * test_height
@@ -182,37 +188,40 @@ async def check_message(message):
         await private_msg(message, "Picture height is too small.")
     else:
         return True
-    return False
+    raise ImageFailed
 
 
 @register_command('spoiler', description='Create webm with spoiler warning.')
 @add_argument('title', help='Spoiler title.')
-@add_argument('-t', '--text', help='Spoiler text.')
-@add_argument('-i', '--image', action="store_true", help='Spoiler image [attachment].')
+@add_group('-t', '--text', help='Spoiler text.')
+@add_group('-i', '--image', action="store_true", help='Spoiler image [attachment].')
 async def spoiler(_, message, args):
-    tmp_path_dir = tempfile.TemporaryDirectory()
-    tmp_path = tmp_path_dir.name
-    if args.image:
-        img_url = message.attachments[0].url
-        filename = message.attachments[0].filename
-        image = await utils.get_file(img_url, tmp_path, filename)
-        if image is None:
-            private_msg(message, "Can't load image. Pls try it again later.")
-    await delete_user_message(message)
+    try:
+        image = None
+        if args.image and await check_message(message):
+            img_url = message.attachments[0].url
+            filename = message.attachments[0].filename
+            width = message.attachments[0].width
+            height = message.attachments[0].height
+            image = await utils.get_file(img_url, tmp_path, filename, message=message)
+            if image is None:
+                return await private_msg(message, "Can't load image. Pls try it again later.")
 
-    await private_msg(message, f"```{message.content}```")
-    spoiler_title = f"Spoiler: {args.title} (by {message.author.display_name})"
-    content = f"**Spoiler: {args.title}** (by <@!{message.author.id}>)"
+        await delete_user_message(message)
+        await private_msg(message, f"```{message.content}```")
+        spoiler_title = f"Spoiler: {args.title} (by {message.author.display_name})"
+        content = f"**Spoiler: {args.title}** (by <@!{message.author.id}>)"
 
-    if args.image:
-        await check_message(message)
-        width = message.attachments[0].width
-        height = message.attachments[0].height
-        check = spoiler_image(spoiler_title, image, width, height, tmp_path)
-    else:
-        check = spoiler_create(spoiler_title, args.text, tmp_path)
+        if image is not None:
+            check = spoiler_image(spoiler_title, image, width, height, tmp_path)
+        else:
+            check = spoiler_create(spoiler_title, args.text, tmp_path)
 
-    if check:
-        await message.channel.send(file=discord.File(f'{tmp_path}/spoiler.webm'), content=content)
-    else:
-        await private_msg(message, f"Text is to long.")
+        if check:
+            await message.channel.send(file=discord.File(f'{tmp_path}/spoiler.webm'), content=content)
+        else:
+            await private_msg(message, "Title/Text is too short/long.")
+    except ImageFailed:
+        pass
+    finally:
+        await delete_user_message(message)

@@ -1,6 +1,5 @@
 import asyncio
 import random
-
 from utils import punish_user
 from handle_messages import private_msg, delete_user_message
 
@@ -64,19 +63,17 @@ def command_not_allowed(message):
 
 
 def is_admin_command(client, message):
-    if message.channel.id == 246368272327507979:
-        return True
-    if message.author.id == 134750562062303232:
-        return True
-    asyncio.ensure_future(punish_user(client, message))
+    if message.guild.id == 221919789017202688:
+        if message.channel.id == 246368272327507979:
+            return True
+        asyncio.ensure_future(punish_user(client, message))
     return False
 
 
 def is_troll_command(client, message):
-    asyncio.ensure_future(delete_user_message(message))
-    if message.author.id == 134750562062303232:
-        return True
-    if random.randint(1, 3) == 2:
-        return True
-    asyncio.ensure_future(punish_user(client, message))
+    if message.guild.id == 221919789017202688:
+        asyncio.ensure_future(delete_user_message(message))
+        if random.randint(1, 3) == 2:
+            return True
+        asyncio.ensure_future(punish_user(client, message))
     return False
