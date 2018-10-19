@@ -10,8 +10,8 @@ def register_command(name, is_enabled=None, is_admin=None, **kwargs):
             for arg_args, arg_kwargs in func._cmd_args:
                 parser.add_argument(*arg_args, **arg_kwargs)
 
-        group = parser.add_mutually_exclusive_group(required=True)
         if hasattr(func, "_cmd_group"):
+            group = parser.add_mutually_exclusive_group(required=True)
             for arg_args, arg_kwargs in func._cmd_group:
                 group.add_argument(*arg_args, **arg_kwargs)
 
