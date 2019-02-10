@@ -132,8 +132,6 @@ async def handle_commands(message):
         await delete_user_message(message)
         return await private_msg_code(message, str(err))
     except (UnkownCommandException, argparse.ArgumentError) as err:
-        if arg_string[0] == "spoiler":
-            await delete_user_message(message)
         if arg_string[0] in dispatcher.commands:
             return await private_msg_code(message, str(err))
         return

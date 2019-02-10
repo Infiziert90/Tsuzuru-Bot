@@ -30,8 +30,7 @@ However running this repository requires the above listed requirements.
 To run this function you will need:
 
 * Vapoursynth
-* [Descale](https://github.com/Infiziert90/vapoursynth-descale)
-* [fmtconv](https://github.com/EleonoreMizo/fmtconv)
+* [Descale](https://github.com/BluBb-mADe/vapoursynth-descale)
 
   
 # Thanks  
