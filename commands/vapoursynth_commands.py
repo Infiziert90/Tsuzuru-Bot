@@ -18,13 +18,12 @@ from cmd_manager.decorators import register_command, add_argument
 
 core = vapoursynth.core
 core.add_cache = False
-core.accept_lowercase = True
 imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
 lossy = ["jpg", "jpeg", "gif"]
 
 
 def get_upscaler(kernel=None, b=None, c=None, taps=None):
-    upsizer = getattr(core.resize, kernel)
+    upsizer = getattr(core.resize, kernel.title())
     if kernel == 'bicubic':
         upsizer = partial(upsizer, filter_param_a=b, filter_param_b=c)
     elif kernel == 'lanczos':
