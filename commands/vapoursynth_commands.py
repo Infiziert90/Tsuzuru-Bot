@@ -1,5 +1,6 @@
 import vapoursynth
 import gc
+import os
 import argparse
 import random
 import tempfile
@@ -19,6 +20,7 @@ core = vapoursynth.core
 core.add_cache = False
 core.accept_lowercase = True
 imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
+lossy = ["jpg", "jpeg", "gif"]
 
 
 def get_upscaler(kernel=None, b=None, c=None, taps=None):
@@ -323,8 +325,9 @@ async def getnative(client, message, args):
 
     if message.author.id in GetNative.user_cooldown:
         return await private_msg(message, "Pls use this command only every 2min.")
-
-    if args.min_h >= message.attachments[0].height:
+    elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
+        return await private_msg(message, f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
+    elif args.min_h >= message.attachments[0].height:
         return await private_msg(message, f"Picture is to small or equal for min height {args.min_h}.")
     elif args.min_h >= args.max_h:
         return await private_msg(message, f"Your min height is bigger or equal to max height.")
@@ -388,6 +391,8 @@ async def getscaler(client, message, args):
 
     if message.author.id in GetScaler.user_cooldown:
         return await private_msg(message, "Pls use this command only every 2min.")
+    elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
+        return await private_msg(message, f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
 
     delete_message = await message.channel.send(file=discord.File(config.PICTURE.spam + "tenor_loading.gif"))
 
@@ -449,7 +454,7 @@ async def grain(client, message, args):
     gra.tmp_dir.cleanup()
 
 
-@register_command('showscaler', description='Grain.')
+@register_command('showscaler', description='Show all available scaler.')
 async def showscaler(client, message, args):
     content = ",\n".join(scaler_dict.keys())
     await delete_user_message(message)
