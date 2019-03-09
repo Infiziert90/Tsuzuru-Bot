@@ -51,9 +51,6 @@ async def delete_role(user, role):
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
-    if isinstance(message.channel, discord.abc.PrivateChannel):
-        return
-
     if message.author.id in user_roles:
         return await message.channel.send(f"User in prison can't use this command!")
     if message.author.id in prison_inmates:
@@ -69,7 +66,8 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
             return
         else:
             prison_inmates[user.id] += prison_length
-        return await private_msg_user(message, f"New Time: {prison_inmates[user.id]}min\nReason: {reason}", user)
+        return await private_msg_user(message, f"New Time: {str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
+                                               f"\nReason: {reason}", user)
     else:
         prison_inmates[user.id] = prison_length
 
@@ -82,7 +80,7 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
     asyncio.ensure_future(delete_role(user, role))
 
     await send_log_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
-                                   f"{prison_inmates[user.id] if prison_length > 0 else 'Reset'}\nReason: "
+                                   f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}\nReason: "
                                    f"{reason}\nBy: {message.author.name}")
     await private_msg_user(message, f"Prison is now active\nTime: {prison_inmates[user.id]}min\nReason: {reason}", user)
 

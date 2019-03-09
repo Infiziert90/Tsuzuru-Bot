@@ -31,7 +31,7 @@ async def prison(client, message, args):
         return await message.channel.send(f"Empty username is not allowed.")
 
     server = client.get_guild(221919789017202688)
-    user = server.get_member_named(args.user) or server.get_member(args.user)
+    user = server.get_member_named(args.user) or server.get_member(int(args.user))
     if not user:
         return await message.channel.send("User not found.")
 
@@ -39,7 +39,7 @@ async def prison(client, message, args):
 
     infi = client.get_user(134750562062303232)
     await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
-                    f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
+                    f"{str(prison_inmates[user.id]) + 'min' if args.prison_length > 0 else 'Reset'}\nReason: "
                     f"{args.reason}\nBy: {message.author.name}")
 
 

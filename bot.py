@@ -93,22 +93,18 @@ async def on_reaction_add(reaction, user):
 
 
 async def handle_commands(message):
+    if message.author.id == client.user.id:  # own bot
+        return
+
     if message.author.id in user_roles:
         return
 
-    if isinstance(message.channel, discord.abc.GuildChannel):
-        server_id = message.guild.id
-        server_name = message.guild.name
-        channel_name = message.channel.name
-    else:
-        server_id = 0
-        server_name = "Private Message"
-        channel_name = None
+    if not isinstance(message.channel, discord.abc.GuildChannel):
+        return await message.author.send("Forbidden, sorry")
 
-    if server_id == 221919789017202688:  # eX Server
+    if message.guild.id == 221919789017202688:  # eX Server
         if message.channel.id == 338273467483029515:  # welcome
-            if message.author.id != client.user.id:  # own bot
-                await delete_user_message(message)  # no return here
+            await delete_user_message(message)  # no return here
 
     if not message.content.startswith(">>"):
         return
@@ -117,7 +113,7 @@ async def handle_commands(message):
         return
 
     today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-    logging.info(f"Date: {today} User: {message.author} Server: {server_name} Channel: {channel_name} "
+    logging.info(f"Date: {today} User: {message.author} Server: {message.guild.name} Channel: {message.channel.name} "
                  f"Command: {message.content[:50]}")
 
     arg_string = message.clean_content[2:]
