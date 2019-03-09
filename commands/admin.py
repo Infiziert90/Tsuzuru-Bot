@@ -36,13 +36,11 @@ async def prison(client, message, args):
         return await message.channel.send("User not found.")
 
     await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
-    await message.channel.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
-                               f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
-                               f"{args.reason}\nBy: {message.author.name}")
+
     infi = client.get_user(134750562062303232)
     await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
-                               f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
-                               f"{args.reason}\nBy: {message.author.name}")
+                    f"{prison_inmates[user.id] if args.prison_length > 0 else 'Reset'}\nReason: "
+                    f"{args.reason}\nBy: {message.author.name}")
 
 
 @register_command('purge_channel', is_admin=is_admin_command, description='Purge channel messages.')

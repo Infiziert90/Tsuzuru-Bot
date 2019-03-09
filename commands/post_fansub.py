@@ -17,9 +17,8 @@ async def post_fansub(client, message, args):
         if len(lname) > 6:
             lname = lname[:6]
         if not link.startswith("http"):
-            await private_msg(message, "Can't find http link.")
-            return
-        description += f" [{lname}]({link}) ‖"
+            return await private_msg(message, "Can't find http link.")
+        description += f" [{lname}]({link})    "
 
     embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
