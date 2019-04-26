@@ -2,17 +2,15 @@ bot_bot:
   avs_links: |
     Ask <#224104675031384065> or <@109369346740015104>
     Links:
-    http://avisynth.nl/index.php/Main_Page
-    https://en.wikipedia.org/wiki/AviSynth
+    http://avisynth.nl/index.php/Guides
     http://www.avs-plus.net/
-    https://iamscum.wordpress.com/encoding-stuff/
   vs_links: |
     Ask <#224104675031384065> or <@137780880344088576>
     Links:
-    http://www.vapoursynth.com/doc/avisynthcomp.html
-    https://github.com/vapoursynth/vapoursynth
+    http://www.vapoursynth.com/doc/
     https://kageru.moe/blog/encode/
     https://guide.encode.moe
+    https://iamscum.wordpress.com/other-useful-stuff/encode-pack/
   yuuno_links: |
     Ask <#224104675031384065> or <@147060397881425920>
     Links:
@@ -22,59 +20,58 @@ bot_bot:
   x264_links: |
     Ask <#224104675031384065> or <@109355116917743616>
     Links:
-    https://dewikipedia.org/wiki/X264
+    https://encodingwissen.de/codecs/x264/referenz/
     https://en.wikibooks.org/wiki/MeGUI/x264_Settings
     http://x264.janhum.alfahosting.org/fullhelp.txt
-    https://kageru.moe/
-    https://iamscum.wordpress.com/encoding-stuff/
+    https://kageru.moe/blog/encode/
     https://guide.encode.moe
   ffmpeg_links: |
     Ask <#224104675031384065> or <@206853964405145600>
     Links:
     https://www.ffmpeg.org
+    https://iamscum.wordpress.com/guides/hardsub-guide/
     https://thebombzen.com/articles/ffmpeg/index.html
   getnative_links: |
     Ask <#224104675031384065> or <@134750562062303232>
     Bot:
     You can test getnative with the bot.
     For more information use ">>getnative --help"
-
+    
     Links:
     https://github.com/Infiziert90/getnative (standalone)
     https://ddl.kageru.moe/kbz12.pdf (WIP)
   member_join: |
     Welcome to our server.
     Please take your time to read all the info above.
-
+    
     Willkommen auf unserem Server.
     Bitte nimm dir Zeit, um alle Info oben durchzulesen.
   command_overview: |
     __**English**__
-    First, make sure to give yourself a language group:
+    Make sure to give yourself a language group:
     Write **>>eng** in this channel.
-
+    
     Please note that you'll get kicked after 30 minutes and that you won’t have access to most channels without being in this group.
-
+    
     Commands you can write in this channel to get permissions for other channels/categories:
     #public_jap | **>>role jap**
     "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
     "NSFW" and "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
-
+    
     An example: **>>eng**
-
-
+    
+    
     __**Deutsch**__
-    Wilkommen auf unserem Server.
-    Zuallererst, musst du dir eine Sprachgruppe geben:
+    Zuallererst musst du dir eine Sprachgruppe geben:
     Schreib **>>ger** in diesen Channel.
-
+    
     Beachte, dass du nach 30 Minuten gekickt wirst und nicht alle Channel sehen kannst, ohne in dieser Gruppe zu sein.
-
+    
     Befehle, die du in diesem Channel schreiben kannst, um Rechte zu folgenden Channel/Kategorien zu erhalten:
     #public_jap | **>>role jap**
     "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
     "NSFW" und "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
-
+    
     Ein Beispiel: **>>ger**
   help_message: |
     __**Invite**__
