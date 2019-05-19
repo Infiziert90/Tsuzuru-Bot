@@ -391,7 +391,7 @@ async def getscaler(client, message, args):
     if message.author.id in GetScaler.user_cooldown:
         return await private_msg(message, "Pls use this command only every 2min.")
     elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
-        return await private_msg(message, f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
+        return await private_msg_file(message, config.PICTURE.spam + "lossy.png", content=f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
 
     delete_message = await message.channel.send(file=discord.File(config.PICTURE.spam + "tenor_loading.gif"))
 

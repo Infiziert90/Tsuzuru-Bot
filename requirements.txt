@@ -12,5 +12,5 @@ requests>=2.18.4
 uvloop>=0.8.0
 yandex.translate>=0.3.5
 yarl<1.2
--e git+https://github.com/Rapptz/discord.py.git@rewrite#egg=discord
+discord.py>=1.0.0
 -e git+https://github.com/strinking/python-duckduckgo@master#egg=duckduckgo-async

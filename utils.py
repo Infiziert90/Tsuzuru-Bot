@@ -2,7 +2,9 @@ import aiohttp
 import discord
 import asyncio
 import random
+import logging
 from handle_messages import private_msg_user, delete_user_message
+
 
 prison_inmates = {}
 user_roles = {}
@@ -41,19 +43,19 @@ async def delete_role(user, role):
     try:
         await user.remove_roles(role)
     except (discord.Forbidden, discord.HTTPException):
-        return
+        return logging.error("Can't remove user roles")
     try:
         await user.edit(roles=user_roles[user.id])
+    except (discord.Forbidden, discord.HTTPException):
+        return logging.error("Can't add user roles")
     except KeyError:
-        return
+        return logging.error(f"KeyError for user: {user}")
 
     user_roles.pop(user.id)
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
-    if message.author.id in user_roles:
-        return await message.channel.send(f"User in prison can't use this command!")
-    if message.author.id in prison_inmates:
+    if message.author.id in user_roles or message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
 
     if prison_length is None:

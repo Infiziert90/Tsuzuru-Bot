@@ -93,28 +93,27 @@ async def on_reaction_add(reaction, user):
 
 
 async def handle_commands(message):
+    is_guild = isinstance(message.channel, discord.abc.GuildChannel)
     if message.author.id == client.user.id:  # own bot
         return
 
     if message.author.id in user_roles:
         return
 
-    if not isinstance(message.channel, discord.abc.GuildChannel):
+    if not is_guild and message.content[:11] != ">>getnative":
         return await message.author.send("Forbidden, sorry")
 
-    if message.guild.id == 221919789017202688:  # eX Server
+    if is_guild and message.guild.id == 221919789017202688:  # eX Server
         if message.channel.id == 338273467483029515:  # welcome
             await delete_user_message(message)  # no return here
 
-    if not message.content.startswith(">>"):
+    if not message.content.startswith(">>") or len(message.content) == 2:  # prevent forwarding '>>' messages
         return
 
-    if len(message.content) == 2:
-        return
-
-    today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
-    logging.info(f"Date: {today} User: {message.author} Server: {message.guild.name} Channel: {message.channel.name} "
-                 f"Command: {message.content[:50]}")
+    if is_guild:
+        today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
+        logging.info(f"Date: {today} User: {message.author} Server: {message.guild.name} "
+                     f"Channel: {message.channel.name} Command: {message.content[:50]}")
 
     arg_string = message.clean_content[2:]
     try:
@@ -143,7 +142,7 @@ def main():
             client.run(config.MAIN.login_token)
             # Test-Bot
             # client.run(config.MAIN.test_token)
-        except aiohttp.client_exceptions.ClientConnectorError:
+        except aiohttp.ClientConnectorError:
             continue
         except KeyboardInterrupt:
             return loop.close()
