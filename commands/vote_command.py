@@ -109,7 +109,7 @@ async def vote_timer(time, mes_id, vo, lang):
         # run until the timer is over
         time_left = time
         for _ in range(0, time, 1):
-            await asyncio.sleep(1)
+            await asyncio.sleep(120)
             await get_message(mes_id, vo)
             time_left -= 2
             embed = vo[mes_id]["message"].embeds[0].set_footer(text=f"Time left: {time_left} min")
