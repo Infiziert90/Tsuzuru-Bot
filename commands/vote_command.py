@@ -107,12 +107,10 @@ async def get_message(mes_id, votes):
 async def vote_timer(time, mes_id, vo, lang):
     try:
         # run until the timer is over
-        time_left = time
-        for _ in range(0, time, 1):
+        for over in range(0, time, 2):
             await asyncio.sleep(120)
             await get_message(mes_id, vo)
-            time_left -= 2
-            embed = vo[mes_id]["message"].embeds[0].set_footer(text=f"Time left: {time_left} min")
+            embed = vo[mes_id]["message"].embeds[0].set_footer(text=f"Time left: {time - over} min")
             await vo[mes_id]["message"].edit(embed=embed)
 
         # get the current message object
