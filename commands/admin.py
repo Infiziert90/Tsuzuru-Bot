@@ -4,6 +4,7 @@ from cmd_manager.filters import is_admin_command
 from utils import get_file, punish_user, prison_inmates, user_roles
 from handle_messages import delete_user_message
 from cmd_manager.decorators import register_command, add_argument
+from .role_system import roles
 
 
 @register_command('send_message', is_admin=is_admin_command, description='Useless function.')
@@ -11,9 +12,7 @@ from cmd_manager.decorators import register_command, add_argument
 @add_argument('text', help='Message text')
 async def send_message(client, message, args):
     channel = client.get_channel(args.channel)
-    em = discord.Embed(description=args.text, color=333333)
-
-    await channel.send(embed=em)
+    await channel.send(embed=discord.Embed(description=args.text, color=333333))
     await delete_user_message(message)
 
 
@@ -56,7 +55,10 @@ async def purge_channel(client, message, args):
 async def send_welcome(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel(338273467483029515)
-    await channel.send(embed=discord.Embed(description=help_text("bot_bot", "command_overview"), color=333333))
+    await channel.send(content=help_text("bot_bot", "welcome_note"))
+    mes = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "command_overview"), color=333333))
+    for emoji in roles.keys():
+        await mes.add_reaction(emoji)
     await channel.send(embed=discord.Embed(description=help_text("bot_bot", "help_message"), color=333333))
     await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"), color=333333))
 

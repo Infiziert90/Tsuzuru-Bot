@@ -148,7 +148,7 @@ async def vote_timer(time, mes_id, vo, lang):
         embed = embed.set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
         await message.edit(content=content, embed=embed)
         await message.channel.send(content)
-    except discord.errors.NotFound:
+    except discord.NotFound:
         return vo.pop(mes_id)
 
 

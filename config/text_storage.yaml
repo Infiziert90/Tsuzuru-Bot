@@ -48,31 +48,39 @@ bot_bot:
     Bitte nimm dir Zeit, um alle Info oben durchzulesen.
   command_overview: |
     __**English**__
-    Make sure to give yourself a language group:
-    Write **>>eng** in this channel.
-    
-    Please note that you'll get kicked after 30 minutes and that you won’t have access to most channels without being in this group.
-    
-    Commands you can write in this channel to get permissions for other channels/categories:
-    #public_jap | **>>role jap**
-    "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
-    "NSFW" and "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
-    
-    An example: **>>eng**
-    
-    
+    Make sure to give yourself a language group
+    You'll get kicked after 30 minutes without being in one of the language groups
+
+    If you want to see the following channels/categories, click on the corresponding emojis:
+    #public_ger | :flag_de:
+    #public_eng | :flag_gb:
+    #public_jap | :flag_jp:
+
+    "Fansub releated channels" | :white_flower:
+    "NSFW" and "NSFL" | :underage:
+
     __**Deutsch**__
-    Zuallererst musst du dir eine Sprachgruppe geben:
-    Schreib **>>ger** in diesen Channel.
-    
-    Beachte, dass du nach 30 Minuten gekickt wirst und nicht alle Channel sehen kannst, ohne in dieser Gruppe zu sein.
-    
-    Befehle, die du in diesem Channel schreiben kannst, um Rechte zu folgenden Channel/Kategorien zu erhalten:
-    #public_jap | **>>role jap**
-    "Fansubbing Talk" (#encode-autism etc.) | **>>role subs**
-    "NSFW" und "NSFL" (#nsfw-anime_manga etc.) | **>>role nsfw**
-    
-    Ein Beispiel: **>>ger**
+    Zuallererst musst du dir eine Sprachgruppe geben
+    Du wirst nach 30 Minuten gekickt, wenn du in keiner der Sprachgruppen bist
+
+    Wenn du die folgenden Channel/Kategorien sehen möchtest, klicke die entsprechenden Emojis an:
+    #public_ger | :flag_de:
+    #public_eng | :flag_gb:
+    #public_jap | :flag_jp:
+
+    "Fansub relatierte Channel" | :white_flower:
+    "Channel für Community-Spiele" | :game_die:
+    "NSFW" und "NSFL" | :underage:
   help_message: |
     __**Invite**__
     https://discord.gg/ZB7ZXbN
+  welcome_note: |
+    ```py
+    @Note
+    Link Preview needs to be activated, so that you can see the messages:
+    "Settings -> Text & Images -> Link Preview"
+
+    @Hinweis
+    Die Linkvorschau muss aktiviert sein, um die Nachrichten zu sehen:
+    "Einstellungen -> Text & Bilder -> Linksvorschau"
+    ```
