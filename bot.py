@@ -9,14 +9,13 @@ import commands
 import datetime
 from cmd_manager import dispatcher
 from config import config, help_text
+from typing import Union
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, send_log_message
 from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
 from commands.role_system import roles, role_handler
+from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import user_roles
-
-ex_server = 221919789017202688
-ex_welcome_channel = 338273467483029515
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 loop = uvloop.new_event_loop()
@@ -34,20 +33,20 @@ async def on_ready():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     await handle_commands(message)
 
 
 @client.event
-async def on_message_edit(_, message):
+async def on_message_edit(_: discord.Message, message: discord.Message):
     await handle_commands(message)
 
 
 @client.event
-async def on_member_join(mem):
-    if mem.guild.id == ex_server:
+async def on_member_join(mem: discord.Member):
+    if mem.guild.id == EX_SERVER:
         await send_log_message(f"{mem.display_name} has joined the server", discord.Embed.Empty, mem, discord.Colour.green(), client)
-        channel = client.get_channel(ex_welcome_channel)
+        channel = client.get_channel(EX_WELCOME_CHANNEL)
         mention = await channel.send(f"<@!{mem.id}>")
         member_message = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"), color=333333))
         await asyncio.sleep(300)
@@ -56,14 +55,14 @@ async def on_member_join(mem):
 
 
 @client.event
-async def on_member_remove(mem):
-    if mem.guild.id == ex_server:
+async def on_member_remove(mem: discord.Member):
+    if mem.guild.id == EX_SERVER:
         await send_log_message(f"{mem.display_name} has left the server", discord.Embed.Empty, mem, discord.Colour.red(), client)
 
 
 @client.event
-async def on_member_update(before, after):
-    if after.guild.id == ex_server:
+async def on_member_update(before: discord.Member, after: discord.Member):
+    if after.guild.id == EX_SERVER:
         if before.nick != after.nick:
             await send_log_message(f"{before.display_name if before.nick is None else before.nick} changed their nickname",
                                    f"New nickname {after.nick}", after, discord.Colour.blue(), client)
@@ -72,7 +71,7 @@ async def on_member_update(before, after):
 
 
 @client.event
-async def on_reaction_remove(reaction, user):
+async def on_reaction_remove(reaction: discord.Reaction, user: Union[discord.User, discord.Member]):
     if not reaction.me or user.id == client.user.id:
         return
 
@@ -81,7 +80,7 @@ async def on_reaction_remove(reaction, user):
 
 
 @client.event
-async def on_reaction_add(reaction, user):
+async def on_reaction_add(reaction: discord.Reaction, user: Union[discord.User, discord.Member]):
     if not reaction.me or user.id == client.user.id:
         return
 
@@ -96,7 +95,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if payload.user_id == client.user.id:
         return
 
-    if payload.guild_id == ex_server and payload.channel_id == ex_welcome_channel:
+    if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, remove=False)
@@ -107,13 +106,13 @@ async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
     if payload.user_id == client.user.id:
         return
 
-    if payload.guild_id == ex_server and payload.channel_id == ex_welcome_channel:
+    if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, remove=True)
 
 
-async def handle_commands(message):
+async def handle_commands(message: discord.Message):
     is_guild = isinstance(message.channel, discord.abc.GuildChannel)
     if message.author.id == client.user.id:  # own bot
         return
@@ -124,8 +123,8 @@ async def handle_commands(message):
     if not is_guild and message.content[:11] != ">>getnative":
         return await message.author.send("Forbidden, sorry")
 
-    if is_guild and message.guild.id == ex_server:
-        if message.channel.id == ex_welcome_channel:  # welcome
+    if is_guild and message.guild.id == EX_SERVER:
+        if message.channel.id == EX_WELCOME_CHANNEL:
             await delete_user_message(message)  # no return here
 
     if not message.content.startswith(">>") or len(message.content) == 2:  # prevent forwarding '>>' messages
@@ -136,14 +135,12 @@ async def handle_commands(message):
         logging.info(f"Date: {today} User: {message.author} Server: {message.guild.name} "
                      f"Channel: {message.channel.name} Command: {message.content[:50]}")
 
-    arg_string = message.clean_content[2:]
     try:
-        arg_string = shlex.split(arg_string)
+        arg_string = message.clean_content[2:]
+        arg_string = shlex.split(message.clean_content[2:])
+        args = parser.parse_args(arg_string)
     except ValueError as err:
         return await private_msg_code(message, str(err))
-
-    try:
-        args = parser.parse_args(arg_string)
     except HelpException as err:
         await delete_user_message(message)
         return await private_msg_code(message, str(err))

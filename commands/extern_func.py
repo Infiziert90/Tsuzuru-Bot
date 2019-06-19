@@ -165,21 +165,3 @@ async def dict_cc(client, message, args):
     for in_word, out_word in trans_tuples[:6]:
         embed.add_field(name=in_word, value=out_word, inline=True)
     await message.channel.send(embed=embed)
-
-
-# TODO Fix error handling in yandex
-# @register_command('translate', description='Translate a message for you.')
-# @add_argument('message_id', help="Message ID for translation.")
-# @add_argument('--direction', '-d', default="de-en", choices=translate.directions, help='Input-Output language.')
-# async def yandex_translate(client, message, args):
-#     try:
-#         mes_trans = await client.get_message(message.channel, args.message_id)
-#     except discord.NotFound:
-#         return await private_msg(message, "Message not found")
-#
-#     try:
-#         trans_end = translate.translate(mes_trans.content, args.direction)
-#         trans_end = f"{trans_end['text'][0]}\n{mes_trans.author}"
-#         await private_msg(message, trans_end)
-#     except:
-#         logging.info(f"Error in Yandex: Message from user {message.author}\n")

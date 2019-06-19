@@ -4,7 +4,8 @@ import discord
 import logging
 from config import config
 from handle_messages import delete_user_message
-from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel
+from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel, EX_YURI_CHANNEL, \
+                                EX_TRAP_CHANNEL, EX_YAOI_CHANNEL
 from cmd_manager.decorators import register_command
 
 yuri_folder = config.PICTURE.yuri
@@ -13,38 +14,38 @@ trap_folder = config.PICTURE.trap
 spam_folder = config.PICTURE.spam
 
 
-async def send_picture(client, folder, channel_id):
-    pictures = os.listdir(folder)
-    for _ in pictures:
-        picture = folder + pictures[random.randint(0, len(pictures))]
+async def send_image(client, folder, channel_id):
+    images = os.listdir(folder)
+    for _ in images:
+        image = folder + images[random.randint(0, len(images))]
         channel = client.get_channel(channel_id)
         try:
-            await channel.send(file=discord.File(picture))
-            os.remove(picture)
+            await channel.send(file=discord.File(image))
+            os.remove(image)
             return
         except discord.HTTPException:
-            os.remove(picture)
+            os.remove(image)
             logging.info("Error: File to large")
 
 
-@register_command('yuri', is_enabled=is_ex_yuri_channel, description='Post a yuri picture.')
+@register_command('yuri', is_enabled=is_ex_yuri_channel, description='Post a yuri image.')
 async def yuri(client, message, args):
     await delete_user_message(message)
-    await send_picture(client, yuri_folder, 328616388233265154)
+    await send_image(client, yuri_folder, EX_YURI_CHANNEL)
 
 
-@register_command('trap', is_enabled=is_ex_trap_channel, description='Post a trap picture.')
+@register_command('trap', is_enabled=is_ex_trap_channel, description='Post a trap image.')
 async def trap(client, message, args):
     await delete_user_message(message)
-    await send_picture(client, trap_folder, 356169435360264192)
+    await send_image(client, trap_folder, EX_TRAP_CHANNEL)
 
 
-@register_command('yaoi', is_enabled=is_ex_yaoi_channel, description='Post a yaoi picture.')
+@register_command('yaoi', is_enabled=is_ex_yaoi_channel, description='Post a yaoi image.')
 async def yaoi(client, message, args):
     await delete_user_message(message)
-    await send_picture(client, yaoi_folder, 328942447784624128)
+    await send_image(client, yaoi_folder, EX_YAOI_CHANNEL)
 
-# Spam Picture
+# Spam images
 @register_command('autism', description='Autism!')
 async def autism(client, message, args):
     await delete_user_message(message)

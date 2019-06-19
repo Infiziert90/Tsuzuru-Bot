@@ -11,42 +11,42 @@ async def help_str(client, message, args):
     await private_msg_code(message, parser.format_help())
 
 
-@register_command('x264', description='Post some links for x264')
+@register_command('x264', description='Post help links for x264')
 async def x264(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for x264?", description=help_text("bot_bot", "x264_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('avi', description='Post some links for Avisynth')
+@register_command('avi', description='Post help links for Avisynth')
 async def avisynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Avisynth?", description=help_text("bot_bot", "avs_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('vs', description='Post some links for Vapoursynth')
+@register_command('vs', description='Post help links for Vapoursynth')
 async def vapoursynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need Help for Vapoursynth?", description=help_text("bot_bot", "vs_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('yuuno', description='Post some links for Yuuno')
+@register_command('yuuno', description='Post help links for Yuuno')
 async def yuuno(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Yuuno?", description=help_text("bot_bot", "yuuno_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('ffmpeg', description='Post some links for ffmpeg')
+@register_command('ffmpeg', description='Post help links for ffmpeg')
 async def ffmpeg(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="ffmpeg?", description=help_text("bot_bot", "ffmpeg_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('getn', description='Post some links for getnative')
+@register_command('getn', description='Post help links for getnative')
 async def getn(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for getnative?", description=help_text("bot_bot", "getnative_links"))
@@ -54,7 +54,7 @@ async def getn(client, message, args):
 
 
 @register_command('__lolz', description='Useless function.')
-@add_argument('server_id', type=int, help='Server where you will check the ids.')
+@add_argument('server_id', type=int, help='Server id')
 async def lolz(client, message, args):
     server = client.get_guild(args.server_id)
     roles = repr(tuple((role.name, role.id) for role in server.roles))

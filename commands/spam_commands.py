@@ -3,10 +3,10 @@ from utils import set_user_cooldown, user_cooldown
 from handle_messages import delete_user_message, private_msg
 from cmd_manager.decorators import register_command, add_argument
 
-reg = re.compile("<:(\w+):(\d+)>")
+reg = re.compile(r"<:(\w+):(\d+)>")
 
 
-@register_command('memefont', description='Converts your text with emoji font')
+@register_command('memefont', description='Converts your text into emojis')
 @add_argument('text', help='Text too convert.')
 async def memefont(client, message, args):
     await delete_user_message(message)

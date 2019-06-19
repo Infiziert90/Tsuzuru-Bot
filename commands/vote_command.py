@@ -15,9 +15,14 @@ language = {
 }
 
 
+class MessageDeletedException(Exception):
+    def __repr__(self):
+        return "Message deleted!"
+
+
 @register_command('vote', description='Post a poll.')
 @add_argument('topic', help='Question')
-@add_argument('--time', '-t', type=int, default=30, help='Time [in Minutes]')
+@add_argument('--time', '-t', type=int, default=60, help='Time [in Minutes]')
 @add_argument('--multi_votes', '-m', dest='multi_votes', action='store_true', default=False, help='Allow multiple votes')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=language.keys(), help='Set the language for the end text')
@@ -25,7 +30,7 @@ async def vote(_, message, args):
     if await check_message(message, args, ongoing_votes):
         return
 
-    embed = discord.Embed(title=args.topic, description="Cast a vote by clicking one of the reactions.", color=0x000000)
+    embed = discord.Embed(title=args.topic, description="Cast a vote by clicking the reactions.", color=0x000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     embed.set_footer(text=f"Time left: {args.time}mins")
     for option, number in zip(args.options, range(len(args.options))):
@@ -43,19 +48,19 @@ async def vote(_, message, args):
     for number in range(len(args.options)):
         await ongoing_votes[mes.id]["message"].add_reaction(num2emo[number])
 
-    await vote_timer(args.time, mes.id, ongoing_votes, args.lang)
+    await run_vote(args.time, mes.id, ongoing_votes, args.lang)
 
 
 @register_command('anon_vote', description='Post an anonymous poll.')
 @add_argument('topic', help='Question')
-@add_argument('--time', '-t', type=int, default=30, help='Time [in Minutes]')
+@add_argument('--time', '-t', type=int, default=60, help='Time [in Minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=language.keys(), help='Set the language for the end text')
 async def anon_vote(_, message, args):
     if await check_message(message, args, anon_votes):
         return
 
-    embed = discord.Embed(title=args.topic, description="Cast a vote secretly by clicking one of the reactions.", color=0x000000)
+    embed = discord.Embed(title=args.topic, description="Cast a vote secretly by clicking the reactions.", color=0000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     embed.set_footer(text=f"Time left: {args.time} min")
     for option, number in zip(args.options, range(len(args.options))):
@@ -74,7 +79,7 @@ async def anon_vote(_, message, args):
     for number in range(len(args.options)):
         await anon_votes[mes.id]["message"].add_reaction(num2emo[number])
 
-    await vote_timer(args.time, mes.id, anon_votes, args.lang)
+    await run_vote(args.time, mes.id, anon_votes, args.lang)
 
 
 async def check_message(message, args, vo):
@@ -98,13 +103,13 @@ async def get_message(mes_id, votes):
     try:
         votes[mes_id]["message"] = await votes[mes_id]["message"].channel.fetch_message(mes_id)
     except (discord.NotFound, discord.Forbidden):
-        raise discord.NotFound  # raise error and delete the vote in the original function
+        raise MessageDeletedException()  # raise error and delete the vote in the original function
     except (aiohttp.ClientConnectorError, discord.HTTPException):
         await asyncio.sleep(3)
         await get_message(mes_id, votes)
 
 
-async def vote_timer(time, mes_id, vo, lang):
+async def run_vote(time, mes_id, vo, lang):
     try:
         # run until the timer is over
         for over in range(0, time, 2):
@@ -141,18 +146,20 @@ async def vote_timer(time, mes_id, vo, lang):
         if len(winners) == 1:
             content = f"{language[lang][0]} **{message.embeds[0].title}** {language[lang][1]} **{winners[0]}**"
         else:
-            content = f"{language[lang][2]} **{message.embeds[0].title}** {language[lang][3]} {''.join([f'**{winner}**, ' for winner in winners])}"
+            content = f"{language[lang][2]} **{message.embeds[0].title}** {language[lang][3]}" \
+                      f" {''.join([f'**{winner}**, ' for winner in winners])}"
 
         vo.pop(mes_id)
         embed = discord.Embed.from_dict(embed)
         embed = embed.set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
         await message.edit(content=content, embed=embed)
         await message.channel.send(content)
-    except discord.NotFound:
+    except MessageDeletedException:
         return vo.pop(mes_id)
 
 
 async def remove_vote(reaction, user, vo):
+    # catch the internal remove process
     if user.id in vo[reaction.message.id]["overflow"]:
         vo[reaction.message.id]["overflow"].remove(user.id)
         return
@@ -171,7 +178,7 @@ async def check_add_vote(reaction, user, vo):
         await reaction.message.remove_reaction(reaction, user)
         return False
     elif user.id in vo[reaction.message.id]["voted_user"]:
-        await private_msg_user(reaction.message, "Only 1 vote is allowed", user)
+        await private_msg_user(reaction.message, "Only 1 vote is allowed!", user)
         vo[reaction.message.id]["overflow"].append(user.id)
         await reaction.message.remove_reaction(reaction, user)
         return False
@@ -195,7 +202,3 @@ async def add_vote(reaction, user, vo):
     else:
         embed["fields"][i]["value"] = f"Votes: {reaction.count-1}"
     await message.edit(embed=discord.Embed.from_dict(embed))
-
-
-
-

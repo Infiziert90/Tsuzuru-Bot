@@ -1,3 +1,4 @@
+import discord
 from typing import Callable, NamedTuple
 
 
@@ -10,11 +11,11 @@ class Command(NamedTuple):
 commands = {}
 
 
-def register(name, func, is_enabled, is_admin):
+def register(name: str, func: Callable, is_enabled: Callable, is_admin: Callable):
     commands[name] = Command(name, func, is_enabled, is_admin)
 
 
-async def handle(name, client, message, args):
+async def handle(name: str, client: discord.Client, message: discord.Message, args):
     command = commands[name]
     if command.is_admin and not command.is_admin(client, message):
         return
