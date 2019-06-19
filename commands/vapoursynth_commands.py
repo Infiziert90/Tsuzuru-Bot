@@ -219,8 +219,13 @@ if vs_available:
             best_result = sorted_results[0]
             longest_key = max(map(len, results_bin))
 
-            txt_output = "\n".join(f"{scaler_name:{longest_key}}  {value / best_result[1]:7.1%}  {value:.10f}"
-                                   for scaler_name, value in sorted_results)
+            try:
+                txt_output = "\n".join(f"{scaler_name:{longest_key}}  "
+                                       f"{0 if best_result[1] == 0.0 else value / best_result[1]:7.1%}  "
+                                       f"{value:.10f}" for scaler_name, value in sorted_results)
+            except ZeroDivisionError:
+                txt_output = "Broken Ouput!" + "\n".join(f"{scaler_name:{longest_key}}  {best_result[1]:7.1%}"
+                                                         f"  {value:.10f}" for scaler_name, value in sorted_results)
 
             for name, scaler in scaler_dict.items():
                 if name == best_result[0]:
