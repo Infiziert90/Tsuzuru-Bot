@@ -1,6 +1,6 @@
 import discord
 from config import help_text
-from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL, is_admin_command
+from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL, EX_GER_RULE_CHANNEL, EX_ENG_RULE_CHANNEL, is_admin_command
 from utils import get_file, punish_user, prison_inmates, user_roles
 from handle_messages import delete_user_message
 from cmd_manager.decorators import register_command, add_argument
@@ -62,6 +62,28 @@ async def send_welcome(client, message, args):
         await mes.add_reaction(emoji)
     await channel.send(embed=discord.Embed(description=help_text("bot_bot", "help_message"), color=333333))
     await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"), color=333333))
+
+
+@register_command('send_rules', is_admin=is_admin_command, description='Send rules.')
+async def send_rules(client, message, args):
+    await delete_user_message(message)
+    ger_channel = client.get_channel(EX_GER_RULE_CHANNEL)
+    eng_channel = client.get_channel(EX_ENG_RULE_CHANNEL)
+    rule_set = help_text("bot_bot", "rule_set")
+
+    # Build and post the ger guidelines
+    embed = discord.Embed(description=rule_set["ger_description"], color=discord.Color.red())
+    for idx, rule in enumerate(rule_set["rules_ger"].values()):
+        embed.add_field(name=f"Regel {idx+1}", value=rule, inline=False)
+    embed.add_field(name=f"Abschluss", value=rule_set["end_ger"], inline=False)
+    await ger_channel.send(embed=embed)
+
+    # Build and post the eng guidelines
+    embed = discord.Embed(description=rule_set["eng_description"], color=discord.Color.red())
+    for idx, rule in enumerate(rule_set["rules_eng"].values()):
+        embed.add_field(name=f"Rule {idx+1}", value=rule, inline=False)
+    embed.add_field(name=f"End", value=rule_set["end_eng"], inline=False)
+    await eng_channel.send(embed=embed)
 
 
 @register_command('send_yaml', is_admin=is_admin_command, description='Sends the newest help yaml.')

@@ -86,8 +86,8 @@ async def check_message(message, args, vo):
     if len(vo) == 5:
         return await private_msg(message, "Too many ongoing votes. Please wait until one is over.")
 
-    if args.time > 1440 or args.time < 5:
-        return await private_msg(message, "Time must be between 5 and 1440.")
+    if args.time < 5:
+        return await private_msg(message, "Time must be over 5")
 
     if len(args.options) > 10 or len(args.options) < 1:
         return await private_msg(message, "Options must be between 2 and 10.")

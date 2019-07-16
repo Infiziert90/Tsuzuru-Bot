@@ -55,6 +55,7 @@ async def delete_role(user, role):
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
+    not_in_prison = True
     if message.author.id in user_roles or message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
 
@@ -63,28 +64,24 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
 
     user = user or message.author
     if user.id in prison_inmates:
+        not_in_prison = False
         if prison_length == 0:
             prison_inmates[user.id] = 0
-            return
         else:
             prison_inmates[user.id] += prison_length
-        return await private_msg_user(message, f"New Time: {str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
-                                               f"\nReason: {reason}", user)
     else:
         prison_inmates[user.id] = prison_length
-
-    user_roles[user.id] = user.roles[1:]
-    await user.edit(roles=[], reason="Ultimate Prison")
-
-    role = get_role_by_id(message.guild, 451076667377582110)
-
-    await user.add_roles(role)
-    asyncio.ensure_future(delete_role(user, role))
+        user_roles[user.id] = user.roles[1:]
+        await user.edit(roles=[], reason="Ultimate Prison")
+        role = get_role_by_id(message.guild, 451076667377582110)
+        await user.add_roles(role)
+        asyncio.ensure_future(delete_role(user, role))
 
     await send_log_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
-                                   f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}\nReason: "
-                                   f"{reason}\nBy: {message.author.name}")
-    await private_msg_user(message, f"Prison is now active\nTime: {prison_inmates[user.id]}min\nReason: {reason}", user)
+                                   f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
+                                   f"\nReason: {reason}\nBy: {message.author.name}")
+    await private_msg_user(message, f"{'Prison is now active' if not_in_prison else 'New Time:'}\nTime: "
+                                    f"{prison_inmates[user.id]}min\nReason: {reason}", user)
 
 
 async def send_log_message(client, message):
