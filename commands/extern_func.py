@@ -9,8 +9,7 @@ from cmd_manager.decorators import register_command, add_argument
 from merriam_api import CollegiateDictionary, WordNotFoundException
 import duckduckgo
 
-collkey = config.MAIN.coll_key
-my_api_key, my_cse_id = config.MAIN.google_api, config.MAIN.google_cse
+coll_key = config.MAIN.coll_key
 
 
 async def lookup_jisho(query):
@@ -29,7 +28,7 @@ def run_dict(word, inlang, outlang):
 
 
 def lookup_merriam(query):
-    dictionary = CollegiateDictionary(collkey)
+    dictionary = CollegiateDictionary(coll_key)
     print(dictionary)
     defs = defaultdict(list)
     try:

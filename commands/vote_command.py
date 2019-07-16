@@ -161,45 +161,43 @@ async def run_vote(time, mes_id, vo, lang):
         return vo.pop(mes_id)
 
 
-async def remove_vote(reaction, user, vo):
+async def remove_vote(reaction, message, user, vo):
     # catch the internal remove process
-    if user.id in vo[reaction.message.id]["overflow"]:
-        vo[reaction.message.id]["overflow"].remove(user.id)
+    if user.id in vo[message.id]["overflow"]:
+        vo[message.id]["overflow"].remove(user.id)
         return
 
-    vo[reaction.message.id]["voted_user"].discard(user.id)
+    vo[message.id]["voted_user"].discard(user.id)
     i = emo2num[reaction.emoji]
-    message = reaction.message
     embed = message.embeds[0].to_dict()
     embed["fields"][i]["value"] = f"Votes: {reaction.count-1}"
     await message.edit(embed=discord.Embed.from_dict(embed))
 
 
-async def check_add_vote(reaction, user, vo):
-    if user.id in vo[reaction.message.id]["overflow"]:
-        vo[reaction.message.id]["overflow"].append(user.id)
-        await reaction.message.remove_reaction(reaction, user)
+async def valid_add(reaction, message, user, vo):
+    if user.id in vo[message.id]["overflow"]:
+        vo[message.id]["overflow"].append(user.id)
+        await reaction.remove(user)
         return False
-    elif user.id in vo[reaction.message.id]["voted_user"]:
-        await private_msg_user(reaction.message, "Only 1 vote is allowed!", user)
-        vo[reaction.message.id]["overflow"].append(user.id)
-        await reaction.message.remove_reaction(reaction, user)
+    elif user.id in vo[message.id]["voted_user"]:
+        await private_msg_user(None, "Only 1 vote is allowed!", user)
+        vo[reaction.message.id]["overflow"].append(user)
+        await reaction.remove(user)
         return False
 
     return True
 
 
-async def add_vote(reaction, user, vo):
-    if not vo[reaction.message.id]["multi_votes"] and not await check_add_vote(reaction, user, vo):
+async def add_vote(reaction, message, user, vo):
+    if not vo[message.id]["multi_votes"] and not await valid_add(reaction, message, user, vo):
         return
 
-    vo[reaction.message.id]["voted_user"].add(user.id)
+    vo[message.id]["voted_user"].add(user.id)
     i = emo2num[reaction.emoji]
-    message = reaction.message
     embed = message.embeds[0].to_dict()
     embed["fields"][i]["value"] = f"Votes: {reaction.count-1}"
     if vo[message.id]["anon"]:
-        await reaction.message.remove_reaction(reaction, user)
+        await reaction.remove(user)
         vo[message.id]["options"][i] += 1
         embed["fields"][i]["value"] = f"Votes: {vo[message.id]['options'][i]}"
     else:

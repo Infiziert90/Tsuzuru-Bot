@@ -9,7 +9,6 @@ import commands
 import datetime
 from cmd_manager import dispatcher
 from config import config, help_text
-from typing import Union
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, send_log_message
 from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
@@ -64,30 +63,12 @@ async def on_member_remove(mem: discord.Member):
 async def on_member_update(before: discord.Member, after: discord.Member):
     if after.guild.id == EX_SERVER:
         if before.nick != after.nick:
-            await send_log_message(f"{before.display_name if before.nick is None else before.nick} changed their nickname",
-                                   f"New nickname {after.nick}", after, discord.Colour.blue(), client)
+            await send_log_message(f"{before.display_name if before.nick is None else before.nick} "
+                                   f"changed their nickname", "New nickname {after.nick}",
+                                   after, discord.Colour.blue(), client)
         elif before.name != after.name:
-            await send_log_message(f"{before.name} changed their username", f"New username {after.name}", after, discord.Colour.orange(), client)
-
-
-@client.event
-async def on_reaction_remove(reaction: discord.Reaction, user: Union[discord.User, discord.Member]):
-    if not reaction.me or user.id == client.user.id:
-        return
-
-    if reaction.message.id in ongoing_votes:
-        await remove_vote(reaction, user, ongoing_votes)
-
-
-@client.event
-async def on_reaction_add(reaction: discord.Reaction, user: Union[discord.User, discord.Member]):
-    if not reaction.me or user.id == client.user.id:
-        return
-
-    if reaction.message.id in ongoing_votes:
-        await add_vote(reaction, user, ongoing_votes)
-    elif reaction.message.id in anon_votes:
-        await add_vote(reaction, user, anon_votes)
+            await send_log_message(f"{before.name} changed their username", f"New username {after.name}",
+                                   after, discord.Colour.orange(), client)
 
         
 @client.event
@@ -99,6 +80,8 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, remove=False)
+    else:
+        await handle_vote_reaction(payload, reaction_added=True)
 
 
 @client.event
@@ -110,6 +93,29 @@ async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, remove=True)
+    else:
+        await handle_vote_reaction(payload, reaction_added=False)
+
+
+async def handle_vote_reaction(payload: discord.RawReactionActionEvent, reaction_added):
+    if payload.message_id in ongoing_votes or payload.message_id in anon_votes:
+        user = client.get_user(payload.user_id)
+        channel = client.get_guild(payload.guild_id).get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        vote_dict = ongoing_votes if message.id in ongoing_votes else anon_votes
+
+        # prevent triggering the vote system for all non bot used emoji
+        for reaction in message.reactions:
+            if reaction.me and reaction.emoji == payload.emoji.name:
+                used_reaction = reaction
+                break
+        else:
+            return
+
+        if reaction_added:
+            await add_vote(used_reaction, message, user, vote_dict)
+        elif payload.message_id not in anon_votes:
+            await remove_vote(used_reaction, message, user, vote_dict)
 
 
 async def handle_commands(message: discord.Message):
