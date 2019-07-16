@@ -1,16 +1,6 @@
-beautifulsoup4>=4.6.0
-decorator>=4.1.2
-dict.cc.py>=2.0.1
-google-api-python-client==1.6.3
-html5lib>=0.999999999
-lxml>=3.8.0
-matplotlib>=2.0.2
-numpy>=1.13.1
-oauth2client>=4.1.2
-PyYAML>=3.12
-requests>=2.18.4
-uvloop>=0.8.0
-yandex.translate>=0.3.5
-yarl<1.2
-discord.py>=1.0.0
+dict.cc.py>=3.0.0
+matplotlib>=3.1.1
+PyYAML>=5.1.1
+uvloop>=0.12.2
+discord.py>1.0.0
 -e git+https://github.com/strinking/python-duckduckgo@master#egg=duckduckgo-async

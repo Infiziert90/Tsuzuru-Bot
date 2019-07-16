@@ -5,7 +5,6 @@ import urllib.parse
 from dictcc import Dict, AVAILABLE_LANGUAGES
 from config import config
 from collections import defaultdict
-from googleapiclient.discovery import build
 from cmd_manager.decorators import register_command, add_argument
 from merriam_api import CollegiateDictionary, WordNotFoundException
 import duckduckgo
@@ -24,12 +23,6 @@ async def lookup_jisho(query):
     return data['data']
 
 
-def google_search(search_term, api_key=my_api_key, cse_id=my_cse_id, **kwargs):
-    service = build("customsearch", "v1", developerKey=api_key, cache_discovery=False)
-    res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
-    return res['items']
-
-
 def run_dict(word, inlang, outlang):
     result = Dict.translate(word, inlang, outlang)
     return result.translation_tuples
@@ -46,15 +39,6 @@ def lookup_merriam(query):
     except WordNotFoundException:
         defs = {}
     return defs
-
-
-@register_command('google', description='Search a keyword with google')
-@add_argument('keyword', help='Keyword for your search.')
-async def google(client, message, args):
-    results = google_search(f'{args.keyword}:en.wikipedia.org', num=1)
-    em = discord.Embed(title=f"{results[0]['link']}", description=f"\n{results[0]['snippet']}")
-    em.set_author(name="Master Google's answer:")
-    await message.channel.send(embed=em)
 
 
 @register_command('ddg', description='Search a keyword with duckduckgo')

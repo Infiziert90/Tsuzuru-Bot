@@ -17,7 +17,7 @@ from commands.role_system import roles, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import user_roles
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+uvloop.install()
 loop = uvloop.new_event_loop()
 asyncio.set_event_loop(loop)
 
@@ -157,9 +157,9 @@ def main():
         try:
             logging.info("Start discord run")
             # bot-Bot
-            client.run(config.MAIN.login_token)
+            # client.run(config.MAIN.login_token)
             # Test-Bot
-            # client.run(config.MAIN.test_token)
+            client.run(config.MAIN.test_token)
         except aiohttp.ClientConnectorError:
             continue
         except KeyboardInterrupt:

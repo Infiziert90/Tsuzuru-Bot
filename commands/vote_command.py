@@ -96,6 +96,9 @@ async def check_message(message, args, vo):
     if len(set(options)) != len(options):
         return await private_msg(message, "Options must be unique.")
 
+    if len(args.topic) >= 250:
+        return await private_msg(message, "Topic can't be over 250 characters long.")
+
     return False
 
 

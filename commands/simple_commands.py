@@ -57,7 +57,7 @@ async def getn(client, message, args):
 @add_argument('server_id', type=int, help='Server id')
 async def lolz(client, message, args):
     server = client.get_guild(args.server_id)
-    roles = repr(tuple((role.name, role.id) for role in server.roles))
+    roles = repr(tuple((role.name, role.id) for role in server.roles)).replace("@everyone", "everyone")
     roles = [roles[i:i+1900] for i in range(0, len(roles), 1900)]
     for x in roles:
         await message.channel.send(x)
