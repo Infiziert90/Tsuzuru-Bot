@@ -43,9 +43,11 @@ bot_bot:
   member_join: |
     Welcome to our server.
     Please take your time to read all the info above.
+    <#598933758258970644>
     
     Willkommen auf unserem Server.
     Bitte nimm dir Zeit, um alle Info oben durchzulesen.
+    <#598930909676437504>
   command_overview: |
     __**English**__
     Make sure to give yourself a language group
@@ -69,6 +71,7 @@ bot_bot:
     #public_jap | :flag_jp:
 
     "Fansub relatierte Channel" | :white_flower:
+    "Politikchannel" | :clown:
     "Channel für Community-Spiele" | :game_die:
     "NSFW" und "NSFL" | :underage:
   help_message: |

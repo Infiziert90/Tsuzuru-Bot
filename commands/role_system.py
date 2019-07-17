@@ -5,6 +5,7 @@ from handle_messages import private_msg_user
 with open("./config/role-settings.json") as f:
     settings = json.load(f)
 
+# iemoji.com iOS 5 and higher
 roles = {
     u"\U0001F1E9\U0001F1EA": "ger",
     u"\U0001F1EC\U0001F1E7": "eng",
@@ -12,6 +13,7 @@ roles = {
     u"\U0001F51E": "nsfw",
     u"\U0001F4AE": "subs",
     u"\U0001F3B2": "games",
+    u"\U0001F921": "pol",
 }
 role_dict = settings["group"]
 

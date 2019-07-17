@@ -44,10 +44,12 @@ async def on_message_edit(_: discord.Message, message: discord.Message):
 @client.event
 async def on_member_join(mem: discord.Member):
     if mem.guild.id == EX_SERVER:
-        await send_log_message(f"{mem.display_name} has joined the server", discord.Embed.Empty, mem, discord.Colour.green(), client)
+        await send_log_message(f"{mem.display_name} has joined the server",
+                               discord.Embed.Empty, mem, discord.Colour.green(), client)
         channel = client.get_channel(EX_WELCOME_CHANNEL)
         mention = await channel.send(f"<@!{mem.id}>")
-        member_message = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"), color=333333))
+        member_message = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"),
+                                                                color=333333))
         await asyncio.sleep(300)
         await delete_user_message(member_message)
         await delete_user_message(mention)
@@ -56,7 +58,8 @@ async def on_member_join(mem: discord.Member):
 @client.event
 async def on_member_remove(mem: discord.Member):
     if mem.guild.id == EX_SERVER:
-        await send_log_message(f"{mem.display_name} has left the server", discord.Embed.Empty, mem, discord.Colour.red(), client)
+        await send_log_message(f"{mem.display_name} has left the server",
+                               discord.Embed.Empty, mem, discord.Colour.red(), client)
 
 
 @client.event
@@ -64,7 +67,7 @@ async def on_member_update(before: discord.Member, after: discord.Member):
     if after.guild.id == EX_SERVER:
         if before.nick != after.nick:
             await send_log_message(f"{before.display_name if before.nick is None else before.nick} "
-                                   f"changed their nickname", "New nickname {after.nick}",
+                                   f"changed their nickname", f"New nickname {after.nick}",
                                    after, discord.Colour.blue(), client)
         elif before.name != after.name:
             await send_log_message(f"{before.name} changed their username", f"New username {after.name}",
@@ -163,9 +166,9 @@ def main():
         try:
             logging.info("Start discord run")
             # bot-Bot
-            # client.run(config.MAIN.login_token)
+            client.run(config.MAIN.login_token)
             # Test-Bot
-            client.run(config.MAIN.test_token)
+            # client.run(config.MAIN.test_token)
         except aiohttp.ClientConnectorError:
             continue
         except KeyboardInterrupt:

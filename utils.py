@@ -77,14 +77,14 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         await user.add_roles(role)
         asyncio.ensure_future(delete_role(user, role))
 
-    await send_log_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
+    await send_mod_channel_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
                                    f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
                                    f"\nReason: {reason}\nBy: {message.author.name}")
     await private_msg_user(message, f"{'Prison is now active' if not_in_prison else 'New Time:'}\nTime: "
                                     f"{prison_inmates[user.id]}min\nReason: {reason}", user)
 
 
-async def send_log_message(client, message):
+async def send_mod_channel_message(client, message):
     channel = client.get_channel(246368272327507979)
     await channel.send(message)
 
