@@ -6,6 +6,15 @@ import logging
 from handle_messages import private_msg_user, delete_user_message
 
 
+# Exception that you can catch, without the risk other errors not getting through
+class HelperException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __repr__(self):
+        return self.message
+
+
 prison_inmates = {}
 user_roles = {}
 user_cooldown = set()

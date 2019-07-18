@@ -1,5 +1,7 @@
 import importlib
 import pathlib
+import logging
+from utils import HelperException
 
 
 def load_commands():
@@ -12,5 +14,7 @@ def load_commands():
         mod_name = file_path.stem
         if not file_path.is_file() or file_path.suffix != ".py":
             continue
-
-        mod = importlib.import_module("." + mod_name, __package__)
+        try:
+            mod = importlib.import_module("." + mod_name, __package__)
+        except HelperException as err:
+            logging.info(err)

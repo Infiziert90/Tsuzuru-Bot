@@ -109,10 +109,10 @@ bot_bot:
         um ein gesundes Serverklima aufrechtzuerhalten. Dazu zählen keine Aussagen, die im Kontext
         dieses Servers eindeutig als Scherz gemeint sind (z.B. „roflcopter du hast shittaste xd“).
       rule2: >-
-        Politische Inhalte sind grundsätzlich erlaubt, solange es einen Anlass gibt
-        (z.B. ein aktueller Artikel im Netz). Kontroverse Meinungen sind gestattet, solange
-        sie nicht als eindeutig menschenverachtend oder volksverhetzend eingestuft werden
-        können oder auf Dauer zu „Channel-Hijacking“ (siehe Punkt 3) führen (durch Kreisgewichse o.ä.).
+        Politische Inhalte sind grundsätzlich erlaubt, jedoch ausschließlich im dafür vorgesehenen
+        Channel #pol. Kontroverse Meinungen sind gestattet, solange sie nicht als eindeutig
+        menschenverachtend oder volksverhetzend eingestuft werden können oder auf Dauer zu
+        „Channel-Hijacking“ (siehe Punkt 3) führen (durch Kreisgewichse o.ä.).
       rule3: >-
         „Channel-Hijacking“ ist verboten. Dies umfasst wiederholtes Posten kontroverser
         Inhalte (z.B. mit politischer Agenda) ohne konkreten Anlass, über die sich nur ein
