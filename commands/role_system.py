@@ -21,7 +21,7 @@ role_dict = settings["group"]
 async def add_role(member, input_role):
     guild_role = get_role_by_id(member.guild, role_dict[roles[input_role]])
     await member.add_roles(guild_role)
-    await private_msg_user(None, "Thanks for telling me that!", user=member)
+    await private_msg_user(None, "Thanks for telling me that!", user=member, retry_local=False)
 
 
 async def find_role(member, input_role):

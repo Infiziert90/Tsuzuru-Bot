@@ -181,7 +181,7 @@ async def valid_add(reaction, message, user, vo):
         return False
     elif user.id in vo[message.id]["voted_user"]:
         await private_msg_user(None, "Only 1 vote is allowed!", user)
-        vo[reaction.message.id]["overflow"].append(user)
+        vo[reaction.message.id]["overflow"].append(user.id)
         await reaction.remove(user)
         return False
 

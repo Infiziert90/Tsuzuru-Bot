@@ -4,13 +4,15 @@ import discord
 import datetime
 
 
-async def handle_msg(message, content=None, embed=None, file=None, user=None):
+async def handle_msg(message, content=None, embed=None, file=None, user=None, retry_local=True):
     user = user or message.author
     try:
         await user.send(content=content, embed=embed, file=file)
     except (AttributeError, discord.Forbidden):
-        del_message = await message.channel.send(content=f"{content or ''}\n\nThis Message will be deleted in 5min.",  embed=embed, file=file)
-        asyncio.get_event_loop().call_later(300, lambda: asyncio.ensure_future(delete_user_message(del_message)))
+        if retry_local:
+            del_message = await message.channel.send(content=f"{content or ''}\nThis Message will be deleted in 5min.",
+                                                     embed=embed, file=file)
+            asyncio.get_event_loop().call_later(300, lambda: asyncio.ensure_future(delete_user_message(del_message)))
 
 
 async def private_msg(message, answer):
@@ -33,8 +35,8 @@ async def private_msg_file(message, file, content=None):
     return True
 
 
-async def private_msg_user(message, answer, user):
-    await handle_msg(message, content=answer, user=user)
+async def private_msg_user(message, answer, user, retry_local=True):
+    await handle_msg(message, content=answer, user=user, retry_local=retry_local)
     return True
 
 
