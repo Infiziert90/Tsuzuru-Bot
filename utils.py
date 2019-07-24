@@ -4,8 +4,10 @@ import asyncio
 import random
 import logging
 import datetime
-from cmd_manager.filters import EX_SERVER
 from handle_messages import private_msg_user, delete_user_message
+
+# TODO: fix loop import with filters.py
+EX_SERVER = 221919789017202688
 
 
 # Exception that you can catch, without the risk other errors not getting through
@@ -46,25 +48,31 @@ async def get_file(url, path, filename, message=None):
 
 async def check_and_release(client):
     while True:
-        await asyncio.sleep(60)
+        try:
+            await asyncio.sleep(60)
 
-        for user_id, prison_array in prison_inmates.copy().items():
-            if datetime.datetime.utcnow() >= prison_array[0]:
-                prison_inmates.pop(user_id)
-                guild = client.get_guild(EX_SERVER)
-                member = guild.get_member(user_id)
-                prison_role = get_role_by_id(guild, 451076667377582110)
-                try:
-                    await member.remove_roles(prison_role)
-                except (discord.Forbidden, discord.HTTPException):
-                    return logging.error("Can't remove user roles")
+            for user_id, prison_array in prison_inmates.copy().items():
+                if datetime.datetime.utcnow() >= prison_array[0]:
+                    prison_inmates.pop(user_id)
+                    guild = client.get_guild(EX_SERVER)
+                    member = guild.get_member(user_id)
+                    prison_role = get_role_by_id(guild, 451076667377582110)
+                    try:
+                        await member.remove_roles(prison_role)
+                    except (discord.Forbidden, discord.HTTPException):
+                        return logging.error("Can't remove user roles")
 
-                try:
-                    await member.edit(roles=[get_role_by_id(guild, role_id) for role_id in prison_array[1]])
-                except (discord.Forbidden, discord.HTTPException):
-                    return logging.error("Can't add user roles")
-                except KeyError:
-                    return logging.error(f"KeyError for member: {member}")
+                    try:
+                        await member.edit(roles=[get_role_by_id(guild, role_id) for role_id in prison_array[1]])
+                    except (discord.Forbidden, discord.HTTPException):
+                        return logging.error("Can't add user roles")
+                    except KeyError:
+                        return logging.error(f"KeyError for member: {member}")
+        except asyncio.CancelledError:
+            logging.info("Stopping task")
+            return
+        except Exception as err:
+            logging.error(f"Something in check_and_release went horrible wrong: {err}")
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):

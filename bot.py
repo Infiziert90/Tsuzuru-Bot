@@ -14,7 +14,7 @@ from handle_messages import private_msg_code, delete_user_message, send_log_mess
 from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
 from commands.role_system import roles, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
-from utils import prison_inmates
+from utils import prison_inmates, check_and_release
 
 uvloop.install()
 loop = uvloop.new_event_loop()
@@ -165,6 +165,8 @@ def main():
     while True:
         try:
             logging.info("Start discord run")
+            # start the prison release task
+            asyncio.ensure_future(check_and_release(client))
             # bot-Bot
             client.run(config.MAIN.login_token)
             # Test-Bot
