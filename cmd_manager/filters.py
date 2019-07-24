@@ -10,9 +10,6 @@ EX_ENG_RULE_CHANNEL = 598933758258970644
 EX_ADMIN_CHANNEL = 246368272327507979
 EX_BOT_CHANNEL = 300947822956773376
 EX_FANSUB_CHANNEL = 221920731871707136
-EX_YURI_CHANNEL = 328616388233265154
-EX_YAOI_CHANNEL = 328942447784624128
-EX_TRAP_CHANNEL = 328942447784624128
 
 
 def is_ex_bot_channel(message):
@@ -26,27 +23,6 @@ def is_ex_server(message):
     if message.guild and message.guild.id == EX_SERVER:
         return True
     asyncio.ensure_future(private_msg(message, "Stop using this command outside of eX-Server"))
-    asyncio.ensure_future(delete_user_message(message))
-
-
-def is_ex_yuri_channel(message):
-    if message.channel.id == EX_YURI_CHANNEL:
-        return True
-    asyncio.ensure_future(private_msg(message, "Stop using this command outside of `#nsfw-yuri`"))
-    asyncio.ensure_future(delete_user_message(message))
-
-
-def is_ex_yaoi_channel(message):
-    if message.channel.id == EX_YAOI_CHANNEL:
-        return True
-    asyncio.ensure_future(private_msg(message, "Stop using this command outside of `#nsfw-yaoi`"))
-    asyncio.ensure_future(delete_user_message(message))
-
-
-def is_ex_trap_channel(message):
-    if message.channel.id == EX_TRAP_CHANNEL:
-        return True
-    asyncio.ensure_future(private_msg(message, "Stop using this command outside of `#nsfw-traps`"))
     asyncio.ensure_future(delete_user_message(message))
 
 

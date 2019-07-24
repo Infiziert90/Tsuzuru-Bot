@@ -19,7 +19,7 @@ async def send_message(client, message, args):
 @register_command('prison', is_admin=is_admin_command, description='Assign prison.')
 @add_argument('--user', '-u', help='Name or id from the user')
 @add_argument('--reason', '-r', help='Reason for prison')
-@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for the prison [in min][0 = reset]')
+@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for prison[in Min][0=Reset]')
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:

@@ -4,13 +4,8 @@ import discord
 import logging
 from config import config
 from handle_messages import delete_user_message
-from cmd_manager.filters import is_ex_yuri_channel, is_ex_yaoi_channel, is_ex_trap_channel, EX_YURI_CHANNEL, \
-                                EX_TRAP_CHANNEL, EX_YAOI_CHANNEL
 from cmd_manager.decorators import register_command
 
-yuri_folder = config.PICTURE.yuri
-yaoi_folder = config.PICTURE.yaoi
-trap_folder = config.PICTURE.trap
 spam_folder = config.PICTURE.spam
 
 
@@ -26,24 +21,6 @@ async def send_image(client, folder, channel_id):
         except discord.HTTPException:
             os.remove(image)
             logging.info("Error: File to large")
-
-
-@register_command('yuri', is_enabled=is_ex_yuri_channel, description='Post a yuri image.')
-async def yuri(client, message, args):
-    await delete_user_message(message)
-    await send_image(client, yuri_folder, EX_YURI_CHANNEL)
-
-
-@register_command('trap', is_enabled=is_ex_trap_channel, description='Post a trap image.')
-async def trap(client, message, args):
-    await delete_user_message(message)
-    await send_image(client, trap_folder, EX_TRAP_CHANNEL)
-
-
-@register_command('yaoi', is_enabled=is_ex_yaoi_channel, description='Post a yaoi image.')
-async def yaoi(client, message, args):
-    await delete_user_message(message)
-    await send_image(client, yaoi_folder, EX_YAOI_CHANNEL)
 
 # Spam images
 @register_command('autism', description='Autism!')
