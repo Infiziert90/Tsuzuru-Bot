@@ -3,6 +3,8 @@ import discord
 import asyncio
 import random
 import logging
+import datetime
+from cmd_manager.filters import EX_SERVER
 from handle_messages import private_msg_user, delete_user_message
 
 
@@ -16,7 +18,6 @@ class HelperException(Exception):
 
 
 prison_inmates = {}
-user_roles = {}
 user_cooldown = set()
 
 
@@ -43,29 +44,31 @@ async def get_file(url, path, filename, message=None):
             return f"{path}/{filename}"
 
 
-async def delete_role(user, role):
-    while prison_inmates[user.id] > 0:
+async def check_and_release(client):
+    while True:
         await asyncio.sleep(60)
-        prison_inmates[user.id] -= 1
 
-    prison_inmates.pop(user.id)
-    try:
-        await user.remove_roles(role)
-    except (discord.Forbidden, discord.HTTPException):
-        return logging.error("Can't remove user roles")
-    try:
-        await user.edit(roles=user_roles[user.id])
-    except (discord.Forbidden, discord.HTTPException):
-        return logging.error("Can't add user roles")
-    except KeyError:
-        return logging.error(f"KeyError for user: {user}")
+        for user_id, prison_array in prison_inmates.copy().items():
+            if datetime.datetime.utcnow() >= prison_array[0]:
+                prison_inmates.pop(user_id)
+                guild = client.get_guild(EX_SERVER)
+                member = guild.get_member(user_id)
+                prison_role = get_role_by_id(guild, 451076667377582110)
+                try:
+                    await member.remove_roles(prison_role)
+                except (discord.Forbidden, discord.HTTPException):
+                    return logging.error("Can't remove user roles")
 
-    user_roles.pop(user.id)
+                try:
+                    await member.edit(roles=[get_role_by_id(guild, role_id) for role_id in prison_array[1]])
+                except (discord.Forbidden, discord.HTTPException):
+                    return logging.error("Can't add user roles")
+                except KeyError:
+                    return logging.error(f"KeyError for member: {member}")
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
-    not_in_prison = True
-    if message.author.id in user_roles or message.author.id in prison_inmates:
+    if message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
 
     if prison_length is None:
@@ -73,24 +76,22 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
 
     user = user or message.author
     if user.id in prison_inmates:
-        not_in_prison = False
         if prison_length == 0:
-            prison_inmates[user.id] = 0
+            prison_inmates[user.id][0] = datetime.datetime.utcnow()
         else:
-            prison_inmates[user.id] += prison_length
+            prison_inmates[user.id][0] += datetime.timedelta(minutes=prison_length)
     else:
-        prison_inmates[user.id] = prison_length
-        user_roles[user.id] = user.roles[1:]
-        await user.edit(roles=[], reason="Ultimate Prison")
-        role = get_role_by_id(message.guild, 451076667377582110)
-        await user.add_roles(role)
-        asyncio.ensure_future(delete_role(user, role))
+        prison_inmates[user.id] = [datetime.datetime.utcnow() + datetime.timedelta(minutes=prison_length)]
+        prison_inmates[user.id].append([role.id for role in user.roles[1:]])
+        await user.edit(roles=[role for role in user.roles[1:] if role.managed], reason="Ultimate Prison")
+        prison_role = get_role_by_id(message.guild, 451076667377582110)
+        await user.add_roles(prison_role)
 
     await send_mod_channel_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
                                    f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
                                    f"\nReason: {reason}\nBy: {message.author.name}")
-    await private_msg_user(message, f"{'Prison is now active' if not_in_prison else 'New Time:'}\nTime: "
-                                    f"{prison_inmates[user.id]}min\nReason: {reason}", user)
+    await private_msg_user(message, f"{'Prison is now active' if not user.id in prison_inmates else 'New Time:'}"
+                                    f"\nTime: {prison_inmates[user.id]}min\nReason: {reason}", user)
 
 
 async def send_mod_channel_message(client, message):
