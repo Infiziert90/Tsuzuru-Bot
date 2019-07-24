@@ -125,7 +125,7 @@ class GetNative:
             fut = asyncio.ensure_future(asyncio.wrap_future(full_clip.get_frame_async(frame_index)))
             tasks_pending.add(fut)
             futures[fut] = frame_index
-            while len(tasks_pending) >= core.num_threads + 2:
+            while len(tasks_pending) >= core.num_threads / 2:  # let the bot not use 100% of the cpu
                 tasks_done, tasks_pending = await asyncio.wait(
                     tasks_pending, return_when=asyncio.FIRST_COMPLETED)
                 vals += [(futures.pop(task), task.result().props.PlaneStatsAverage) for task in tasks_done]

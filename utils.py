@@ -82,24 +82,26 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
     if prison_length is None:
         prison_length = random.randint(30, 230)
 
+    timestamp = datetime.datetime.utcnow()
     user = user or message.author
     if user.id in prison_inmates:
         if prison_length == 0:
-            prison_inmates[user.id][0] = datetime.datetime.utcnow()
+            prison_inmates[user.id][0] = timestamp
         else:
             prison_inmates[user.id][0] += datetime.timedelta(minutes=prison_length)
     else:
-        prison_inmates[user.id] = [datetime.datetime.utcnow() + datetime.timedelta(minutes=prison_length)]
+        prison_inmates[user.id] = [timestamp + datetime.timedelta(minutes=prison_length)]
         prison_inmates[user.id].append([role.id for role in user.roles[1:]])
         await user.edit(roles=[role for role in user.roles[1:] if role.managed], reason="Ultimate Prison")
         prison_role = get_role_by_id(message.guild, 451076667377582110)
         await user.add_roles(prison_role)
 
-    await send_mod_channel_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nFull Time: "
-                                   f"{str(prison_inmates[user.id]) + 'min' if prison_length > 0 else 'Reset'}"
+    time_string = prison_inmates[user.id][0].strftime('%H:%M:%S %Y-%m-%d')
+    await send_mod_channel_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nUntil: "
+                                   f"{time_string + ' UTC' if prison_length > 0 else 'Reset'}"
                                    f"\nReason: {reason}\nBy: {message.author.name}")
-    await private_msg_user(message, f"{'Prison is now active' if not user.id in prison_inmates else 'New Time:'}"
-                                    f"\nTime: {prison_inmates[user.id]}min\nReason: {reason}", user)
+    await private_msg_user(message, f"{'Prison is now active' if not user.id in prison_inmates else 'time in changed:'}"
+                                    f"\nUntil: {time_string} UTC\nReason: {reason}", user)
 
 
 async def send_mod_channel_message(client, message):

@@ -36,7 +36,7 @@ async def prison(client, message, args):
 
     infi = client.get_user(134750562062303232)
     await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
-                    f"{str(prison_inmates[user.id]) + 'min' if args.prison_length > 0 else 'Reset'}\nReason: "
+                    f"{str(prison_inmates[user.id][0]) + 'min' if args.prison_length > 0 else 'Reset'}\nReason: "
                     f"{args.reason}\nBy: {message.author.name}")
 
 
