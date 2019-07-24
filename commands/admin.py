@@ -1,7 +1,7 @@
 import discord
 from config import help_text
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL, EX_GER_RULE_CHANNEL, EX_ENG_RULE_CHANNEL, is_admin_command
-from utils import get_file, punish_user, prison_inmates, user_roles
+from utils import get_file, punish_user, prison_inmates
 from handle_messages import delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 from .role_system import roles
@@ -22,7 +22,7 @@ async def send_message(client, message, args):
 @add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for the prison [in min][0 = reset]')
 async def prison(client, message, args):
     await delete_user_message(message)
-    if message.author.id in prison_inmates or message.author.id in user_roles:
+    if message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
     elif len(args.user) == 0:
         return await message.channel.send(f"Empty username is not allowed!")
@@ -110,5 +110,4 @@ async def replace_yaml(client, message, args):
 async def replace_yaml(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
     embed.add_field(name="User in prison", value=prison_inmates)
-    embed.add_field(name="Saved roles for user", value=user_roles)
     await message.channel.send(embed=embed)

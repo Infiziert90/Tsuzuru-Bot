@@ -14,7 +14,7 @@ from handle_messages import private_msg_code, delete_user_message, send_log_mess
 from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
 from commands.role_system import roles, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
-from utils import user_roles
+from utils import prison_inmates
 
 uvloop.install()
 loop = uvloop.new_event_loop()
@@ -126,7 +126,7 @@ async def handle_commands(message: discord.Message):
     if message.author.id == client.user.id:  # own bot
         return
 
-    if message.author.id in user_roles:
+    if message.author.id in prison_inmates:
         return
 
     if not is_guild and message.content[:11] != ">>getnative":
