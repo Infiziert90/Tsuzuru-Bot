@@ -48,10 +48,10 @@ async def on_member_join(mem: discord.Member):
                                discord.Embed.Empty, mem, discord.Colour.green(), client)
         channel = client.get_channel(EX_WELCOME_CHANNEL)
         mention = await channel.send(f"<@!{mem.id}>")
-        member_message = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"),
-                                                                color=333333))
+        text = help_text("bot_bot", "welcome_set")["member_join"]
+        member_mes = await channel.send(embed=discord.Embed(description=text, color=333333))
         await asyncio.sleep(300)
-        await delete_user_message(member_message)
+        await delete_user_message(member_mes)
         await delete_user_message(mention)
 
 

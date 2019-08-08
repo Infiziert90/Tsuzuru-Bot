@@ -40,143 +40,159 @@ bot_bot:
     Links:
     https://github.com/Infiziert90/getnative (standalone)
     https://ddl.kageru.moe/kbz12.pdf (WIP)
-  member_join: |
-    Welcome to our server.
-    Please take your time to read all the info above.
-    <#598933758258970644>
-    
-    Willkommen auf unserem Server.
-    Bitte nimm dir Zeit, um alle Info oben durchzulesen.
-    <#598930909676437504>
-  command_overview: |
-    __**English**__
-    Make sure to give yourself a language group
-    You'll get kicked after 30 minutes without being in one of the language groups
+  welcome_set:
+    warning: |
+      ```py
+      @Note
+      Link Preview needs to be activated, so that you can see the messages:
+      "Settings -> Text & Images -> Link Preview"
 
-    If you want to see the following channels/categories, click on the corresponding emojis:
-    #public_ger | :flag_de:
-    #public_eng | :flag_gb:
-    #public_jap | :flag_jp:
+      @Hinweis
+      Die Linkvorschau muss aktiviert sein, um die Nachrichten zu sehen:
+      "Einstellungen -> Text & Bilder -> Linksvorschau"
+      ```
+    command_overview: |
+      __**English**__
+      Make sure to give yourself a language group
+      You'll get kicked after 30 minutes without being in one of the language groups
 
-    "Fansub releated channels" | :white_flower:
-    "NSFW" and "NSFL" | :underage:
+      If you want to see the following channels/categories, click on the corresponding emojis:
+      #public_ger | :flag_de:
+      #public_eng | :flag_gb:
+      #public_jap | :flag_jp:
 
-    __**Deutsch**__
-    Zuallererst musst du dir eine Sprachgruppe geben
-    Du wirst nach 30 Minuten gekickt, wenn du in keiner der Sprachgruppen bist
+      "Fansub releated channels" | :white_flower:
+      "NSFW" and "NSFL" | :underage:
 
-    Wenn du die folgenden Channel/Kategorien sehen möchtest, klicke die entsprechenden Emojis an:
-    #public_ger | :flag_de:
-    #public_eng | :flag_gb:
-    #public_jap | :flag_jp:
+      __**Deutsch**__
+      Zuallererst musst du dir eine Sprachgruppe geben
+      Du wirst nach 30 Minuten gekickt, wenn du in keiner der Sprachgruppen bist
 
-    "Fansub relatierte Channel" | :white_flower:
-    "Politikchannel" | :clown:
-    "Channel für Community-Spiele" | :game_die:
-    "NSFW" und "NSFL" | :underage:
-  help_message: |
-    __**Invite**__
-    https://discord.gg/ZB7ZXbN
-  welcome_note: |
-    ```py
-    @Note
-    Link Preview needs to be activated, so that you can see the messages:
-    "Settings -> Text & Images -> Link Preview"
+      Wenn du die folgenden Channel/Kategorien sehen möchtest, klicke die entsprechenden Emojis an:
+      #public_ger | :flag_de:
+      #public_eng | :flag_gb:
+      #public_jap | :flag_jp:
 
-    @Hinweis
-    Die Linkvorschau muss aktiviert sein, um die Nachrichten zu sehen:
-    "Einstellungen -> Text & Bilder -> Linksvorschau"
-    ```
+      "Fansub relatierte Channel" | :white_flower:
+      "Politikchannel" | :clown:
+      "Channel für Community-Spiele" | :game_die:
+      "NSFW" und "NSFL" | :underage:
+    help_message: |
+      __**Invite**__
+      https://discord.gg/ZB7ZXbN
+    member_join: |
+      Welcome to our server.
+      Please take your time to read all the info above.
+      <#598933758258970644>
+
+      Willkommen auf unserem Server.
+      Bitte nimm dir Zeit, um alle Info oben durchzulesen.
+      <#598930909676437504>
   rule_set:
-    ger_description: |
-      Diese 10 Gebote oder auch allgemeinen Regeln beziehen sich auf alle Channel:
-    end_ger: >-
-      Verstöße gegen diese Regeln führen i.d.R. zunächst zu einer Verwarnung und bei
-      Wiederholungstätern und/oder hohem Schweregrad zu analer Penetration im Prison
-      oder kompletter Darmzerberstung (Bann). Wenn ihr euch nicht sicher seid, ob
-      es sich um einen Verstoß handeln könnte, könnt ihr auf Nummer sicher gehen
-      und einen Mod fragen.
-    eng_description: |
-      These 10 Commandments apply to all channels:
-    end_eng: >-
-      Violations of these rules usually lead to a warning. Repeat offenders or
-      severe cases might be forced to pick up the soap in our prison or could even
-      be permanently banned. If you are not sure if something is against the rules,
-      you can ask one of the mods.
-    rules_ger:
-      rule1: >-
-        Sei kein Hurensohn. Eindeutige Anfeindungen ohne triftigen Grund sind zu unterlassen,
-        um ein gesundes Serverklima aufrechtzuerhalten. Dazu zählen keine Aussagen, die im Kontext
-        dieses Servers eindeutig als Scherz gemeint sind (z.B. „roflcopter du hast shittaste xd“).
-      rule2: >-
-        Politische Inhalte sind grundsätzlich erlaubt, jedoch ausschließlich im dafür vorgesehenen
-        Channel #pol. Kontroverse Meinungen sind gestattet, solange sie nicht als eindeutig
-        menschenverachtend oder volksverhetzend eingestuft werden können oder auf Dauer zu
-        „Channel-Hijacking“ (siehe Punkt 3) führen (durch Kreisgewichse o.ä.).
-      rule3: >-
-        „Channel-Hijacking“ ist verboten. Dies umfasst wiederholtes Posten kontroverser
-        Inhalte (z.B. mit politischer Agenda) ohne konkreten Anlass, über die sich nur ein
-        sehr kleiner Personenkreis unterhält, sodass andere Nutzer den Channel auf Dauer meiden könnten.
-      rule4: >-
-        Rechtzeitig vor wichtigen bevorstehenden Wahlen wird ein eigener Channel (#wahl)
-        erstellt. Hierbei handelt es sich aber um keinen allgemeinpolitischen Channel,
-        sondern um einen ausschließlich für Diskussionen, Meinungsaustausch und Themen
-        mit Bezug zu der bevorstehenden Wahl.
-      rule5: >-
-        Illegale Streamingseiten sind Untermenschencontent und dürfen nur aus speziellen
-        Anlässen gepostet werden, z.B. um sich über besonderes Versagen lustig zu machen.
-        Torrentseiten sind von dieser Regel nicht betroffen.
-      rule6: >-
-        Anderweitig strafrechtlich relevante Inhalte sind verboten und werden unverzüglich
-         gelöscht (verfassungsfeindliche Symbole, Volksverhetzung, reale Kinderpornographie etc.).
-      rule7: >-
-        Das Verlinken anderer Discordserver ist erlaubt, solange ein entsprechender Kontext
-        gegeben ist. Der verlinkte Server muss sich jedoch auch an entsprechende Regeln halten (5 & 6).
-      rule8: >-
-        NSFW-Inhalte sind in NSFW-Channels zu posten. Animebilder mit offensichtlichem
-        Ecchi-Content (kein 18+) bilden in #asian_content eine Ausnahme, sind aber
-        explizit als Spoiler zu kennzeichnen mit NSFW-Kennzeichnung.
-      rule9: >-
-        Memes sind grundsätzlich in <#222037538238365696> zu posten, themenrelevante lustige
-        Bildchen/Videos sind jedoch ausnahmsweise auch in anderen Channels erlaubt.
-      rule10: >-
-        Bilder und Beiträge von momentan laufenden Anime sind mit jeweiligen Spoiler-Tags
-        und Deklarierung zu versehen, wenn man daraus das weitere Geschehen ableiten kann
-        oder diese andersweitig starken Storybezug haben (z.B. Bild aus Folge 5 einer Person,
-        die vermeintlich in Folge 4 gestorben sein soll).
-    rules_eng:
-      rule1: >-
-        Don't be an asshole. Clear hostility without good reason should be avoided in order
-        to maintain a healthy server climate. This does not include statements which are
-        clearly meant as a joke in this environment (e.g. “lol fag, you’re taste a shit“).
-      rule2: >-
-        Political content is allowed as long as there is an occasion (e.g. a news article or
-        an important event). Controversial opinions are permitted as long as they are not
-        clearly hateful and inciting or lead to “channel hijacking“ (see point 3, circlejerking or similar).
-      rule3: >-
-        “Channel hijacking“ is prohibited. This includes repeatedly posting controversial
-        content (usually with a political agenda) without a real reason and only concerning
-        a small number of people, which would make the channel unusable for most members.
-        It also includes using public channels as DMs.
-      rule4: >-
-        This rule only affects the German community, but I need a placeholder to still call
-        this “The 10 Commandments“.
-      rule5: >-
-        Illegal streaming sites are subhuman and may only be posted in very few cases, such
-        as to make fun of particular failures or drama. Torrent sites are not streaming sites.
-      rule6: >-
-        Content that is against the law is prohibited and will be deleted immediately
-        (incitement, real child pornography, etc.). As this is partially a German server,
-        this also includes imagery banned under German law (Nazi symbology).
-      rule7: >-
-        Linking other Discord servers is permitted, as long as an appropriate context is
-        provided and the linked server also adheres to rules 5 & 6.
-      rule8: >-
-        Keep NSFW content to the NSFW channels. Anime screenshots with ecchi content (not 18+)
-        are allowed in #asian_content, but must be explicitly marked as spoilers and NSFW.
-      rule9: >-
-        Memes should be posted in <#222037538238365696>, but exceptions can be made
-        (e.g. a programming joke or meme in <#277135357739401218>). As always, use common sense.
-      rule10: >-
-        Screenshots and discussions of currently airing anime must be marked as spoilers
-        when necessary (e.g. a picture from episode 5 of a character who “died“ in episode 4).
+    ger_ruleset:
+      description: |
+        Diese 10 Gebote oder auch allgemeinen Regeln beziehen sich auf alle Channel:
+      rules:
+        rule1: >-
+          Sei kein Hurensohn. Eindeutige Anfeindungen ohne triftigen Grund sind zu unterlassen,
+          um ein gesundes Serverklima aufrechtzuerhalten. Dazu zählen keine Aussagen, die im Kontext
+          dieses Servers eindeutig als Scherz gemeint sind (z.B. „roflcopter du hast shittaste xd“).
+        rule2: >-
+          Politische Inhalte sind grundsätzlich erlaubt, jedoch ausschließlich im dafür vorgesehenen
+          Channel #pol. Kontroverse Meinungen sind gestattet, solange sie nicht als eindeutig
+          menschenverachtend oder volksverhetzend eingestuft werden können oder auf Dauer zu
+          „Channel-Hijacking“ (siehe Punkt 3) führen (durch Kreisgewichse o.ä.).
+        rule3: >-
+          „Channel-Hijacking“ ist verboten. Dies umfasst wiederholtes Posten kontroverser
+          Inhalte (z.B. mit politischer Agenda) ohne konkreten Anlass, über die sich nur ein
+          sehr kleiner Personenkreis unterhält, sodass andere Nutzer den Channel auf Dauer meiden könnten.
+        rule4: >-
+          Rechtzeitig vor wichtigen bevorstehenden Wahlen wird ein eigener Channel (#wahl)
+          erstellt. Hierbei handelt es sich aber um keinen allgemeinpolitischen Channel,
+          sondern um einen ausschließlich für Diskussionen, Meinungsaustausch und Themen
+          mit Bezug zu der bevorstehenden Wahl.
+        rule5: >-
+          Illegale Streamingseiten sind Untermenschencontent und dürfen nur aus speziellen
+          Anlässen gepostet werden, z.B. um sich über besonderes Versagen lustig zu machen.
+          Torrentseiten sind von dieser Regel nicht betroffen.
+        rule6: >-
+          Anderweitig strafrechtlich relevante Inhalte sind verboten und werden unverzüglich
+           gelöscht (verfassungsfeindliche Symbole, Volksverhetzung, reale Kinderpornographie etc.).
+        rule7: >-
+          Das Verlinken anderer Discordserver ist erlaubt, solange ein entsprechender Kontext
+          gegeben ist. Der verlinkte Server muss sich jedoch auch an entsprechende Regeln halten (5 & 6).
+        rule8: >-
+          NSFW-Inhalte sind in NSFW-Channels zu posten. Animebilder mit offensichtlichem
+          Ecchi-Content (kein 18+) bilden in #asian_content eine Ausnahme, sind aber
+          explizit als Spoiler zu kennzeichnen mit NSFW-Kennzeichnung.
+        rule9: >-
+          Memes sind grundsätzlich in <#222037538238365696> zu posten, themenrelevante lustige
+          Bildchen/Videos sind jedoch ausnahmsweise auch in anderen Channels erlaubt.
+        rule10: >-
+          Bilder und Beiträge von momentan laufenden Anime sind mit jeweiligen Spoiler-Tags
+          und Deklarierung zu versehen, wenn man daraus das weitere Geschehen ableiten kann
+          oder diese andersweitig starken Storybezug haben (z.B. Bild aus Folge 5 einer Person,
+          die vermeintlich in Folge 4 gestorben sein soll).
+      end: >-
+        Verstöße gegen diese Regeln führen i.d.R. zunächst zu einer Verwarnung und bei
+        Wiederholungstätern und/oder hohem Schweregrad zu analer Penetration im Prison
+        oder kompletter Darmzerberstung (Bann). Wenn ihr euch nicht sicher seid, ob
+        es sich um einen Verstoß handeln könnte, könnt ihr auf Nummer sicher gehen
+        und einen Mod fragen.
+      supplement:
+        Regeln für Mods bei Entscheidungen: >-
+          - Bei potenziellen Änderungen wird nicht-öffentlich im Mod-Channel darüber diskutiert.
+          - Umfangreiche Änderungen (z.B. die Erstellung/Löschung von Channels) am Server bedürfen
+          einer öffentlichen Umfrage, deren Ergebnis anschließend von den Mods evaluiert wird. Bei
+          Unklarheiten können weitere Umfragen folgen.
+          - Bei geringfügigen Änderungen gibt es zunächst eine interne Mod-Umfrage, sollte diese
+          unentschieden ausgehen, folgt auch hier eine öffentliche Umfrage.
+          - Auf Basis der Ergebnisse werden Entscheidungen getroffen und anschließend nach außen
+          kommuniziert, inkl. anonymisierter Ergebnisse der internen Umfragen.
+          - Moderationsentscheidungen aufgrund von Regelbrüchen werden intern diskutiert und auf
+          Anfrage offengelegt. Alle Regeln, nach denen gehandelt wird, sind öffentlich einsehbar.
+    eng_ruleset:
+      description: |
+        These 10 Commandments apply to all channels:
+      rules:
+        rule1: >-
+          Don't be an asshole. Clear hostility without good reason should be avoided in order
+          to maintain a healthy server climate. This does not include statements which are
+          clearly meant as a joke in this environment (e.g. “lol fag, you’re taste a shit“).
+        rule2: >-
+          Political content is allowed as long as there is an occasion (e.g. a news article or
+          an important event). Controversial opinions are permitted as long as they are not
+          clearly hateful and inciting or lead to “channel hijacking“ (see point 3, circlejerking or similar).
+        rule3: >-
+          “Channel hijacking“ is prohibited. This includes repeatedly posting controversial
+          content (usually with a political agenda) without a real reason and only concerning
+          a small number of people, which would make the channel unusable for most members.
+          It also includes using public channels as DMs.
+        rule4: >-
+          This rule only affects the German community, but I need a placeholder to still call
+          this “The 10 Commandments“.
+        rule5: >-
+          Illegal streaming sites are subhuman and may only be posted in very few cases, such
+          as to make fun of particular failures or drama. Torrent sites are not streaming sites.
+        rule6: >-
+          Content that is against the law is prohibited and will be deleted immediately
+          (incitement, real child pornography, etc.). As this is partially a German server,
+          this also includes imagery banned under German law (Nazi symbology).
+        rule7: >-
+          Linking other Discord servers is permitted, as long as an appropriate context is
+          provided and the linked server also adheres to rules 5 & 6.
+        rule8: >-
+          Keep NSFW content to the NSFW channels. Anime screenshots with ecchi content (not 18+)
+          are allowed in #asian_content, but must be explicitly marked as spoilers and NSFW.
+        rule9: >-
+          Memes should be posted in <#222037538238365696>, but exceptions can be made
+          (e.g. a programming joke or meme in <#277135357739401218>). As always, use common sense.
+        rule10: >-
+          Screenshots and discussions of currently airing anime must be marked as spoilers
+          when necessary (e.g. a picture from episode 5 of a character who “died“ in episode 4).
+      end: >-
+        Violations of these rules usually lead to a warning. Repeat offenders or
+        severe cases might be forced to pick up the soap in our prison or could even
+        be permanently banned. If you are not sure if something is against the rules,
+        you can ask one of the mods.
+      supplement:

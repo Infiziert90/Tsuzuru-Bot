@@ -1,10 +1,11 @@
 import discord
 from config import help_text
-from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL, EX_GER_RULE_CHANNEL, EX_ENG_RULE_CHANNEL, is_admin_command
-from utils import get_file, punish_user, prison_inmates
-from handle_messages import delete_user_message
-from cmd_manager.decorators import register_command, add_argument
+from config.globals import *
 from .role_system import roles
+from handle_messages import delete_user_message
+from cmd_manager.filters import is_admin_command
+from utils import get_file, punish_user, prison_inmates
+from cmd_manager.decorators import register_command, add_argument
 
 
 @register_command('send_message', is_admin=is_admin_command, description='Useless function.')
@@ -34,7 +35,7 @@ async def prison(client, message, args):
 
     await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
 
-    infi = client.get_user(134750562062303232)
+    infi = client.get_user(BOT_AUTHOR)
     await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
                     f"{str(prison_inmates[user.id][0]) + 'min' if args.prison_length > 0 else 'Reset'}\nReason: "
                     f"{args.reason}\nBy: {message.author.name}")
@@ -56,34 +57,35 @@ async def purge_channel(client, message, args):
 async def send_welcome(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel(EX_WELCOME_CHANNEL)
-    await channel.send(content=help_text("bot_bot", "welcome_note"))
-    mes = await channel.send(embed=discord.Embed(description=help_text("bot_bot", "command_overview"), color=333333))
-    for emoji in roles.keys():
-        await mes.add_reaction(emoji)
-    await channel.send(embed=discord.Embed(description=help_text("bot_bot", "help_message"), color=333333))
-    await channel.send(embed=discord.Embed(description=help_text("bot_bot", "member_join"), color=333333))
+    for key, val in help_text("bot_bot", "welcome_set").items():
+        if key == "warning":
+            await channel.send(content=val)
+        else:
+            mes = await channel.send(embed=discord.Embed(description=val, color=333333))
+            if key == "command_overview":
+                for emoji in roles.keys():
+                    await mes.add_reaction(emoji)
 
 
 @register_command('send_rules', is_admin=is_admin_command, description='Send rules.')
 async def send_rules(client, message, args):
     await delete_user_message(message)
-    ger_channel = client.get_channel(EX_GER_RULE_CHANNEL)
-    eng_channel = client.get_channel(EX_ENG_RULE_CHANNEL)
-    rule_set = help_text("bot_bot", "rule_set")
+    for key, val in help_text("bot_bot", "rule_set").items():
+        is_ger = True if key == "ger_ruleset" else False
+        channel = client.get_channel(EX_GER_RULE_CHANNEL) if is_ger else client.get_channel(EX_ENG_RULE_CHANNEL)
 
-    # Build and post the ger guidelines
-    embed = discord.Embed(description=rule_set["ger_description"], color=discord.Color.red())
-    for idx, rule in enumerate(rule_set["rules_ger"].values()):
-        embed.add_field(name=f"Regel {idx+1}", value=rule, inline=False)
-    embed.add_field(name=f"Abschluss", value=rule_set["end_ger"], inline=False)
-    await ger_channel.send(embed=embed)
+        embed = discord.Embed(description=val["description"], color=discord.Color.red())
+        for idx, rule in enumerate(val["rules"].values()):
+            embed.add_field(name=f"{'Regel' if is_ger else 'Rule'} {idx + 1}", value=rule, inline=False)
+        embed.add_field(name=f"{'Abschluss' if is_ger else 'End'}", value=val["end"], inline=False)
+        await channel.send(embed=embed)
 
-    # Build and post the eng guidelines
-    embed = discord.Embed(description=rule_set["eng_description"], color=discord.Color.red())
-    for idx, rule in enumerate(rule_set["rules_eng"].values()):
-        embed.add_field(name=f"Rule {idx+1}", value=rule, inline=False)
-    embed.add_field(name=f"End", value=rule_set["end_eng"], inline=False)
-    await eng_channel.send(embed=embed)
+        try:
+            for name, text in val["supplement"].items():
+                embed = discord.Embed(title=name, description=text, color=discord.Color.red())
+                await channel.send(embed=embed)
+        except AttributeError:
+            pass
 
 
 @register_command('send_yaml', is_admin=is_admin_command, description='Sends the newest help yaml.')

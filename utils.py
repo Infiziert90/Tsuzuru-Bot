@@ -4,10 +4,8 @@ import asyncio
 import random
 import logging
 import datetime
+from config.globals import EX_SERVER
 from handle_messages import private_msg_user, delete_user_message
-
-# TODO: fix loop import with filters.py
-EX_SERVER = 221919789017202688
 
 
 # Exception that you can catch, without the risk other errors not getting through
