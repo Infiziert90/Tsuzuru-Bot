@@ -142,13 +142,21 @@ bot_bot:
       supplement:
         Regeln für Mods bei Entscheidungen: >-
           - Bei potenziellen Änderungen wird nicht-öffentlich im Mod-Channel darüber diskutiert.
+
+
           - Umfangreiche Änderungen (z.B. die Erstellung/Löschung von Channels) am Server bedürfen
           einer öffentlichen Umfrage, deren Ergebnis anschließend von den Mods evaluiert wird. Bei
           Unklarheiten können weitere Umfragen folgen.
+
+
           - Bei geringfügigen Änderungen gibt es zunächst eine interne Mod-Umfrage, sollte diese
           unentschieden ausgehen, folgt auch hier eine öffentliche Umfrage.
+
+
           - Auf Basis der Ergebnisse werden Entscheidungen getroffen und anschließend nach außen
           kommuniziert, inkl. anonymisierter Ergebnisse der internen Umfragen.
+
+
           - Moderationsentscheidungen aufgrund von Regelbrüchen werden intern diskutiert und auf
           Anfrage offengelegt. Alle Regeln, nach denen gehandelt wird, sind öffentlich einsehbar.
     eng_ruleset:
