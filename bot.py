@@ -11,7 +11,7 @@ from cmd_manager import dispatcher
 from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, send_log_message
-from commands.vote_command import add_vote, remove_vote, ongoing_votes, anon_votes
+from commands.vote_command import add_vote, remove_vote, ongoing_votes
 from commands.role_system import roles, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import prison_inmates, check_and_release
@@ -26,9 +26,8 @@ commands.load_commands()
 
 @client.event
 async def on_ready():
-    logging.info(f'Logged in as\nUsername: {client.user.name}\nID: {client.user.id}\nAPI Version: {discord.__version__}')
-    gameplayed = discord.Game(name=config.MAIN.get("gameplayed", "Yuri is Love!"))
-    await client.change_presence(activity=gameplayed)
+    logging.info(f'Logged in as\nUsername: {client.user.name}\nID: {client.user.id}\nAPI: {discord.__version__}')
+    await client.change_presence(activity=discord.Game(name=config.MAIN.get("gameplayed", "Yuri is Love!")))
 
 
 @client.event
@@ -44,8 +43,7 @@ async def on_message_edit(_: discord.Message, message: discord.Message):
 @client.event
 async def on_member_join(mem: discord.Member):
     if mem.guild.id == EX_SERVER:
-        await send_log_message(f"{mem.display_name} has joined the server",
-                               discord.Embed.Empty, mem, discord.Colour.green(), client)
+        await send_log_message(client, mem, f"{mem.display_name} has joined the server")
         channel = client.get_channel(EX_WELCOME_CHANNEL)
         mention = await channel.send(f"<@!{mem.id}>")
         text = help_text("bot_bot", "welcome_set")["member_join"]
@@ -58,20 +56,21 @@ async def on_member_join(mem: discord.Member):
 @client.event
 async def on_member_remove(mem: discord.Member):
     if mem.guild.id == EX_SERVER:
-        await send_log_message(f"{mem.display_name} has left the server",
-                               discord.Embed.Empty, mem, discord.Colour.red(), client)
+        await send_log_message(client, mem, f"{mem.display_name} has left the server", colour=discord.Colour.red())
 
 
 @client.event
 async def on_member_update(before: discord.Member, after: discord.Member):
-    if after.guild.id == EX_SERVER:
-        if before.nick != after.nick:
-            await send_log_message(f"{before.display_name if before.nick is None else before.nick} "
-                                   f"changed their nickname", f"New nickname {after.nick}",
-                                   after, discord.Colour.blue(), client)
-        elif before.name != after.name:
-            await send_log_message(f"{before.name} changed their username", f"New username {after.name}",
-                                   after, discord.Colour.orange(), client)
+    if after.guild.id != EX_SERVER:
+        return
+
+    if before.nick != after.nick:
+        await send_log_message(client, after, f"{before.display_name if before.nick is None else before.nick} "
+                               f"changed their nickname", f"New nickname is {after.nick}",
+                               colour=discord.Colour.blue())
+    elif before.name != after.name:
+        await send_log_message(client, after, f"{before.name} changed their username", f"New username is {after.name}",
+                               colour=discord.Colour.orange())
 
         
 @client.event
@@ -100,12 +99,11 @@ async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
         await handle_vote_reaction(payload, reaction_added=False)
 
 
-async def handle_vote_reaction(payload: discord.RawReactionActionEvent, reaction_added):
-    if payload.message_id in ongoing_votes or payload.message_id in anon_votes:
+async def handle_vote_reaction(payload: discord.RawReactionActionEvent, reaction_added: bool):
+    if payload.message_id in ongoing_votes:
         user = client.get_user(payload.user_id)
         channel = client.get_guild(payload.guild_id).get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        vote_dict = ongoing_votes if message.id in ongoing_votes else anon_votes
 
         # prevent triggering the vote system for all non bot used emoji
         for reaction in message.reactions:
@@ -116,9 +114,9 @@ async def handle_vote_reaction(payload: discord.RawReactionActionEvent, reaction
             return
 
         if reaction_added:
-            await add_vote(used_reaction, message, user, vote_dict)
-        elif payload.message_id not in anon_votes:
-            await remove_vote(used_reaction, message, user, vote_dict)
+            await add_vote(used_reaction, message, user)
+        elif not ongoing_votes[payload.message_id]["anon"]:
+            await remove_vote(used_reaction, message, user)
 
 
 async def handle_commands(message: discord.Message):
@@ -129,15 +127,17 @@ async def handle_commands(message: discord.Message):
     if message.author.id in prison_inmates:
         return
 
-    if not is_guild and message.content[:11] != ">>getnative":
-        return await message.author.send("Forbidden, sorry")
-
     if is_guild and message.guild.id == EX_SERVER:
         if message.channel.id == EX_WELCOME_CHANNEL:
             await delete_user_message(message)  # no return here
 
+    # prevent forwarding '>>' messages
     if not message.content.startswith(">>") or len(message.content) == 2:  # prevent forwarding '>>' messages
         return
+
+    arg_string = message.clean_content[2:]
+    if not is_guild and arg_string.split(" ")[0] not in ["getnative", "getscaler", "grain", "help"]:
+        return await message.author.send("This command is not allowed in private chat, sorry.")
 
     if is_guild:
         today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
@@ -145,8 +145,7 @@ async def handle_commands(message: discord.Message):
                      f"Channel: {message.channel.name} Command: {message.content[:50]}")
 
     try:
-        arg_string = message.clean_content[2:]
-        arg_string = shlex.split(message.clean_content[2:])
+        arg_string = shlex.split(arg_string)
         args = parser.parse_args(arg_string)
     except ValueError as err:
         return await private_msg_code(message, str(err))
