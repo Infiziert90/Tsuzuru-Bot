@@ -2,7 +2,7 @@ from utils import HelperException
 try:
     import vapoursynth
 except ImportError:
-    raise HelperException("Vapoursynth is not available, stop importing all commands that need vapoursynth.")
+    raise HelperException("VapourSynth is not available, stop importing all commands that need vapoursynth.")
 
 import gc
 import os
