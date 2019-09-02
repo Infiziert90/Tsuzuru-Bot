@@ -25,10 +25,10 @@ async def avisynth(client, message, args):
     await message.channel.send(embed=em)
 
 
-@register_command('vs', description='Post help links for Vapoursynth')
+@register_command('vs', description='Post help links for VapourSynth')
 async def vapoursynth(client, message, args):
     await delete_user_message(message)
-    em = discord.Embed(title="You need Help for Vapoursynth?", description=help_text("bot_bot", "vs_links"))
+    em = discord.Embed(title="You need help for VapourSynth?", description=help_text("bot_bot", "vs_links"))
     await message.channel.send(embed=em)
 
 

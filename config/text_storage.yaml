@@ -9,13 +9,16 @@ bot_bot:
     Links:
     http://www.vapoursynth.com/doc/
     https://kageru.moe/blog/encode/
-    https://guide.encode.moe
+    https://guide.encode.moe/encoding/preparation.html#the-frameserver
     https://iamscum.wordpress.com/other-useful-stuff/encode-pack/
+    http://vsdb.top/
+    https://learnxinyminutes.com/docs/python3/
   yuuno_links: |
     Ask <#224104675031384065> or <@147060397881425920>
     Links:
     https://pypi.python.org/pypi/yuuno
     https://github.com/stuxcrystal/yuuno
+    https://yuuno.encode.moe/ipython/installation.html
     https://myanimelist.net/character/32939/Arashiko_Yuuno
   x264_links: |
     Ask <#224104675031384065> or <@109355116917743616>
@@ -24,7 +27,7 @@ bot_bot:
     https://en.wikibooks.org/wiki/MeGUI/x264_Settings
     http://x264.janhum.alfahosting.org/fullhelp.txt
     https://kageru.moe/blog/encode/
-    https://guide.encode.moe
+    https://guide.encode.moe/encoding/preparation.html#video-codecs
   ffmpeg_links: |
     Ask <#224104675031384065> or <@206853964405145600>
     Links:

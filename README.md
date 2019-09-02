@@ -29,7 +29,7 @@ However running this repository requires the above listed requirements.
 
 To run this function you will need:
 
-* Vapoursynth
+* [VapourSynth](https://github.com/vapoursynth/vapoursynth/releases)
 * [Descale](https://github.com/BluBb-mADe/vapoursynth-descale)
 
   
