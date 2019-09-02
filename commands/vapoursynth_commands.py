@@ -1,8 +1,12 @@
+import logging
 from utils import HelperException
 try:
     import vapoursynth
 except ImportError:
-    raise HelperException("VapourSynth is not available, stop importing all commands that need vapoursynth.")
+    raise HelperException("VapourSynth is not available for the bot, stop importing commands that need vapoursynth.")
+except Exception as err:
+    logging.warning(err)
+    raise HelperException("VapourSynth is broken, stop importing commands that need vapoursynth.")
 
 import gc
 import os
@@ -10,7 +14,6 @@ import argparse
 import random
 import tempfile
 import asyncio
-import logging
 import discord
 import matplotlib
 matplotlib.use('Agg')
