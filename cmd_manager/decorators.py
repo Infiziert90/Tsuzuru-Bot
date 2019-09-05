@@ -26,6 +26,8 @@ def add_argument(*args, **kwargs):
         if not hasattr(func, "_cmd_args"):
             func._cmd_args = []
 
+        if kwargs.get("default", None) is not None:
+            kwargs["help"] += "(default: %(default)s)"
         func._cmd_args.insert(0, (args, kwargs))
         return func
 
