@@ -81,6 +81,7 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         prison_length = random.randint(30, 230)
 
     timestamp = datetime.datetime.utcnow()
+    prison_time = timestamp + datetime.timedelta(minutes=prison_length)
     user = user or message.author
     if user.id in prison_inmates:
         if prison_length == 0:
@@ -88,18 +89,31 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         else:
             prison_inmates[user.id][0] += datetime.timedelta(minutes=prison_length)
     else:
-        prison_inmates[user.id] = [timestamp + datetime.timedelta(minutes=prison_length)]
+        prison_inmates[user.id] = [prison_time]
         prison_inmates[user.id].append([role.id for role in user.roles[1:]])
         await user.edit(roles=[role for role in user.roles[1:] if role.managed], reason="Ultimate Prison")
         prison_role = get_role_by_id(message.guild, 451076667377582110)
         await user.add_roles(prison_role)
 
-    time_string = prison_inmates[user.id][0].strftime('%H:%M:%S %Y-%m-%d')
-    await send_mod_channel_message(client, f"Username: {user.name}\nNew Time: {prison_length}min\nUntil: "
-                                   f"{time_string + ' UTC' if prison_length > 0 else 'Reset'}"
-                                   f"\nReason: {reason}\nBy: {message.author.name}")
-    await private_msg_user(message, f"{'Prison is now active' if not user.id in prison_inmates else 'time in changed:'}"
-                                    f"\nUntil: {time_string} UTC\nReason: {reason}", user)
+    prison_time_str = prison_inmates[user.id][0].strftime('%H:%M %a-%b')
+    server_time_str = timestamp.strftime('%H:%M %a-%b')
+    await send_mod_channel_message(
+           client,
+           f"Username: {user.name}"
+           f"\nNew Time: {prison_length}min"
+           f"\nUntil: {prison_time_str if prison_length > 0 else 'Reset'}"
+           f"\nReason: {reason}"
+           f"\nBy: {message.author.name}"
+           f"\n\nServer Time: {server_time_str}"
+       )
+    await private_msg_user(
+           message,
+           f"{'Prison is now active' if prison_time == prison_inmates[user.id][0] else 'New release time:'}"
+           f"\nUntil: {prison_time_str}"
+           f"\nReason: {reason}"
+           f"\n\nServer Time: {server_time_str}",
+           user
+    )
 
 
 async def send_mod_channel_message(client, message):

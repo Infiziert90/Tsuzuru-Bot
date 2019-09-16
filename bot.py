@@ -165,7 +165,7 @@ def main():
         try:
             logging.info("Start discord run")
             # start the prison release task
-            asyncio.ensure_future(check_and_release(client))
+            loop.create_task(check_and_release(client))
             # bot-Bot
             client.run(config.MAIN.login_token)
             # Test-Bot
@@ -173,7 +173,7 @@ def main():
         except aiohttp.ClientConnectorError:
             continue
         except KeyboardInterrupt:
-            return loop.close()
+            return
 
 
 if __name__ == "__main__":
