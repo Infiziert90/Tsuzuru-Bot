@@ -95,8 +95,8 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         prison_role = get_role_by_id(message.guild, 451076667377582110)
         await user.add_roles(prison_role)
 
-    prison_time_str = prison_inmates[user.id][0].strftime('%H:%M %a-%b')
-    server_time_str = timestamp.strftime('%H:%M %a-%b')
+    prison_time_str = prison_inmates[user.id][0].strftime('%H:%M %a %d %b')
+    server_time_str = timestamp.strftime('%H:%M %a %d %b')
     await send_mod_channel_message(
            client,
            f"Username: {user.name}"

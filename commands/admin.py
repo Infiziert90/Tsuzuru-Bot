@@ -29,7 +29,10 @@ async def prison(client, message, args):
         return await message.channel.send(f"Empty username is not allowed!")
 
     server = client.get_guild(EX_SERVER)
-    user = server.get_member_named(args.user.replace("@", "")) or server.get_member(int(args.user))
+    try:
+        user = server.get_member_named(args.user.replace("@", "")) or server.get_member(int(args.user))
+    except ValueError:
+        return await message.channel.send("User not found, probably is the #XXXX identifier not given.")
     if not user:
         return await message.channel.send("User not found!")
 
