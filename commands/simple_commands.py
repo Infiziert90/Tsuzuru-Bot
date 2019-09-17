@@ -1,6 +1,6 @@
 import discord
 from config import help_text
-from cmd_manager.bot_args import parser
+from cmd_manager.bot_args import build_custom_help
 from handle_messages import delete_user_message, private_msg_code
 from cmd_manager.decorators import register_command, add_argument
 
@@ -8,45 +8,49 @@ from cmd_manager.decorators import register_command, add_argument
 @register_command('help', description='Post the help message.')
 async def help_str(client, message, args):
     await delete_user_message(message)
-    await private_msg_code(message, parser.format_help())
+
+    help_string = build_custom_help()
+    # TODO split in better positions
+    for val in [help_string[i:i + 1900] for i in range(0, len(help_string), 1900)]:
+        await private_msg_code(message, val)
 
 
-@register_command('x264', description='Post help links for x264')
+@register_command('x264', description='[Link] Helpful links for x264')
 async def x264(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for x264?", description=help_text("bot_bot", "x264_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('avi', description='Post help links for Avisynth')
+@register_command('avi', description='[Link] Helpful links for Avisynth')
 async def avisynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Avisynth?", description=help_text("bot_bot", "avs_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('vs', description='Post help links for VapourSynth')
+@register_command('vs', description='[Link] Helpful links for VapourSynth')
 async def vapoursynth(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for VapourSynth?", description=help_text("bot_bot", "vs_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('yuuno', description='Post help links for Yuuno')
+@register_command('yuuno', description='[Link] Helpful links for Yuuno')
 async def yuuno(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Yuuno?", description=help_text("bot_bot", "yuuno_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('ffmpeg', description='Post help links for ffmpeg')
+@register_command('ffmpeg', description='[Link] Helpful links for ffmpeg')
 async def ffmpeg(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="ffmpeg?", description=help_text("bot_bot", "ffmpeg_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('getn', description='Post help links for getnative')
+@register_command('getn', description='[Link] Helpful links for getnative')
 async def getn(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for getnative?", description=help_text("bot_bot", "getnative_links"))

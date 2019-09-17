@@ -3,10 +3,10 @@ from utils import HelperException
 try:
     import vapoursynth
 except ImportError:
-    raise HelperException("VapourSynth is not available for the bot, stop importing commands that need vapoursynth.")
+    raise HelperException("VapourSynth is not available for the bot, dropping VapourSynth commands.")
 except Exception as e:
     logging.warning(e)
-    raise HelperException("VapourSynth is broken, stop importing commands that need vapoursynth.")
+    raise HelperException("VapourSynth is broken, dropping VapourSynth commands.")
 
 import gc
 import os
@@ -42,7 +42,11 @@ def get_upscaler(kernel=None, b=None, c=None, taps=None):
 
 
 def get_descaler(kernel=None, b=None, c=None, taps=None):
-    descale = getattr(core.descale, 'De' + kernel)
+    descale = getattr(core, "descale_getnative", None)
+    if descale is None:
+        logging.warning("Only the slow descale is installed or you did not change the namespace.")
+        descale = getattr(core, "descale")
+    descale = getattr(descale, 'De' + kernel)
     if kernel == 'bicubic':
         descale = partial(descale, b=b, c=c)
     elif kernel == 'lanczos':

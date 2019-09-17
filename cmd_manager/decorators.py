@@ -4,6 +4,12 @@ from .bot_args import subparsers
 
 def register_command(name, is_enabled=None, is_admin=None, **kwargs):
     def decorator(func):
+        if "description" not in kwargs:
+            raise RuntimeError(f"Missing description for bot command: {name}")
+
+        if is_admin is not None:
+            kwargs["description"] = f"[Admin] {kwargs['description']}"
+
         # TODO check if formatter_class needs to be provided here
         parser = subparsers.add_parser(name, **kwargs)
         if hasattr(func, "_cmd_args"):

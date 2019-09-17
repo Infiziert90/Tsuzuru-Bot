@@ -1,4 +1,5 @@
 import argparse
+import discord
 
 
 class HelpException(Exception):
@@ -26,6 +27,38 @@ class BotArgParse(argparse.ArgumentParser):
 
     def error(self, message=None):
         raise UnkownCommandException(f'Error: {message}')
+
+
+def build_custom_help():
+    help_string = "Usage: >>COMMAND [ARGS]\n"
+
+    # https://stackoverflow.com/questions/20094215/argparse-subparser-monolithic-help-output
+    subparsers_actions = [
+        action for action in parser._actions
+        if isinstance(action, argparse._SubParsersAction)]
+    # there will probably only be one subparser_action,
+    # but better save than sorry
+    categories = {
+        "normal": ["\nnormal commands:"],
+        "admin": ["\nadmin commands (yields punishment for non-privileged user):"],
+        "link": ["\npost links for:"],
+        "image": ["\npost image:"],
+    }
+    admin_commands = []
+    for subparsers_action in subparsers_actions:
+        # get all subparsers and print help
+        for dest, choice in subparsers_action.choices.items():
+            if choice.description.startswith("[Admin]"):
+                categories["admin"].append(f"    {dest:<19} {choice.description[8:]}")
+            elif choice.description.startswith("[Image]"):
+                categories["image"].append(f"    {dest}")
+            elif choice.description.startswith("[Link]"):
+                categories["link"].append(f"    {dest}")
+            else:
+                categories["normal"].append(f"    {dest:<19} {choice.description}")
+
+    help_string += '\n'.join([command for commands in categories.values() for command in commands])
+    return help_string
 
 
 parser = BotArgParse(prog=">>", usage=">>", formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -6,7 +6,7 @@ from cmd_manager.decorators import register_command, add_argument
 reg = re.compile(r"<:(\w+):(\d+)>")
 
 
-@register_command('memefont', description='Converts your text into emojis')
+@register_command('memefont', description='Converts your text into emoji characters')
 @add_argument('text', help='Text too convert.')
 async def memefont(client, message, args):
     await delete_user_message(message)
@@ -42,6 +42,6 @@ async def memefont(client, message, args):
             emoji_text += "  "
 
     if len(emoji_text) > 1950:
-        await message.channel.send(f"From: {message.author.display_name}\n{emoji_text[:1950]} .........truncated")
+        await message.channel.send(f"From: {message.author.name}\n{emoji_text[:1950]} .........truncated")
     else:
-        await message.channel.send(f"From: {message.author.display_name}\n{emoji_text}")
+        await message.channel.send(f"From: {message.author.name}\n{emoji_text}")

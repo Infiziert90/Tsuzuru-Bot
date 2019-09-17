@@ -174,7 +174,8 @@ def main():
             continue
         except KeyboardInterrupt:
             return
-        except (InterruptedError, Exception):
+        except (InterruptedError, Exception) as err:
+            logging.warning(err)
             return
 
 
