@@ -48,7 +48,7 @@ async def vote(_, message, args):
     for number in range(len(args.options)):
         await ongoing_votes[mes.id]["message"].add_reaction(num2emo[number])
 
-    await run_vote(args.time, mes.id, ongoing_votes, args.lang)
+    await run_vote(args.time, mes.id, args.lang)
 
 
 @register_command('anon_vote', description='Post an anonymous poll.')
@@ -102,14 +102,14 @@ async def check_message(message, args):
     return False
 
 
-async def get_message(mes_id, votes):
+async def get_message(mes_id):
     try:
-        votes[mes_id]["message"] = await votes[mes_id]["message"].channel.fetch_message(mes_id)
+        ongoing_votes[mes_id]["message"] = await ongoing_votes[mes_id]["message"].channel.fetch_message(mes_id)
     except (discord.NotFound, discord.Forbidden):
         raise MessageDeletedException()  # raise error and delete the vote in the original function
     except (aiohttp.ClientConnectorError, discord.HTTPException):
         await asyncio.sleep(3)
-        await get_message(mes_id, votes)
+        await get_message(mes_id)
 
 
 async def run_vote(time, mes_id, lang):
