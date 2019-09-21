@@ -55,13 +55,3 @@ async def getn(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for getnative?", description=help_text("bot_bot", "getnative_links"))
     await message.channel.send(embed=em)
-
-
-@register_command('__lolz', description='Useless function.')
-@add_argument('server_id', type=int, help='Server id')
-async def lolz(client, message, args):
-    server = client.get_guild(args.server_id)
-    roles = repr(tuple((role.name, role.id) for role in server.roles)).replace("@everyone", "everyone")
-    roles = [roles[i:i+1900] for i in range(0, len(roles), 1900)]
-    for x in roles:
-        await message.channel.send(x)

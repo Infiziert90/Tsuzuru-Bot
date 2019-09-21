@@ -116,3 +116,13 @@ async def replace_yaml(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
     embed.add_field(name="User in prison", value=prison_inmates)
     await message.channel.send(embed=embed)
+
+
+@register_command('__lolz', is_admin=is_admin_command, description='Useless function.')
+@add_argument('server_id', type=int, help='Server id')
+async def lolz(client, message, args):
+    server = client.get_guild(args.server_id)
+    roles = repr(tuple((role.name, role.id) for role in server.roles)).replace("@everyone", "everyone")
+    roles = [roles[i:i+1900] for i in range(0, len(roles), 1900)]
+    for x in roles:
+        await message.channel.send(x)

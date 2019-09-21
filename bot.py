@@ -11,7 +11,7 @@ from cmd_manager import dispatcher
 from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, send_log_message
-from commands.vote_command import add_vote, remove_vote, ongoing_votes
+from commands.vote_command import ongoing_votes, Vote
 from commands.role_system import roles, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import prison_inmates, check_and_release
@@ -105,18 +105,15 @@ async def handle_vote_reaction(payload: discord.RawReactionActionEvent, reaction
         channel = client.get_guild(payload.guild_id).get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
 
-        # prevent triggering the vote system for all non bot used emoji
+        # prevent triggering the vote system for all emoji not used from the bot
         for reaction in message.reactions:
             if reaction.me and reaction.emoji == payload.emoji.name:
-                used_reaction = reaction
+                reaction_used = reaction
                 break
         else:
             return
 
-        if reaction_added:
-            await add_vote(used_reaction, message, user)
-        elif not ongoing_votes[payload.message_id]["anon"]:
-            await remove_vote(used_reaction, message, user)
+        await ongoing_votes[payload.message_id].store_vote(Vote(user, reaction_used, added=reaction_added))
 
 
 async def handle_commands(message: discord.Message):
