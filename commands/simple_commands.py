@@ -1,3 +1,4 @@
+import random
 import discord
 from config import help_text
 from cmd_manager.bot_args import build_custom_help
@@ -13,6 +14,21 @@ async def help_str(client, message, args):
     # TODO split in better positions
     for val in [help_string[i:i + 1900] for i in range(0, len(help_string), 1900)]:
         await private_msg_code(message, val)
+
+
+NAMES = [
+    "Satan", "God", "Myself", "yuri", "GNU/Linux", "a brigher future", "hopelessness",
+    "weeabooism",
+]
+
+
+@register_command(description='Select one of the given choices.')
+@add_argument('choices', nargs='+')
+async def choose(client, message, args):
+    choice = random.choice(args.choices)
+    name = random.choice(NAMES + [message.author.name])
+
+    await message.channel.send(f"In the name of {name} I choose: {choice}")
 
 
 @register_command('x264', description='[Link] Helpful links for x264')
