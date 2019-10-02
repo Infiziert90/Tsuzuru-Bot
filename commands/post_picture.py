@@ -10,10 +10,10 @@ spam_path = Path(spam_folder)
 
 if spam_folder and spam_path.is_dir():
 
-    async def image_handler(_, message, args, *, file):
+    async def image_handler(_, message, args, *, path):
         await delete_user_message(message)
-        await message.channel.send(file=file, content=f"From: {message.author.name}")
+        await message.channel.send(file=File(path), content=f"From: {message.author.name}")
 
     for img_path in spam_path.iterdir():
-        callback = partial(image_handler, file=File(img_path))
+        callback = partial(image_handler, path=img_path)
         register_command(img_path.stem, description="[Image]")(callback)
