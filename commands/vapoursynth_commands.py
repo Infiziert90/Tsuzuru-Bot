@@ -212,14 +212,14 @@ class Getscaler:
         try:
             txt_output = "\n".join(f"{scaler_name:{longest_key}}  "
                                    f"{0 if best_result[1] == 0.0 else value / best_result[1]:7.1%}  "
-                                   f"{value:.10f}" for scaler_name, value in sorted_results)
+                                   f"{value:.3e}" for scaler_name, value in sorted_results)
         except ZeroDivisionError:
             txt_output = "Broken Ouput!" + "\n".join(f"{scaler_name:{longest_key}}  {best_result[1]:7.1%}"
-                                                     f"  {value:.10f}" for scaler_name, value in sorted_results)
+                                                     f"  {value:.3e}" for scaler_name, value in sorted_results)
 
         self.save_images(src, self.native_height, scaler_dict.get(best_result[0]), ar)
         end_text = f"Testing scalers for native height: {self.native_height}\n```{txt_output}```\n" \
-                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.10f})"
+                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.3e})"
 
         return end_text
 
