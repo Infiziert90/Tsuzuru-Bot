@@ -112,7 +112,7 @@ async def replace_yaml(client, message, args):
 
 
 @register_command('output_internals', is_admin=is_admin_command, description='Send internal stats')
-async def replace_yaml(client, message, args):
+async def output_internals(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
     embed.add_field(name="User in prison", value=prison_inmates)
     await message.channel.send(embed=embed)
