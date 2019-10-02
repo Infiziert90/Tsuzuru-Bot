@@ -6,6 +6,7 @@ import logging
 import datetime
 from config.globals import EX_SERVER
 from handle_messages import private_msg_user, delete_user_message
+import storage
 
 
 # Exception that you can catch, without the risk other errors not getting through
@@ -17,7 +18,10 @@ class HelperException(Exception):
         return self.message
 
 
-prison_inmates = {}
+# Call storage.save() when modifying this!
+# {user_id: [timestamp, [roleid, …]}
+prison_inmates = storage.storage.setdefault('prison_inmates', {})
+
 user_cooldown = set()
 
 
@@ -52,6 +56,7 @@ async def check_and_release(client):
             for user_id, prison_array in prison_inmates.copy().items():
                 if datetime.datetime.utcnow() >= prison_array[0]:
                     prison_inmates.pop(user_id)
+                    logging.info("Removing prison for %d", user_id)
                     guild = client.get_guild(EX_SERVER)
                     member = guild.get_member(user_id)
                     prison_role = get_role_by_id(guild, 451076667377582110)
@@ -71,6 +76,8 @@ async def check_and_release(client):
             return
         except Exception as err:
             logging.error(f"Something in check_and_release went horrible wrong: {err}")
+        finally:
+            storage.save()
 
 
 async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
@@ -94,6 +101,8 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         await user.edit(roles=[role for role in user.roles[1:] if role.managed], reason="Ultimate Prison")
         prison_role = get_role_by_id(message.guild, 451076667377582110)
         await user.add_roles(prison_role)
+
+    storage.save()
 
     prison_time_str = prison_inmates[user.id][0].strftime('%H:%M %a %d %b')
     server_time_str = timestamp.strftime('%H:%M %a %d %b')
