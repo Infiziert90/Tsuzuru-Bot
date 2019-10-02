@@ -56,7 +56,7 @@ async def check_and_release(client):
             for user_id, prison_array in prison_inmates.copy().items():
                 if datetime.datetime.utcnow() >= prison_array[0]:
                     prison_inmates.pop(user_id)
-                    logging.info("Removing prison for %d", user_id)
+                    logging.info(f"Removing prison for {user_id}")
                     guild = client.get_guild(EX_SERVER)
                     member = guild.get_member(user_id)
                     prison_role = get_role_by_id(guild, 451076667377582110)

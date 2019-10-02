@@ -18,7 +18,8 @@ async def help_str(client, message, args):
 
 NAMES = [
     "Satan", "God", "Myself", "yuri", "GNU/Linux", "a brigher future", "hopelessness",
-    "weeabooism",
+    "weeabooism", "Tatsuya", "eXmendiC (F*****T)", "Infi", "pipapo", "proprietary",
+    "Arch", "trash"
 ]
 
 
