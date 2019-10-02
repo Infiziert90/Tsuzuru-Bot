@@ -6,7 +6,7 @@ from cmd_manager.decorators import register_command, add_argument
 reg = re.compile(r"<:(\w+):(\d+)>")
 
 
-@register_command('memefont', description='Converts your text into emoji characters')
+@register_command(description='Converts your text into emoji characters')
 @add_argument('text', help='Text too convert.')
 async def memefont(client, message, args):
     await delete_user_message(message)

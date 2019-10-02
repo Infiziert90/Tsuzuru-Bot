@@ -324,7 +324,7 @@ async def cleanup(cls):
     cls.tmp_dir.cleanup()
 
 
-@register_command('getnative', description='Find the native resolution(s) of upscaled material')
+@register_command(description='Find the native resolution(s) of upscaled material')
 @add_argument('--min-height', '-min', dest="min_h", type=int, default=500, help='Min height to consider')
 @add_argument('--max-height', '-max', dest="max_h", type=int, default=1000, help='Max height to consider [max 1080]')
 @add_argument('--kernel', '-k', dest='kernel', type=str.lower, default="bicubic", help='Resize kernel to be used')
@@ -382,7 +382,7 @@ async def getnative(client, message, args):
     await cleanup(getn)
 
 
-@register_command('getscaler', description='Find the best inverse scaler (mostly anime)')
+@register_command(description='Find the best inverse scaler (mostly anime)')
 @add_argument("--native_height", "-nh", dest="native_height", type=int, default=720, help="Approximated native height.")
 async def getscaler(client, message, args):
     if not await check_message(message):
@@ -411,7 +411,7 @@ async def getscaler(client, message, args):
     await cleanup(gets)
 
 
-@register_command('grain', description='Grain.')
+@register_command(description='Grain.')
 async def grain(client, message, args):
     if not await check_message(message):
         return

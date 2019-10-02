@@ -19,7 +19,7 @@ class MessageDeletedException(Exception):
         return "Message deleted!"
 
 
-@register_command('cancel_vote', description='Cancel your vote')
+@register_command(description='Cancel your vote')
 @add_argument('message_id', type=int, help='Message id from the bot message')
 async def cancel_vote(_, message, args):
     await delete_user_message(message)
@@ -39,7 +39,7 @@ async def normal_vote(_, message, args):
     return await create_vote(message, args, anon=False)
 
 
-@register_command('anon_vote', description='Post an anonymous poll.')
+@register_command(description='Post an anonymous poll.')
 @add_argument('topic', help='Question')
 @add_argument('--time', '-t', type=int, default=60, help='Time [in Minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')

@@ -4,7 +4,7 @@ from cmd_manager.decorators import register_command, add_argument
 from cmd_manager.filters import is_ex_fan_release_channel
 
 
-@register_command('post_fansub', is_enabled=is_ex_fan_release_channel, description='Post your release in #release_fansubs.')
+@register_command(is_enabled=is_ex_fan_release_channel, description='Post your release in #release_fansubs.')
 @add_argument('name', help='Your group + anime name.')
 @add_argument('episode', help='Episode number + name')
 @add_argument('--link', '-l', dest='links', nargs=2, required=True, action='append', help='Links.', metavar=("Name", "Link"))
