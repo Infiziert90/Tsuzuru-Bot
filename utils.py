@@ -72,7 +72,7 @@ async def check_and_release(client):
                     except KeyError:
                         return logging.error(f"KeyError for member: {member}")
         except asyncio.CancelledError:
-            logging.info("Stopping task")
+            logging.info("Stopping prison task")
             return
         except Exception as err:
             logging.error(f"Something in check_and_release went horrible wrong: {err}")

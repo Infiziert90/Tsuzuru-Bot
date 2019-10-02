@@ -1,17 +1,19 @@
-import os
+from pathlib import Path
+from functools import partial
 from discord import File
 from config import config
 from handle_messages import delete_user_message
 from cmd_manager.decorators import register_command
 
 spam_folder = config.PICTURE.spam
+spam_path = Path(spam_folder)
 
-# Spam images
-for file in os.listdir(spam_folder):
-    fn = os.path.splitext(file)[0]
-    @register_command(fn, description="[Image]")
-    async def image_helper(_, message, args):
+if spam_folder and spam_path.is_dir():
+
+    async def image_handler(_, message, args, *, file):
         await delete_user_message(message)
+        await message.channel.send(file=file, content=f"From: {message.author.name}")
 
-        f_name = filter(lambda f: f.startswith(args.command), os.listdir(spam_folder)).__next__()
-        await message.channel.send(file=File(f"{spam_folder}{f_name}"), content=f"From: {message.author.name}")
+    for img_path in spam_path.iterdir():
+        callback = partial(image_handler, file=File(img_path))
+        register_command(img_path.stem, description="[Image]")(callback)

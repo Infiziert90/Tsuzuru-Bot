@@ -40,7 +40,7 @@ def lookup_merriam(query):
     return defs
 
 
-@register_command('ddg', description='Search a keyword with duckduckgo')
+@register_command(description='Search a keyword with duckduckgo')
 @add_argument('query', help='Your search query. Can use bangs, e.g. `!unicode EXCLAMATION MARK`.')
 async def ddg(client, message, args):
     # https://github.com/strinking/python-duckduckgo
@@ -82,7 +82,7 @@ async def ddg(client, message, args):
     await message.channel.send(embed=embed)
 
 
-@register_command('jisho', description='Translate a keyword with jisho.')
+@register_command(description='Translate a keyword with jisho.')
 @add_argument('keyword', help='Keyword for translation.')
 async def jisho(client, message, args):
     result_list = await lookup_jisho(args.keyword)
@@ -106,7 +106,7 @@ async def jisho(client, message, args):
     await message.channel.send(embed=embed)
 
 
-@register_command('define', description='Define a word with merriam.')
+@register_command(description='Define a word with merriam.')
 @add_argument('keyword', help='Keyword for defination.')
 @add_argument('--type', '-t', help="Only show definitions for this word type.")
 async def merriam(client, message, args):
@@ -132,7 +132,7 @@ async def merriam(client, message, args):
     await message.channel.send(embed=embed)
 
 
-@register_command('dict', description='Dict will show you translation for your input/output language.')
+@register_command('dict', description='Translate a word/term using dict.cc.')
 @add_argument('keyword', help="Keyword for translation.")
 @add_argument('--in-lang', '-i', default="de", choices=AVAILABLE_LANGUAGES.keys(), help='Input language.')
 @add_argument('--out-lang', '-o', default="en", choices=AVAILABLE_LANGUAGES.keys(), help="Output language.")

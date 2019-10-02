@@ -212,14 +212,14 @@ class Getscaler:
         try:
             txt_output = "\n".join(f"{scaler_name:{longest_key}}  "
                                    f"{0 if best_result[1] == 0.0 else value / best_result[1]:7.1%}  "
-                                   f"{value:.10f}" for scaler_name, value in sorted_results)
+                                   f"{value:.3e}" for scaler_name, value in sorted_results)
         except ZeroDivisionError:
             txt_output = "Broken Ouput!" + "\n".join(f"{scaler_name:{longest_key}}  {best_result[1]:7.1%}"
-                                                     f"  {value:.10f}" for scaler_name, value in sorted_results)
+                                                     f"  {value:.3e}" for scaler_name, value in sorted_results)
 
         self.save_images(src, self.native_height, scaler_dict.get(best_result[0]), ar)
         end_text = f"Testing scalers for native height: {self.native_height}\n```{txt_output}```\n" \
-                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.10f})"
+                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.3e})"
 
         return end_text
 
@@ -267,7 +267,7 @@ async def set_cooldown_and_get_image(self):
 
     image = await get_file(self.img_url, self.path, self.filename)
     if image is None:
-        raise BaseException("Can't load image. Pls try it again later.")
+        raise BaseException("Can't load image. Please try it again later.")
 
     return imwri.Read(image, float_output=True)
 
@@ -324,7 +324,7 @@ async def cleanup(cls):
     cls.tmp_dir.cleanup()
 
 
-@register_command('getnative', description='Find the native resolution(s) of upscaled material')
+@register_command(description='Find the native resolution(s) of upscaled material')
 @add_argument('--min-height', '-min', dest="min_h", type=int, default=500, help='Min height to consider')
 @add_argument('--max-height', '-max', dest="max_h", type=int, default=1000, help='Max height to consider [max 1080]')
 @add_argument('--kernel', '-k', dest='kernel', type=str.lower, default="bicubic", help='Resize kernel to be used')
@@ -337,11 +337,11 @@ async def getnative(client, message, args):
 
     if message.author.id in Getnative.user_cooldown:
         await delete_user_message(message)
-        return await private_msg(message, "Cooldown active, pls try again in two minutes.")
+        return await private_msg(message, "Cooldown active. Try again in two minutes.")
     elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
-        return await private_msg(message, f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
+        return await private_msg(message, f"Don't use lossy formats. Lossy formats are:\n{', '.join(lossy)}")
     elif args.min_h >= message.attachments[0].height:
-        return await private_msg(message, f"Picture is to small with {args.min_h} min height.")
+        return await private_msg(message, f"Picture is to small for {args.min_h} min height.")
     elif args.min_h >= args.max_h:
         return await private_msg(message, f"Your min height is bigger or equal to max height.")
     elif args.max_h - args.min_h > 1000:
@@ -382,7 +382,7 @@ async def getnative(client, message, args):
     await cleanup(getn)
 
 
-@register_command('getscaler', description='Find the best inverse scaler (mostly anime)')
+@register_command(description='Find the best inverse scaler (mostly anime)')
 @add_argument("--native_height", "-nh", dest="native_height", type=int, default=720, help="Approximated native height.")
 async def getscaler(client, message, args):
     if not await check_message(message):
@@ -411,14 +411,14 @@ async def getscaler(client, message, args):
     await cleanup(gets)
 
 
-@register_command('grain', description='Grain.')
+@register_command(description='Grain.')
 async def grain(client, message, args):
     if not await check_message(message):
         return
 
     if message.author.id in Grain.user_cooldown:
         await delete_user_message(message)
-        return await private_msg(message, "Pls use this command only every 2min.")
+        return await private_msg(message, "Please only use this command once every 2 minutes.")
 
     delete_message = await message.channel.send(file=File(config.PICTURE.spam + "tenor_loading.gif"))
 

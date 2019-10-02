@@ -6,7 +6,7 @@ from handle_messages import delete_user_message, private_msg_code
 from cmd_manager.decorators import register_command, add_argument
 
 
-@register_command('help', description='Post the help message.')
+@register_command('help', description='Show this help message.')
 async def help_str(client, message, args):
     await delete_user_message(message)
 
@@ -31,7 +31,7 @@ async def choose(client, message, args):
     await message.channel.send(f"In the name of {name} I choose: {choice}")
 
 
-@register_command('x264', description='[Link] Helpful links for x264')
+@register_command(description='[Link] Helpful links for x264')
 async def x264(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for x264?", description=help_text("bot_bot", "x264_links"))
@@ -52,21 +52,21 @@ async def vapoursynth(client, message, args):
     await message.channel.send(embed=em)
 
 
-@register_command('yuuno', description='[Link] Helpful links for Yuuno')
+@register_command(description='[Link] Helpful links for Yuuno')
 async def yuuno(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for Yuuno?", description=help_text("bot_bot", "yuuno_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('ffmpeg', description='[Link] Helpful links for ffmpeg')
+@register_command(description='[Link] Helpful links for ffmpeg')
 async def ffmpeg(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="ffmpeg?", description=help_text("bot_bot", "ffmpeg_links"))
     await message.channel.send(embed=em)
 
 
-@register_command('getn', description='[Link] Helpful links for getnative')
+@register_command(description='[Link] Helpful links for getnative')
 async def getn(client, message, args):
     await delete_user_message(message)
     em = discord.Embed(title="You need help for getnative?", description=help_text("bot_bot", "getnative_links"))

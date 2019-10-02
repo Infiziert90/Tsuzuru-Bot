@@ -159,10 +159,10 @@ async def handle_commands(message: discord.Message):
 
 def main():
     while True:
+        # start the prison release task
+        loop.create_task(check_and_release(client))
+        logging.info("Start discord run")
         try:
-            logging.info("Start discord run")
-            # start the prison release task
-            loop.create_task(check_and_release(client))
             # bot-Bot
             client.run(config.MAIN.login_token)
             # Test-Bot
@@ -171,9 +171,11 @@ def main():
             continue
         except KeyboardInterrupt:
             return
-        except (InterruptedError, Exception) as err:
-            logging.warning(err)
+        except (InterruptedError, Exception):
+            logging.exception("")
             return
+
+        return
 
 
 if __name__ == "__main__":

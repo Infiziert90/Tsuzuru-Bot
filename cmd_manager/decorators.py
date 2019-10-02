@@ -2,8 +2,12 @@ from . import dispatcher
 from .bot_args import subparsers
 
 
-def register_command(name, is_enabled=None, is_admin=None, **kwargs):
+def register_command(name=None, *, is_enabled=None, is_admin=None, **kwargs):
     def decorator(func):
+        nonlocal name
+        if not name:
+            name = func.__name__
+
         if "description" not in kwargs:
             raise RuntimeError(f"Missing description for bot command: {name}")
 
