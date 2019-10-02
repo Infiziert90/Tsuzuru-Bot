@@ -6,7 +6,7 @@ import logging
 import datetime
 from config.globals import EX_SERVER
 from handle_messages import private_msg_user, delete_user_message
-from storage import storage
+import storage
 
 
 # Exception that you can catch, without the risk other errors not getting through
@@ -18,9 +18,9 @@ class HelperException(Exception):
         return self.message
 
 
-# Call storage.save when modifying this!
+# Call storage.save() when modifying this!
 # {user_id: [timestamp, [roleid, …]}
-prison_inmates = storage.setdefault('prison_inmates', {})
+prison_inmates = storage.storage.setdefault('prison_inmates', {})
 
 user_cooldown = set()
 
