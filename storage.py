@@ -22,12 +22,12 @@ def load() -> None:
         logging.debug("Persistent storage not found, starting fresh")
         return
 
-    with storage_path.open('b') as fp:
+    with storage_path.open('rb') as fp:
         storage = pickle.load(fp)
 
 
 def save() -> None:
-    with storage_path.open('wb',  encoding='utf-8') as fp:
+    with storage_path.open('wb') as fp:
         pickle.dump(storage, fp, protocol=4)
 
 
