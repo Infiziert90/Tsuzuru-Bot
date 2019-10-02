@@ -1,7 +1,8 @@
 import re
-from utils import set_user_cooldown, user_cooldown
+from utils import set_user_cooldown, user_cooldown, punish_user
 from handle_messages import delete_user_message, private_msg
 from cmd_manager.decorators import register_command, add_argument
+from cmd_manager.filters import is_ex_server
 
 reg = re.compile(r"<:(\w+):(\d+)>")
 
@@ -45,3 +46,13 @@ async def memefont(client, message, args):
         await message.channel.send(f"From: {message.author.name}\n{emoji_text[:1950]} .........truncated")
     else:
         await message.channel.send(f"From: {message.author.name}\n{emoji_text}")
+
+
+@register_command(description="It's time to cool off.", is_enabled=is_ex_server)
+@add_argument('--time', '-t', type=int, default=30,
+              help='Duration in prison [in minutes]')
+@add_argument('--reason', '-r', default="By Choice\N{TRADE MARK SIGN}",
+              help='Reason for prison (optional)')
+async def user_prison(client, message, args):
+    # await delete_user_message(message)  # Don't delete to preserve context
+    await punish_user(client, message, reason=args.reason, prison_length=args.time)
