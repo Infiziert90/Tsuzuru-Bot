@@ -132,7 +132,7 @@ async def merriam(client, message, args):
     await message.channel.send(embed=embed)
 
 
-@register_command('dict', description='Dict will show you translation for your input/output language.')
+@register_command('dict', description='Translate a word/term using dict.cc.')
 @add_argument('keyword', help="Keyword for translation.")
 @add_argument('--in-lang', '-i', default="de", choices=AVAILABLE_LANGUAGES.keys(), help='Input language.')
 @add_argument('--out-lang', '-o', default="en", choices=AVAILABLE_LANGUAGES.keys(), help="Output language.")

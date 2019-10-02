@@ -5,7 +5,7 @@ from handle_messages import delete_user_message, private_msg_code
 from cmd_manager.decorators import register_command
 
 
-@register_command('help', description='Post the help message.')
+@register_command('help', description='Show this help message.')
 async def help_str(client, message, args):
     await delete_user_message(message)
 

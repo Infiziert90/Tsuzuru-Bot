@@ -32,7 +32,7 @@ async def cancel_vote(_, message, args):
 
 @register_command('vote', description='Post a poll.')
 @add_argument('topic', help='Question')
-@add_argument('--time', '-t', type=int, default=60, help='Time [in Minutes]')
+@add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=languages.keys(), help='Set the language for the end text')
 async def normal_vote(_, message, args):
@@ -41,7 +41,7 @@ async def normal_vote(_, message, args):
 
 @register_command(description='Post an anonymous poll.')
 @add_argument('topic', help='Question')
-@add_argument('--time', '-t', type=int, default=60, help='Time [in Minutes]')
+@add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=languages.keys(), help='Set the language for the end text')
 async def anon_vote(_, message, args):

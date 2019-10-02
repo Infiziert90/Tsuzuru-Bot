@@ -267,7 +267,7 @@ async def set_cooldown_and_get_image(self):
 
     image = await get_file(self.img_url, self.path, self.filename)
     if image is None:
-        raise BaseException("Can't load image. Pls try it again later.")
+        raise BaseException("Can't load image. Please try it again later.")
 
     return imwri.Read(image, float_output=True)
 
@@ -337,11 +337,11 @@ async def getnative(client, message, args):
 
     if message.author.id in Getnative.user_cooldown:
         await delete_user_message(message)
-        return await private_msg(message, "Cooldown active, pls try again in two minutes.")
+        return await private_msg(message, "Cooldown active. Try again in two minutes.")
     elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
-        return await private_msg(message, f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
+        return await private_msg(message, f"Don't use lossy formats. Lossy formats are:\n{', '.join(lossy)}")
     elif args.min_h >= message.attachments[0].height:
-        return await private_msg(message, f"Picture is to small with {args.min_h} min height.")
+        return await private_msg(message, f"Picture is to small for {args.min_h} min height.")
     elif args.min_h >= args.max_h:
         return await private_msg(message, f"Your min height is bigger or equal to max height.")
     elif args.max_h - args.min_h > 1000:
@@ -418,7 +418,7 @@ async def grain(client, message, args):
 
     if message.author.id in Grain.user_cooldown:
         await delete_user_message(message)
-        return await private_msg(message, "Pls use this command only every 2min.")
+        return await private_msg(message, "Please only use this command once every 2 minutes.")
 
     delete_message = await message.channel.send(file=File(config.PICTURE.spam + "tenor_loading.gif"))
 

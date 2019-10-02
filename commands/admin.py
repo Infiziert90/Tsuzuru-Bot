@@ -18,13 +18,13 @@ async def send_message(client, message, args):
 
 
 @register_command(is_admin=is_admin_command, description='Assign prison.')
-@add_argument('--user', '-u', help='Name or id from the user')
+@add_argument('--user', '-u', help='Name or id of the user')
 @add_argument('--reason', '-r', help='Reason for prison')
-@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for prison[in Min][0=Reset]')
+@add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for prison [in minutes][0=Reset]')
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:
-        return await message.channel.send(f"User in prison can't use this command!")
+        return await message.channel.send(f"Users in prison can't use this command!")
     elif len(args.user) == 0:
         return await message.channel.send(f"Empty username is not allowed!")
 
@@ -32,7 +32,7 @@ async def prison(client, message, args):
     try:
         user = server.get_member_named(args.user.replace("@", "")) or server.get_member(int(args.user))
     except ValueError:
-        return await message.channel.send("User not found, probably is the #XXXX identifier not given.")
+        return await message.channel.send("User not found, probably the #XXXX identifier was not provided.")
     if not user:
         return await message.channel.send("User not found!")
 
@@ -114,7 +114,7 @@ async def replace_yaml(client, message, args):
 @register_command(is_admin=is_admin_command, description='Send internal stats')
 async def output_internals(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
-    embed.add_field(name="User in prison", value=prison_inmates)
+    embed.add_field(name="Users in prison", value=prison_inmates)
     await message.channel.send(embed=embed)
 
 
