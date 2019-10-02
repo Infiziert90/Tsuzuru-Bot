@@ -65,22 +65,6 @@ class DefineScaler:
         self.upscaler = get_upscaler(kernel=kernel, b=b, c=c, taps=taps)
 
 
-scaler_dict = {
-    "Bilinear": DefineScaler("bilinear"),
-    "Bicubic (b=1/3, c=1/3)": DefineScaler("bicubic", b=1/3, c=1/3),
-    "Bicubic (b=0.5, c=0)": DefineScaler(kernel="bicubic", b=.5, c=0),
-    "Bicubic (b=0, c=0.5)": DefineScaler(kernel="bicubic", b=0, c=.5),
-    "Bicubic (b=1, c=0)": DefineScaler(kernel="bicubic", b=1, c=0),
-    "Bicubic (b=0, c=1)": DefineScaler(kernel="bicubic", b=0, c=1),
-    "Bicubic (b=0.2, c=0.5)": DefineScaler(kernel="bicubic", b=.2, c=.5),
-    "Lanczos (3 Taps)": DefineScaler(kernel="lanczos", taps=3),
-    "Lanczos (4 Taps)": DefineScaler(kernel="lanczos", taps=4),
-    "Lanczos (5 Taps)": DefineScaler(kernel="lanczos", taps=5),
-    "Spline16": DefineScaler(kernel="spline16"),
-    "Spline36": DefineScaler(kernel="spline36"),
-}
-
-
 class Getnative:
     user_cooldown = set()
 
@@ -180,62 +164,6 @@ class Getnative:
         matplotlib.pyplot.yscale(self.plotScaling)
         matplotlib.pyplot.savefig(f'{self.path}/{self.filename}.png')
         matplotlib.pyplot.clf()
-
-
-class Getscaler:
-    user_cooldown = set()
-
-    def __init__(self, mes, spam, img_url, fn, native_height):
-        self.mes = mes
-        self.spam = spam
-        self.img_url = img_url
-        self.filename = fn
-        self.native_height = native_height
-        self.plotScaling = 'log'
-        self.tmp_dir = tempfile.TemporaryDirectory()
-        self.path = self.tmp_dir.name
-
-    async def run(self):
-        src = await set_cooldown_and_get_image(self)
-        ar = src.width / src.height
-        src_luma32 = convert_rgb_gray32(src)
-
-        results_bin = {}
-        for name, scaler in scaler_dict.items():
-            error = self.compute_error(src_luma32, self.native_height, scaler, ar)
-            results_bin[name] = error
-
-        sorted_results = list(sorted(results_bin.items(), key=lambda x: x[1]))
-        best_result = sorted_results[0]
-        longest_key = max(map(len, results_bin))
-
-        try:
-            txt_output = "\n".join(f"{scaler_name:{longest_key}}  "
-                                   f"{0 if best_result[1] == 0.0 else value / best_result[1]:7.1%}  "
-                                   f"{value:.3e}" for scaler_name, value in sorted_results)
-        except ZeroDivisionError:
-            txt_output = "Broken Ouput!" + "\n".join(f"{scaler_name:{longest_key}}  {best_result[1]:7.1%}"
-                                                     f"  {value:.3e}" for scaler_name, value in sorted_results)
-
-        self.save_images(src, self.native_height, scaler_dict.get(best_result[0]), ar)
-        end_text = f"Testing scalers for native height: {self.native_height}\n```{txt_output}```\n" \
-                   f"Smallest error achieved by \"{best_result[0]}\" ({best_result[1]:.3e})"
-
-        return end_text
-
-    def compute_error(self, clip, h, scaler, ar):
-        down = scaler.descaler(clip, getw(ar, h), h)
-        up = scaler.upscaler(down, getw(ar, clip.height), clip.height)
-        smask = core.std.Expr([clip, up], 'x y - abs dup 0.015 > swap 0 ?')
-        smask = core.std.CropRel(smask, 5, 5, 5, 5)
-        mask = core.std.PlaneStats(smask)
-        luma = mask.get_frame(0).props.PlaneStatsAverage
-        return luma
-
-    def save_images(self, clip, h, scaler, ar):
-        src = scaler.descaler(clip, getw(ar, h), h)
-        first_out = imwri.Write(src, 'png', f'{self.path}/{self.filename}_source%d.png')
-        first_out.get_frame(0)  # trick vapoursynth into rendering the frame
 
 
 class Grain:
@@ -380,35 +308,6 @@ async def getnative(client, message, args):
     await message.channel.send(file=File(f'{getn.path}/{filename}'), content=f"Input\n{message.author}: '{message.content}'")
     await message.channel.send(file=File(f'{getn.path}/{filename}.png'), content=content)
     await cleanup(getn)
-
-
-@register_command(description='Find the best inverse scaler (mostly anime)')
-@add_argument("--native_height", "-nh", dest="native_height", type=int, default=720, help="Approximated native height.")
-async def getscaler(client, message, args):
-    if not await check_message(message):
-        return
-
-    if message.author.id in Getscaler.user_cooldown:
-        await delete_user_message(message)
-        return await private_msg(message, "Pls use this command only every 2min.")
-    elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
-        return await private_msg_file(message, config.PICTURE.spam + "lossy.png",
-                                      content=f"No lossy format pls. Lossy formats are:\n{', '.join(lossy)}")
-
-    delete_message = await message.channel.send(file=File(config.PICTURE.spam + "tenor_loading.gif"))
-
-    img_url = message.attachments[0].url
-    filename = message.attachments[0].filename
-    gets = Getscaler(message, delete_message, img_url, filename, args.native_height)
-    try:
-        best_value = await gets.run()
-    except BaseException as err:
-        return await error_handler(gets, inspect.currentframe().f_code.co_name, err)
-
-    gc.collect()
-    await message.channel.send(file=File(f'{gets.path}/{filename}'), content=f"Input\n{message.author}: \"{message.content}\"")
-    await message.channel.send(file=File(f'{gets.path}/{filename}_source0.png'), content=f"Output\n{best_value}")
-    await cleanup(gets)
 
 
 @register_command(description='Grain.')
