@@ -1,7 +1,8 @@
 import os
+import warnings
 import dicts
-import logging
 import configparser
+import logging.handlers
 from . import load_help
 
 config = dicts.AttrDict()
@@ -26,8 +27,12 @@ def load_config():
         log_level = logging.WARNING
 
     logging.basicConfig(level=log_level)
-    logging.getLogger('').addHandler(logging.FileHandler("output.log"))
-
+    log = logging.getLogger(__name__)
+    # suppress poll infos from asyncio
+    logging.getLogger('asyncio').setLevel(logging.ERROR)
+    log.addHandler(logging.handlers.TimedRotatingFileHandler("output.log", when='W0', backupCount=3))
+    log.setLevel(log_level)
+    warnings.resetwarnings()
 
 load_config()
 help_text = load_help.get_help_text

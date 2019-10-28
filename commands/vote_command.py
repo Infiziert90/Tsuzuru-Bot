@@ -1,6 +1,7 @@
 import aiohttp
 import discord
 import asyncio
+import logging
 from string import Template
 from handle_messages import private_msg_user, private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
@@ -207,7 +208,8 @@ class VoteHandler:
 
             # get the latest message object
             await self.get_message()
-        except (MessageDeletedException, asyncio.CancelledError):
+        except (MessageDeletedException, asyncio.CancelledError, IndexError):
+            logging.info(f"Dropped vote: {self.message.id} | {self.message.created_at}")
             self.task.cancel()
             return ongoing_votes.pop(self.message.id, None)
 

@@ -4,8 +4,8 @@ try:
     import vapoursynth
 except ImportError:
     raise HelperException("VapourSynth is not available for the bot, dropping VapourSynth commands.")
-except Exception as e:
-    logging.warning(e)
+except Exception as err:
+    logging.warning(err)
     raise HelperException("VapourSynth is broken, dropping VapourSynth commands.")
 
 import gc
