@@ -4,7 +4,8 @@ import asyncio
 import random
 import logging
 import datetime
-from config.globals import EX_SERVER
+from dateutil import tz
+from config.globals import EX_SERVER, EX_MOD_LOG_CHANNEL
 from handle_messages import private_msg_user, delete_user_message
 import storage
 
@@ -80,14 +81,14 @@ async def check_and_release(client):
             storage.save()
 
 
-async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None):
+async def punish_user(client, message, user=None, reason="Stop using this command!", prison_length=None, cet_output=True):
     if message.author.id in prison_inmates:
         return await message.channel.send(f"User in prison can't use this command!")
 
     if prison_length is None:
-        prison_length = random.randint(30, 230)
+        prison_length = random.randint(30, 1440)
 
-    timestamp = datetime.datetime.utcnow()
+    timestamp = datetime.datetime.now(datetime.timezone.utc)
     prison_time = timestamp + datetime.timedelta(minutes=prison_length)
     user = user or message.author
     if user.id in prison_inmates:
@@ -101,11 +102,13 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         await user.edit(roles=[role for role in user.roles[1:] if role.managed], reason="Ultimate Prison")
         prison_role = get_role_by_id(message.guild, 451076667377582110)
         await user.add_roles(prison_role)
-
     storage.save()
 
+    if cet_output:
+        cet = tz.gettz('Europe/Berlin')
+        prison_inmates[user.id][0] = prison_inmates[user.id][0].astimezone(cet)
+
     prison_time_str = prison_inmates[user.id][0].strftime('%H:%M %a %d %b')
-    server_time_str = timestamp.strftime('%H:%M %a %d %b')
     await send_mod_channel_message(
            client,
            f"Username: {user.name}"
@@ -113,20 +116,18 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
            f"\nUntil: {prison_time_str if prison_length > 0 else 'Reset'}"
            f"\nReason: {reason}"
            f"\nBy: {message.author.name}"
-           f"\n\nServer Time: {server_time_str}"
-       )
+    )
     await private_msg_user(
            message,
-           f"{'Prison is now active' if prison_time == prison_inmates[user.id][0] else 'New release time:'}"
+           f"{'Prison is now active' if prison_time == prison_inmates[user.id][0] else 'Prison got extended:'}"
            f"\nUntil: {prison_time_str}"
-           f"\nReason: {reason}"
-           f"\n\nServer Time: {server_time_str}",
+           f"\nReason: {reason}",
            user
     )
 
 
 async def send_mod_channel_message(client, message):
-    channel = client.get_channel(246368272327507979)
+    channel = client.get_channel(EX_MOD_LOG_CHANNEL)
     await channel.send(message)
 
 

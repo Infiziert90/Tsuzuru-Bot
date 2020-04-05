@@ -39,9 +39,12 @@ async def prison(client, message, args):
     await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
 
     infi = client.get_user(BOT_AUTHOR)
-    await infi.send(f"Username: {user.name}\nNew Time: {args.prison_length}min\nFull Time: "
-                    f"{str(prison_inmates[user.id][0]) + 'min' if args.prison_length > 0 else 'Reset'}\nReason: "
-                    f"{args.reason}\nBy: {message.author.name}")
+    await infi.send(
+        f"Username: {user.name}\n"
+        f"New Time: {args.prison_length}min\n"
+        f"Full Time: {prison_inmates[user.id][0].strftime('%H:%M %a %d %b') if args.prison_length > 0 else 'Reset'}\n"
+        f"Reason: {args.reason}\nBy: {message.author.name}"
+    )
 
 
 @register_command(is_admin=is_admin_command, description='Purge channel messages.')
