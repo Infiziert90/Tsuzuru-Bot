@@ -1,4 +1,5 @@
 import os
+import sys
 import warnings
 import dicts
 import configparser
@@ -26,12 +27,15 @@ def load_config():
     else:
         log_level = logging.WARNING
 
-    logging.basicConfig(level=log_level)
-    log = logging.getLogger(__name__)
+    logging.basicConfig(
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.handlers.TimedRotatingFileHandler("output.log", when='W0', backupCount=3),
+        ],
+        level=log_level
+    )
     # suppress poll infos from asyncio
     logging.getLogger('asyncio').setLevel(logging.ERROR)
-    log.addHandler(logging.handlers.TimedRotatingFileHandler("output.log", when='W0', backupCount=3))
-    log.setLevel(log_level)
     warnings.resetwarnings()
 
 load_config()
