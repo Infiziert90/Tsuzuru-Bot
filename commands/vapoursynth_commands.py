@@ -267,6 +267,7 @@ async def getnative(client, message, args):
         await delete_user_message(message)
         return await private_msg(message, "Cooldown active. Try again in two minutes.")
     elif os.path.splitext(message.attachments[0].filename)[1][1:] in lossy:
+        await message.channel.send(file=File(config.PICTURE.spam + "lossy.png"))
         return await private_msg(message, f"Don't use lossy formats. Lossy formats are:\n{', '.join(lossy)}")
     elif args.min_h >= message.attachments[0].height:
         return await private_msg(message, f"Picture is to small for {args.min_h} min height.")

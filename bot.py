@@ -75,6 +75,9 @@ async def on_member_update(before: discord.Member, after: discord.Member):
         
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    if payload.user_id in prison_inmates:
+        return
+
     if payload.user_id == client.user.id:
         return
 
@@ -88,6 +91,9 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 @client.event
 async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
+    if payload.user_id in prison_inmates:
+        return
+
     if payload.user_id == client.user.id:
         return
 
@@ -133,7 +139,7 @@ async def handle_commands(message: discord.Message):
         return
 
     arg_string = message.clean_content[2:]
-    if not is_guild and arg_string.split(" ")[0] not in ["getnative", "getscaler", "grain", "help"]:
+    if not is_guild and arg_string.split(" ")[0] not in ["getnative", "grain", "help"]:
         return await message.author.send("This command is not allowed in private chat, sorry.")
 
     if is_guild:
@@ -172,7 +178,7 @@ def main():
         except KeyboardInterrupt:
             return
         except (InterruptedError, Exception):
-            logging.exception("")
+            logging.exception("done")
             return
 
         return
