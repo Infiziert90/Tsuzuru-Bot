@@ -36,6 +36,7 @@ async def cancel_vote(_, message, args):
 @add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=languages.keys(), help='Set the language for the end text')
+@add_argument('--show-avg', '-avg', dest='avg', action="store_true", default=False, help='Shows the average for votes like 1-10.')
 async def normal_vote(_, message, args):
     return await create_vote(message, args, anon=False)
 
@@ -45,6 +46,7 @@ async def normal_vote(_, message, args):
 @add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
 @add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
 @add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=languages.keys(), help='Set the language for the end text')
+@add_argument('--show-avg', '-avg', dest='avg', action="store_true", default=False, help='Shows the average for votes like 1-10.')
 async def anon_vote(_, message, args):
     return await create_vote(message, args, anon=True)
 
@@ -81,7 +83,7 @@ async def create_vote(message, args, anon):
         embed.add_field(name=f"{num2emo[number]} {option}", value=f"Votes: 0", inline=False)
 
     mes = await message.channel.send(embed=embed)
-    handler = VoteHandler(mes, args.options, args.lang, message.author.id, anon=anon)
+    handler = VoteHandler(mes, args.options, args.lang, message.author.id, anon=anon, avg=args.avg)
     ongoing_votes[mes.id] = handler
 
     for number in range(len(args.options)):
@@ -101,12 +103,13 @@ class Vote:
 
 
 class VoteHandler:
-    def __init__(self, message, options, language, creator_id, anon=False):
+    def __init__(self, message, options, language, creator_id, anon=False, avg=False):
         self.message: discord.Message = message
         self.votes_per_options: dict = {k: set() for k in range(len(options))}
         self.language: str = language
         self.creator_id = creator_id
         self.anon: bool = anon
+        self.avg: bool = avg
 
         self.users: set = set()
         self.overflow: list = []
@@ -142,11 +145,11 @@ class VoteHandler:
         i = emo2num[vote.reaction.emoji]
         if vote.user.id in self.votes_per_options[i]:
             self.votes_per_options[i].remove(vote.user.id)
-            embed = self.veracity_check()
+            embed = self.create_embed()
             await self.message.edit(embed=discord.Embed.from_dict(embed))
 
     async def added_vote(self, vote: Vote):
-        if not await self.validate_add(vote):
+        if not await self.validate(vote):
             return
 
         # get the latest message object
@@ -160,10 +163,10 @@ class VoteHandler:
         i = emo2num[vote.reaction.emoji]
         self.votes_per_options[i].add(vote.user.id)
 
-        embed = self.veracity_check()
+        embed = self.create_embed()
         await self.message.edit(embed=discord.Embed.from_dict(embed))
 
-    async def validate_add(self, vote: Vote):
+    async def validate(self, vote: Vote):
         if vote.user.id in self.overflow:
             self.overflow.append(vote.user.id)
             await vote.remove()
@@ -176,7 +179,7 @@ class VoteHandler:
 
         return True
 
-    def veracity_check(self):
+    def create_embed(self):
         embed = self.message.embeds[0].to_dict()
 
         for reaction in self.message.reactions:
@@ -202,7 +205,7 @@ class VoteHandler:
             for over in range(0, time, 1):
                 await asyncio.sleep(60)
                 await self.get_message()
-                embed = self.veracity_check()
+                embed = self.create_embed()
                 embed = discord.Embed.from_dict(embed).set_footer(text=f"Time left: {time - over} min")
                 await self.message.edit(embed=embed)
 
@@ -223,8 +226,10 @@ class VoteHandler:
         embed = self.message.embeds[0].to_dict()
         winner = 0
         winners = []
+        avg = [0, 0]
         for k, v in self.votes_per_options.items():
             v = len(v)
+            avg = [(k + 1) * v, v]
             if v == winner:
                 winners.append(embed["fields"][k]["name"])
             elif v > winner:
@@ -234,7 +239,9 @@ class VoteHandler:
 
         title = self.message.embeds[0].title
         content = Template(languages[self.language]['win' if len(winners) == 1 else 'draw'])
-        content = content.substitute(question=title, winner=''.join([f'{winner}, ' for winner in winners]))
+        content = content.substitute(question=title, winner=', '.join([f'{winner}' for winner in winners]))
+        if self.avg and avg[0] != 0 and avg[1] != 0:
+            content += f"\nAverage: {avg[0]/avg[1]}"
 
         embed = discord.Embed.from_dict(embed)
         embed = embed.set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)

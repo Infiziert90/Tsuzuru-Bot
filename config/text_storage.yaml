@@ -110,10 +110,11 @@ bot_bot:
           Inhalte (z.B. mit politischer Agenda) ohne konkreten Anlass, über die sich nur ein
           sehr kleiner Personenkreis unterhält, sodass andere Nutzer den Channel auf Dauer meiden könnten.
         rule4: >-
-          Rechtzeitig vor wichtigen bevorstehenden Wahlen wird ein eigener Channel (#wahl)
-          erstellt. Hierbei handelt es sich aber um keinen allgemeinpolitischen Channel,
-          sondern um einen ausschließlich für Diskussionen, Meinungsaustausch und Themen
-          mit Bezug zu der bevorstehenden Wahl.
+         Bei wichtigen Wahlen wie Europa-, Bundestags- und relevanten Landtagswahlen sind im Zeitraum 
+         von 2 Tagen vor bis zum Tag nach der Wahl in #public_ger ausnahmsweise dazugehörige Politik-Themen, 
+         insbesondere zu Prognosen, Hochrechnungen, Koalitiionsspekulationen etc. erlaubt. 
+         Ausführliche und grundsätzliche Diskussionen zu politischen Themen 
+         abseits dieser Wahlen sind aber weiterhin in #pol zu führen.
         rule5: >-
           Illegale Streamingseiten sind Untermenschencontent und dürfen nur aus speziellen
           Anlässen gepostet werden, z.B. um sich über besonderes Versagen lustig zu machen.

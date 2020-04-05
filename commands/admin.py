@@ -111,7 +111,7 @@ async def replace_yaml(client, message, args):
         await message.channel.send("Failed for unknown reasons.")
 
 
-@register_command(is_admin=is_admin_command, description='Send internal stats')
+@register_command(is_admin=is_admin_command, description='Send internal stats.')
 async def output_internals(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
     embed.add_field(name="Users in prison", value=prison_inmates)
