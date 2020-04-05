@@ -55,7 +55,7 @@ async def check_and_release(client):
             await asyncio.sleep(60)
 
             for user_id, prison_array in prison_inmates.copy().items():
-                if datetime.datetime.utcnow() >= prison_array[0]:
+                if datetime.datetime.now(datetime.timezone.utc) >= prison_array[0]:
                     prison_inmates.pop(user_id)
                     logging.info(f"Removing prison for {user_id}")
                     guild = client.get_guild(EX_SERVER)
@@ -117,13 +117,16 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
            f"\nReason: {reason}"
            f"\nBy: {message.author.name}"
     )
-    await private_msg_user(
-           message,
-           f"{'Prison is now active' if prison_time == prison_inmates[user.id][0] else 'Prison got extended:'}"
-           f"\nUntil: {prison_time_str}"
-           f"\nReason: {reason}",
-           user
-    )
+    if prison_length > 0:
+        await private_msg_user(
+               message,
+               f"{'Prison is now active!' if prison_time == prison_inmates[user.id][0] else 'Prison got extended!'}"
+               f"\nUntil: {prison_time_str}"
+               f"\nReason: {reason}",
+               user
+        )
+    else:
+        await private_msg_user(message, f"You are free!\nReason: {reason}", user)
 
 
 async def send_mod_channel_message(client, message):
