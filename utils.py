@@ -113,7 +113,7 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
            client,
            f"Username: {user.name}"
            f"\nNew Time: {prison_length}min"
-           f"\nUntil: {prison_time_str if prison_length > 0 else 'Reset'}"
+           f"\nUntil: {prison_time_str if prison_length > 0 else 'Reset'} {'CET' if cet_output else 'UTC'}"
            f"\nReason: {reason}"
            f"\nBy: {message.author.name}"
     )
@@ -121,7 +121,7 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
         await private_msg_user(
                message,
                f"{'Prison is now active!' if prison_time == prison_inmates[user.id][0] else 'Prison got extended!'}"
-               f"\nUntil: {prison_time_str}"
+               f"\nUntil: {prison_time_str} {'CET' if cet_output else 'UTC'}"
                f"\nReason: {reason}",
                user
         )
