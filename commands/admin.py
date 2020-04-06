@@ -21,6 +21,7 @@ async def send_message(client, message, args):
 @add_argument('--user', '-u', help='Name or id of the user')
 @add_argument('--reason', '-r', help='Reason for prison')
 @add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for prison [in minutes][0=Reset]')
+@add_argument('--no_cet_output', '-utc', dest="cet", action="store_false", default=True, help='Changes the output from CET to UTC')
 async def prison(client, message, args):
     await delete_user_message(message)
     if message.author.id in prison_inmates:
@@ -36,7 +37,7 @@ async def prison(client, message, args):
     if not user:
         return await message.channel.send("User not found!")
 
-    await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length)
+    await punish_user(client, message, user=user, reason=args.reason, prison_length=args.prison_length, cet_output=args.cet)
 
     infi = client.get_user(BOT_AUTHOR)
     await infi.send(
