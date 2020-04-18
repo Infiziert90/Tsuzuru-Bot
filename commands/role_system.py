@@ -6,15 +6,18 @@ with open("./config/role-settings.json") as f:
     settings = json.load(f)
 
 # iemoji.com iOS 5 and higher
-roles = {
+language_roles = {
     u"\U0001F1E9\U0001F1EA": "ger",
     u"\U0001F1EC\U0001F1E7": "eng",
     u"\U0001F1EF\U0001F1F5": "jap",
+}
+roles = dict(language_roles)
+roles.update({
     u"\U0001F51E": "nsfw",
     u"\U0001F4AE": "subs",
     u"\U0001F3B2": "games",
     u"\U0001F921": "pol",
-}
+})
 role_dict = settings["group"]
 
 
@@ -26,7 +29,7 @@ async def add_role(member, input_role):
 
 async def find_role(member, input_role):
     needed_roles = [settings["group"]["ger"], settings["group"]["eng"], settings["group"]["jap"]]
-    if input_role not in [u"\U0001F1E9\U0001F1EA", u"\U0001F1EC\U0001F1E7", u"\U0001F1EF\U0001F1F5"]:
+    if input_role not in language_roles:
         for role in member.roles:
             if role.id in needed_roles:  # ensure that the user has eng or ger role
                 await add_role(member, input_role)

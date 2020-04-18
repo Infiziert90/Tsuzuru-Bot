@@ -9,7 +9,7 @@ async def handle_msg(message, content=None, embed=None, file=None, user=None, re
     try:
         await user.send(content=content, embed=embed, file=file)
     except (AttributeError, discord.Forbidden):
-        if retry_local:
+        if retry_local and message is not None:
             del_message = await message.channel.send(content=f"{content or ''}\nThis Message will be deleted in 5min.",
                                                      embed=embed, file=file)
             asyncio.get_event_loop().call_later(300, lambda: asyncio.ensure_future(delete_user_message(del_message)))
