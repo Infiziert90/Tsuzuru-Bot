@@ -1,7 +1,7 @@
 import discord
 from config import help_text
 from config.globals import *
-from .role_system import roles
+from .role_system import emotes
 from handle_messages import delete_user_message
 from cmd_manager.filters import is_admin_command
 from utils import get_file, punish_user, prison_inmates
@@ -70,7 +70,7 @@ async def send_welcome(client, message, args):
         else:
             mes = await channel.send(embed=discord.Embed(description=val, color=333333))
             if key == "command_overview":
-                for emoji in roles.keys():
+                for emoji in emotes.keys():
                     await mes.add_reaction(emoji)
 
 

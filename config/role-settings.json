@@ -1,11 +1,24 @@
 {
-    "group": {
+    "languages_roles": {
         "ger": 221920178940805120,
         "eng": 232284026348503041,
-        "jap": 306797507797581825,
+        "jap": 306797507797581825
+    },
+    "other_roles": {
         "subs": 247428692169457667,
         "nsfw": 338272951994417153,
         "games": 587733301523906569,
         "pol": 601120901408227349
+    },
+    "language_emotes": {
+        "\uD83C\uDDE9\uD83C\uDDEA": "ger",
+        "\uD83C\uDDEC\uD83C\uDDE7": "eng",
+        "\uD83C\uDDEF\uD83C\uDDF5": "jap"
+    },
+    "other_emotes": {
+        "\uD83D\uDD1E": "nsfw",
+        "\uD83D\uDCAE": "subs",
+        "\uD83C\uDFB2": "games",
+        "\uD83E\uDD21": "pol"
     }
 }

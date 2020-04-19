@@ -12,7 +12,7 @@ from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
 from handle_messages import private_msg_code, delete_user_message, send_log_message
 from commands.vote_command import ongoing_votes, Vote
-from commands.role_system import roles, role_handler
+from commands.role_system import emotes, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import prison_inmates, check_and_release
 
@@ -82,7 +82,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         return
 
     if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
-        if payload.emoji.name in roles:
+        if payload.emoji.name in emotes:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, add=True)
     else:
@@ -98,7 +98,7 @@ async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
         return
 
     if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
-        if payload.emoji.name in roles:
+        if payload.emoji.name in emotes:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
             await role_handler(member, payload.emoji.name, add=False)
     else:
