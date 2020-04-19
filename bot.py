@@ -10,7 +10,7 @@ import datetime
 from cmd_manager import dispatcher
 from config import config, help_text
 from cmd_manager.bot_args import parser, HelpException, UnkownCommandException
-from handle_messages import private_msg_code, delete_user_message, send_log_message
+from handle_messages import private_msg, delete_user_message, send_log_message
 from commands.vote_command import ongoing_votes, Vote
 from commands.role_system import emotes, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
@@ -151,13 +151,13 @@ async def handle_commands(message: discord.Message):
         arg_string = shlex.split(arg_string)
         args = parser.parse_args(arg_string)
     except ValueError as err:
-        return await private_msg_code(message, str(err))
+        return await private_msg(message, f"```\n{err}```")
     except HelpException as err:
         await delete_user_message(message)
-        return await private_msg_code(message, str(err))
+        return await private_msg(message, f"```\n{err}```")
     except (UnkownCommandException, argparse.ArgumentError) as err:
         if arg_string[0] in dispatcher.commands:
-            return await private_msg_code(message, str(err))
+            return await private_msg(message, f"```\n{err}```")
         return
 
     return await dispatcher.handle(args.command, client, message, args)

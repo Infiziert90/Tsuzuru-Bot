@@ -6,7 +6,7 @@ import logging
 import datetime
 from dateutil import tz
 from config.globals import EX_SERVER, EX_MOD_LOG_CHANNEL
-from handle_messages import private_msg_user, delete_user_message
+from handle_messages import private_msg, delete_user_message
 import storage
 
 
@@ -117,16 +117,16 @@ async def punish_user(client, message, user=None, reason="Stop using this comman
            f"\nReason: {reason}"
            f"\nBy: {message.author.name}"
     )
+
+    content = (
+        f"{'Prison is now active!' if prison_time == prison_inmates[user.id][0] else 'Prison got extended!'}"
+        f"\nUntil: {prison_time_str} {'CET' if cet_output else 'UTC'}"
+        f"\nReason: {reason}"
+    )
     if prison_length > 0:
-        await private_msg_user(
-               message,
-               f"{'Prison is now active!' if prison_time == prison_inmates[user.id][0] else 'Prison got extended!'}"
-               f"\nUntil: {prison_time_str} {'CET' if cet_output else 'UTC'}"
-               f"\nReason: {reason}",
-               user
-        )
+        await private_msg(None, content=content, user=user)
     else:
-        await private_msg_user(message, f"You are free!\nReason: {reason}", user)
+        await private_msg(None, content=f"You are free!\nReason: {reason}", user=user)
 
 
 async def send_mod_channel_message(client, message):

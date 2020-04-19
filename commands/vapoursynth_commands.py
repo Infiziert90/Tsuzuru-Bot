@@ -23,7 +23,7 @@ from utils import get_file
 from functools import partial
 from discord import File, HTTPException
 from cmd_manager.decorators import register_command, add_argument
-from handle_messages import private_msg_file, private_msg, delete_user_message
+from handle_messages import private_msg, delete_user_message
 
 core = vapoursynth.core
 core.add_cache = False
@@ -305,9 +305,9 @@ async def getnative(client, message, args):
         f"Taps: {scaler.taps} " if scaler.kernel == "lanczos" else "",
         f"\n{best_value}",
     ])
-    await private_msg_file(message, f"{getn.path}/{filename}.txt", "Output from getnative.")
-    await message.channel.send(file=File(f'{getn.path}/{filename}'), content=f"Input\n{message.author}: '{message.content}'")
-    await message.channel.send(file=File(f'{getn.path}/{filename}.png'), content=content)
+    await private_msg(message, content="Output from getnative.", file=File(f"{getn.path}/{filename}.txt"))
+    await message.channel.send(content=f"Input\n{message.author}: '{message.content}'", file=File(f'{getn.path}/{filename}'))
+    await message.channel.send(content=content, file=File(f'{getn.path}/{filename}.png'))
     await cleanup(getn)
 
 

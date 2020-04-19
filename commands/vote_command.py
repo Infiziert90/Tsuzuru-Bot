@@ -3,7 +3,7 @@ import discord
 import asyncio
 import logging
 from string import Template
-from handle_messages import private_msg_user, private_msg, delete_user_message
+from handle_messages import private_msg, delete_user_message
 from cmd_manager.decorators import register_command, add_argument
 
 ongoing_votes = {}
@@ -172,7 +172,7 @@ class VoteHandler:
             await vote.remove()
             return False
         elif vote.user.id in self.users:
-            await private_msg_user(None, "Only 1 vote is allowed!", vote.user)
+            await private_msg(None, content="Only 1 vote is allowed!", user=vote.user)
             self.overflow.append(vote.user.id)
             await vote.remove()
             return False

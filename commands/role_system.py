@@ -1,6 +1,6 @@
 import json
 from utils import get_role_by_id
-from handle_messages import private_msg_user
+from handle_messages import private_msg
 
 with open("./config/role-settings.json") as f:
     settings = json.load(f)
@@ -17,7 +17,7 @@ def check_role(func):
         # ensure that the user has eng, ger or jap role, when it is not a language role
         if emoji in language_emotes or any(role.id in needed_roles.values() for role in member.roles):
             return await func(member, emoji, add)
-        await private_msg_user(None, "Language role is missing, pls select one!", user=member, retry_local=False)
+        await private_msg(None, content="Language role is missing, pls select one!", user=member)
     return wrapper
 
 
@@ -25,4 +25,4 @@ def check_role(func):
 async def role_handler(member, emoji, add=True):
     guild_role = get_role_by_id(member.guild, role_dict[emotes[emoji]])
     await member.add_roles(guild_role) if add else await member.remove_roles(guild_role)
-    await private_msg_user(None, f"{'Added' if add else 'Removed'} {emoji}", user=member, retry_local=False)
+    await private_msg(None, content=f"{'Added' if add else 'Removed'} {emoji}", user=member)
