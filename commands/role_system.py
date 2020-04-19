@@ -19,32 +19,24 @@ roles.update({
     u"\U0001F921": "pol",
 })
 role_dict = settings["group"]
+needed_roles = [
+    settings["group"]["ger"],
+    settings["group"]["eng"],
+    settings["group"]["jap"]
+]
 
 
-async def add_role(member, input_role):
-    guild_role = get_role_by_id(member.guild, role_dict[roles[input_role]])
-    await member.add_roles(guild_role)
-    await private_msg_user(None, "Thanks for telling me that!", user=member, retry_local=False)
+def check_role(func):
+    async def wrapper(member, emoji, add=True):
+        # ensure that the user has eng, ger or jap role, when it is not a language role
+        if emoji in language_roles or any(role.id in needed_roles for role in member.roles):
+            return await func(member, emoji, add)
+        await private_msg_user(None, "Language role is missing, pls select one!", user=member, retry_local=False)
+    return wrapper
 
 
-async def find_role(member, input_role):
-    needed_roles = [settings["group"]["ger"], settings["group"]["eng"], settings["group"]["jap"]]
-    if input_role not in language_roles:
-        for role in member.roles:
-            if role.id in needed_roles:  # ensure that the user has eng or ger role
-                await add_role(member, input_role)
-    else:
-        await add_role(member, input_role)
-
-
-async def remove_role(member, input_role):
-    guild_role = get_role_by_id(member.guild, role_dict[roles[input_role]])
-    await member.remove_roles(guild_role)
-    await private_msg_user(None, "Role removed.", user=member)
-
-
-async def role_handler(member, emoji, remove=False):
-    if not remove:
-        await find_role(member, emoji)
-    else:
-        await remove_role(member, emoji)
+@check_role
+async def role_handler(member, emoji, add=True):
+    guild_role = get_role_by_id(member.guild, role_dict[roles[emoji]])
+    await member.add_roles(guild_role) if add else await member.remove_roles(guild_role)
+    await private_msg_user(None, f"{'Added' if add else 'Removed'} {emoji}", user=member, retry_local=False)

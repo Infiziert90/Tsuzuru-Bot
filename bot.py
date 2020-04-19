@@ -84,7 +84,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
-            await role_handler(member, payload.emoji.name, remove=False)
+            await role_handler(member, payload.emoji.name, add=True)
     else:
         await handle_vote_reaction(payload, reaction_added=True)
 
@@ -100,7 +100,7 @@ async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
     if payload.guild_id == EX_SERVER and payload.channel_id == EX_WELCOME_CHANNEL:
         if payload.emoji.name in roles:
             member = client.get_guild(payload.guild_id).get_member(payload.user_id)
-            await role_handler(member, payload.emoji.name, remove=True)
+            await role_handler(member, payload.emoji.name, add=False)
     else:
         await handle_vote_reaction(payload, reaction_added=False)
 
