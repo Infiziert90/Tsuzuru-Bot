@@ -25,9 +25,7 @@ To run this project you will need:
 Bots can be copied freely from the source code if you just wish to make a bot. 
 However running this repository requires the above listed requirements.
 
-### Requirements for getnative
-
-To run this function you will need:
+### Requirements for getnative and grain
 
 * [VapourSynth](https://github.com/vapoursynth/vapoursynth/releases)
 * [Descale](https://github.com/BluBb-mADe/vapoursynth-descale)
