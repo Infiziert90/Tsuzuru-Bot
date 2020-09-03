@@ -9,26 +9,25 @@ from cmd_manager.decorators import register_command, add_argument
 ongoing_votes = {}
 num2emo = {0: "🇦", 1: "🇧", 2: "🇨", 3: "🇩", 4: "🇪", 5: "🇫", 6: "🇬", 7: "🇭", 8: "🇮", 9: "🇯"}
 emo2num = {v: k for k, v in num2emo.items()}
+num2numemo = {0: "1️⃣", 1: "2️⃣", 2: "3️⃣", 3: "4️⃣", 4: "5️⃣", 5: "6️⃣", 6: "7️⃣", 7: "8️⃣", 8: "9️⃣", 9: "🔟"}
+numemo2num = {v: k for k, v in num2numemo.items()}
 languages = {
-    "en": {"win": "And the winner of $question is $winner", "draw": "$question is a draw between $winner"},
-    "de": {"win": "Der Sieger von $question ist $winner", "draw": "$question ist ein Unentschieden zwischen $winner"},
+    "en": {
+        "win": "And the winner of $question is $winner",
+        "draw": "$question is a draw between $winner",
+        "avg": "```c\nThe average is $avg by $votes votes```",
+    },
+    "de": {
+        "win": "Der Sieger von $question ist $winner",
+        "draw": "$question ist ein Unentschieden zwischen $winner",
+        "avg": "```c\nDer Durchschnitt beträgt $avg bei $votes Bewertungen```",
+    },
 }
 
 
 class MessageDeletedException(Exception):
     def __repr__(self):
         return "Message deleted!"
-
-
-@register_command(description='Cancel your vote')
-@add_argument('message_id', type=int, help='Message id from the bot message')
-async def cancel_vote(_, message, args):
-    await delete_user_message(message)
-    if ongoing_votes[args.message_id].creator_id != message.author.id:
-        return await private_msg(message, "This is not your vote!")
-
-    await ongoing_votes[args.message_id].message.delete()
-    return ongoing_votes.pop(args.message_id, None)
 
 
 @register_command('vote', description='Post a poll.')
@@ -72,6 +71,7 @@ async def check_message(message, args):
 
 
 async def create_vote(message, args, anon):
+    emo_dict = num2emo if not args.avg else num2numemo
     if await check_message(message, args):
         return
 
@@ -80,14 +80,14 @@ async def create_vote(message, args, anon):
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     embed.set_footer(text=f"Time left: {args.time} min")
     for option, number in zip(args.options, range(len(args.options))):
-        embed.add_field(name=f"{num2emo[number]} {option}", value=f"Votes: 0", inline=False)
+        embed.add_field(name=f"{emo_dict[number]} {option}", value=f"Votes: 0", inline=False)
 
     mes = await message.channel.send(embed=embed)
     handler = VoteHandler(mes, args.options, args.lang, message.author.id, anon=anon, avg=args.avg)
     ongoing_votes[mes.id] = handler
 
     for number in range(len(args.options)):
-        await mes.add_reaction(num2emo[number])
+        await mes.add_reaction(emo_dict[number])
 
     asyncio.create_task(handler.vote_timer(args.time))
 
@@ -116,6 +116,8 @@ class VoteHandler:
         self.task: asyncio.Task = asyncio.Task(self.processing_worker())
         self.queue: asyncio.Queue = asyncio.Queue()
 
+        self.emo2num = emo2num if not self.avg else numemo2num
+
     async def store_vote(self, vote: Vote):
         return await self.queue.put(vote)
 
@@ -142,7 +144,7 @@ class VoteHandler:
         self.users.discard(vote.user.id)
 
         # check if the user is still in the reactions or if the bot already deleted it
-        i = emo2num[vote.reaction.emoji]
+        i = self.emo2num[vote.reaction.emoji]
         if vote.user.id in self.votes_per_options[i]:
             self.votes_per_options[i].remove(vote.user.id)
             embed = self.create_embed()
@@ -160,7 +162,7 @@ class VoteHandler:
             self.overflow.append(vote.user.id)
             await vote.remove()
 
-        i = emo2num[vote.reaction.emoji]
+        i = self.emo2num[vote.reaction.emoji]
         self.votes_per_options[i].add(vote.user.id)
 
         embed = self.create_embed()
@@ -184,7 +186,7 @@ class VoteHandler:
 
         for reaction in self.message.reactions:
             if reaction.me:
-                i = emo2num[reaction.emoji]
+                i = self.emo2num[reaction.emoji]
                 embed["fields"][i]["value"] = f"Votes: {len(self.votes_per_options[i])}"
 
         return embed
@@ -226,10 +228,14 @@ class VoteHandler:
         embed = self.message.embeds[0].to_dict()
         winner = 0
         winners = []
-        avg = [0, 0]
-        for k, v in self.votes_per_options.items():
+        options = self.votes_per_options.items()
+        # avg = (A * votes + B * votes ...) / all votes
+        # prevent dividing by zero
+        vote_count = sum([len(v) for _, v in options])
+        avg = sum([(k + 1) * len(v) for k, v in options]) / vote_count if vote_count > 0 else 1
+
+        for k, v in options:
             v = len(v)
-            avg = [(k + 1) * v, v]
             if v == winner:
                 winners.append(embed["fields"][k]["name"])
             elif v > winner:
@@ -237,11 +243,13 @@ class VoteHandler:
                 winners.append(embed["fields"][k]["name"])
                 winner = v
 
-        title = self.message.embeds[0].title
-        content = Template(languages[self.language]['win' if len(winners) == 1 else 'draw'])
-        content = content.substitute(question=title, winner=', '.join([f'{winner}' for winner in winners]))
-        if self.avg and avg[0] != 0 and avg[1] != 0:
-            content += f"\nAverage: {avg[0]/avg[1]}"
+        if self.avg:
+            content = Template(languages[self.language]['avg'])
+            content = content.substitute(avg=f"{avg:.2f}", votes=vote_count)
+        else:
+            title = self.message.embeds[0].title
+            content = Template(languages[self.language]['win' if len(winners) == 1 else 'draw'])
+            content = content.substitute(question=title, winner=', '.join([f'{winner}' for winner in winners]))
 
         embed = discord.Embed.from_dict(embed)
         embed = embed.set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
