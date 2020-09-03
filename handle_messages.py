@@ -2,6 +2,7 @@ import asyncio
 import logging
 import discord
 import datetime
+from config.globals import EX_LOG_CHANNEL
 
 
 async def private_msg(message, content=None, embed=None, file=None, user=None):
@@ -31,7 +32,7 @@ async def delete_user_message(message):
 
 
 async def send_log_message(client, member, title, desc=discord.Embed.Empty, colour=discord.Colour.green()):
-    channel = client.get_channel(338293663677546496)
+    channel = client.get_channel(EX_LOG_CHANNEL)
     embed = discord.Embed(title=" ", description=desc, colour=colour)
     embed.set_author(name=title, icon_url=member.avatar_url)
     embed.set_footer(text=datetime.datetime.now().strftime('%H:%M:%S %Y-%m-%d'))
