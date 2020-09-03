@@ -30,6 +30,17 @@ class MessageDeletedException(Exception):
         return "Message deleted!"
 
 
+@register_command(description='Cancel your vote')
+@add_argument('message_id', type=int, help='Message id from the bot message')
+async def cancel_vote(_, message, args):
+    await delete_user_message(message)
+    if ongoing_votes[args.message_id].creator_id != message.author.id:
+        return await private_msg(message, "This is not your vote!")
+
+    await ongoing_votes[args.message_id].message.delete()
+    return ongoing_votes.pop(args.message_id, None)
+
+
 @register_command('vote', description='Post a poll.')
 @add_argument('topic', help='Question')
 @add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
