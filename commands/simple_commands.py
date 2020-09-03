@@ -1,6 +1,7 @@
 import random
 import discord
 from config import help_text
+from functools import partial
 from cmd_manager.bot_args import build_custom_help
 from handle_messages import delete_user_message, private_msg
 from cmd_manager.decorators import register_command, add_argument
@@ -32,43 +33,11 @@ async def choose(client, message, args):
     await message.channel.send(f"In the name of {name} I choose: {choice}")
 
 
-@register_command(description='[Link] Helpful links for x264')
-async def x264(client, message, args):
+async def text_handler(_, message, args, *, name, text):
     await delete_user_message(message)
-    em = discord.Embed(title="You need help for x264?", description=help_text("bot_bot", "x264_links"))
+    em = discord.Embed(title=f"Helpful links for {name}", description=text)
     await message.channel.send(embed=em)
 
-
-@register_command('avi', description='[Link] Helpful links for Avisynth')
-async def avisynth(client, message, args):
-    await delete_user_message(message)
-    em = discord.Embed(title="You need help for Avisynth?", description=help_text("bot_bot", "avs_links"))
-    await message.channel.send(embed=em)
-
-
-@register_command('vs', description='[Link] Helpful links for VapourSynth')
-async def vapoursynth(client, message, args):
-    await delete_user_message(message)
-    em = discord.Embed(title="You need help for VapourSynth?", description=help_text("bot_bot", "vs_links"))
-    await message.channel.send(embed=em)
-
-
-@register_command(description='[Link] Helpful links for Yuuno')
-async def yuuno(client, message, args):
-    await delete_user_message(message)
-    em = discord.Embed(title="You need help for Yuuno?", description=help_text("bot_bot", "yuuno_links"))
-    await message.channel.send(embed=em)
-
-
-@register_command(description='[Link] Helpful links for ffmpeg')
-async def ffmpeg(client, message, args):
-    await delete_user_message(message)
-    em = discord.Embed(title="ffmpeg?", description=help_text("bot_bot", "ffmpeg_links"))
-    await message.channel.send(embed=em)
-
-
-@register_command(description='[Link] Helpful links for getnative')
-async def getn(client, message, args):
-    await delete_user_message(message)
-    em = discord.Embed(title="You need help for getnative?", description=help_text("bot_bot", "getnative_links"))
-    await message.channel.send(embed=em)
+for _name, _text in help_text("bot_bot").items():
+    callback = partial(text_handler, name=_name, text=_text)
+    register_command(_name, description=f"[Link] Helpful links for {_name}")(callback)

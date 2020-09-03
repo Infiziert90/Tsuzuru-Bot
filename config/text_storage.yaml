@@ -1,10 +1,10 @@
 bot_bot:
-  avs_links: |
+  avi: |
     Ask <#224104675031384065> or <@109369346740015104>
     Links:
     http://avisynth.nl/index.php/Guides
     http://www.avs-plus.net/
-  vs_links: |
+  vs: |
     Ask <#224104675031384065> or <@137780880344088576>
     Links:
     http://www.vapoursynth.com/doc/
@@ -13,14 +13,14 @@ bot_bot:
     https://iamscum.wordpress.com/other-useful-stuff/encode-pack/
     http://vsdb.top/
     https://learnxinyminutes.com/docs/python3/
-  yuuno_links: |
+  yuuno: |
     Ask <#224104675031384065> or <@147060397881425920>
     Links:
     https://pypi.python.org/pypi/yuuno
     https://github.com/stuxcrystal/yuuno
     https://yuuno.encode.moe/ipython/installation.html
     https://myanimelist.net/character/32939/Arashiko_Yuuno
-  x264_links: |
+  x264: |
     Ask <#224104675031384065> or <@109355116917743616>
     Links:
     https://encodingwissen.de/codecs/x264/referenz/
@@ -28,13 +28,13 @@ bot_bot:
     http://x264.janhum.alfahosting.org/fullhelp.txt
     https://kageru.moe/blog/encode/
     https://guide.encode.moe/encoding/preparation.html#video-codecs
-  ffmpeg_links: |
+  ffmpeg: |
     Ask <#224104675031384065> or <@206853964405145600>
     Links:
     https://www.ffmpeg.org
     https://iamscum.wordpress.com/guides/hardsub-guide/
     https://thebombzen.com/articles/ffmpeg/index.html
-  getnative_links: |
+  getn: |
     Ask <#224104675031384065> or <@134750562062303232>
     Bot:
     You can test getnative with the bot.
@@ -43,6 +43,13 @@ bot_bot:
     Links:
     https://github.com/Infiziert90/getnative (standalone)
     https://ddl.kageru.moe/kbz12.pdf (WIP)
+  arch: |
+    :masterrace:
+
+    Links:
+    https://www.archlinux.org/
+    https://wiki.archlinux.org/
+bot_admin:
   welcome_set:
     warning: |
       ```py
@@ -66,6 +73,7 @@ bot_bot:
 
       "Fansub releated channels" | :white_flower:
       "NSFW" and "NSFL" | :underage:
+      "News Channel" | :newspaper:
 
       __**Deutsch**__
       Zuallererst musst du dir eine Sprachgruppe geben
@@ -80,6 +88,7 @@ bot_bot:
       "Politikchannel" | :clown:
       "Channel für Community-Spiele" | :game_die:
       "NSFW" und "NSFL" | :underage:
+      "News Channel" | :newspaper:
     help_message: |
       __**Invite**__
       https://discord.gg/ZB7ZXbN

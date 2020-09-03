@@ -64,7 +64,7 @@ async def purge_channel(client, message, args):
 async def send_welcome(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel(EX_WELCOME_CHANNEL)
-    for key, val in help_text("bot_bot", "welcome_set").items():
+    for key, val in help_text("bot_admin", "welcome_set").items():
         if key == "warning":
             await channel.send(content=val)
         else:
@@ -77,7 +77,7 @@ async def send_welcome(client, message, args):
 @register_command(is_admin=has_admin_permission, description='Send rules.')
 async def send_rules(client, message, args):
     await delete_user_message(message)
-    for key, val in help_text("bot_bot", "rule_set").items():
+    for key, val in help_text("bot_admin", "rule_set").items():
         is_ger = True if key == "ger_ruleset" else False
         channel = client.get_channel(EX_GER_RULE_CHANNEL) if is_ger else client.get_channel(EX_ENG_RULE_CHANNEL)
 
