@@ -8,7 +8,8 @@
         "subs": 247428692169457667,
         "nsfw": 338272951994417153,
         "games": 587733301523906569,
-        "pol": 601120901408227349
+        "pol": 601120901408227349,
+        "news": 750991377248157706
     },
     "language_emotes": {
         "\uD83C\uDDE9\uD83C\uDDEA": "ger",
@@ -19,6 +20,7 @@
         "\uD83D\uDD1E": "nsfw",
         "\uD83D\uDCAE": "subs",
         "\uD83C\uDFB2": "games",
-        "\uD83E\uDD21": "pol"
+        "\uD83E\uDD21": "pol",
+        "\uD83D\uDCF0": "news"
     }
 }
