@@ -3,12 +3,12 @@ from config import help_text
 from config.globals import *
 from .role_system import emotes
 from handle_messages import delete_user_message
-from cmd_manager.filters import is_admin_command
+from cmd_manager.filters import has_admin_permission
 from utils import get_file, punish_user, prison_inmates
 from cmd_manager.decorators import register_command, add_argument
 
 
-@register_command(is_admin=is_admin_command, description='Useless function.')
+@register_command(is_admin=has_admin_permission, description='Useless function.')
 @add_argument('channel', type=int, help='Target channel id')
 @add_argument('text', help='Message text')
 async def send_message(client, message, args):
@@ -17,7 +17,7 @@ async def send_message(client, message, args):
     await delete_user_message(message)
 
 
-@register_command(is_admin=is_admin_command, description='Assign prison.')
+@register_command(is_admin=has_admin_permission, description='Assign prison.')
 @add_argument('--user', '-u', help='Name or id of the user')
 @add_argument('--reason', '-r', help='Reason for prison')
 @add_argument('--time', '-t', dest="prison_length", type=int, default=30, help='Length for prison [in minutes][0=Reset]')
@@ -48,7 +48,7 @@ async def prison(client, message, args):
     )
 
 
-@register_command(is_admin=is_admin_command, description='Purge channel messages.')
+@register_command(is_admin=has_admin_permission, description='Purge channel messages.')
 @add_argument('channel_id', type=int, help='Channel id')
 @add_argument('--reason', '-r', default='bullshit', help='Reason for the purge')
 @add_argument('--number', '-n', dest="number", type=int, default=10, help='Number of messages that will be deleted')
@@ -60,7 +60,7 @@ async def purge_channel(client, message, args):
                                f"By: {message.author.name}")
 
 
-@register_command(is_admin=is_admin_command, description='Send welcome messages.')
+@register_command(is_admin=has_admin_permission, description='Send welcome messages.')
 async def send_welcome(client, message, args):
     await delete_user_message(message)
     channel = client.get_channel(EX_WELCOME_CHANNEL)
@@ -74,7 +74,7 @@ async def send_welcome(client, message, args):
                     await mes.add_reaction(emoji)
 
 
-@register_command(is_admin=is_admin_command, description='Send rules.')
+@register_command(is_admin=has_admin_permission, description='Send rules.')
 async def send_rules(client, message, args):
     await delete_user_message(message)
     for key, val in help_text("bot_bot", "rule_set").items():
@@ -95,13 +95,13 @@ async def send_rules(client, message, args):
             pass
 
 
-@register_command(is_admin=is_admin_command, description='Sends the newest help yaml.')
+@register_command(is_admin=has_admin_permission, description='Sends the newest help yaml.')
 async def send_yaml(client, message, args):
     await delete_user_message(message)
     await message.channel.send(file=discord.File("config/text_storage.yaml"))
 
 
-@register_command(is_admin=is_admin_command, description='Replace the help yaml.')
+@register_command(is_admin=has_admin_permission, description='Replace the help yaml.')
 async def replace_yaml(client, message, args):
     try:
         url = message.attachments[0].url
@@ -115,14 +115,14 @@ async def replace_yaml(client, message, args):
         await message.channel.send("Failed for unknown reasons.")
 
 
-@register_command(is_admin=is_admin_command, description='Send internal stats.')
+@register_command(is_admin=has_admin_permission, description='Send internal stats.')
 async def output_internals(client, message, args):
     embed = discord.Embed(description="Internal Stats", color=333333)
     embed.add_field(name="Users in prison", value=prison_inmates)
     await message.channel.send(embed=embed)
 
 
-@register_command('__lolz', is_admin=is_admin_command, description='Useless function.')
+@register_command('__lolz', is_admin=has_admin_permission, description='Useless function.')
 @add_argument('server_id', type=int, help='Server id')
 async def lolz(client, message, args):
     server = client.get_guild(args.server_id)
@@ -130,3 +130,8 @@ async def lolz(client, message, args):
     roles = [roles[i:i+1900] for i in range(0, len(roles), 1900)]
     for x in roles:
         await message.channel.send(x)
+
+
+@register_command('admin_test', is_admin=has_admin_permission, description='Test admin function.')
+async def admin_test(client, message, args):
+    await message.channel.send("Noob!")

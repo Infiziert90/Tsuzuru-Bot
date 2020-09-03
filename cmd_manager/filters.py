@@ -1,4 +1,5 @@
 import asyncio
+import discord
 import random
 from utils import punish_user
 from config.globals import *
@@ -32,11 +33,15 @@ def command_not_allowed(message):
     return False
 
 
-def is_admin_command(client, message):
+def has_admin_permission(client, message: discord.Message):
     if message.guild.id == EX_SERVER:
-        if message.channel.id == EX_ADMIN_CHANNEL:
+        # moderator has no admin rights, so we check it separately
+        if EX_MOD_ROLE in [role.id for role in message.author.roles]:
             return True
-        asyncio.ensure_future(punish_user(client, message))
+        elif message.author.permissions_in(message.channel).administrator:
+            return True
+        else:
+            asyncio.ensure_future(punish_user(client, message))
     return False
 
 
