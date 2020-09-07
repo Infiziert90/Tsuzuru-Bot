@@ -67,7 +67,7 @@ def build_custom_help():
             help_string += f"{command}{spacing}" if _inline and i % 3 != 0 else f"{command}\n"
 
         help_string += "\n" if _inline and len(category) % 3 != 0 else ""
-        return help_string
+    return help_string
 
 
 parser = BotArgParse(prog=">>", usage=">>", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
