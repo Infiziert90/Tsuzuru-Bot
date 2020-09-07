@@ -1,5 +1,4 @@
 import argparse
-import discord
 
 
 class HelpException(Exception):
@@ -39,12 +38,11 @@ def build_custom_help():
     # there will probably only be one subparser_action,
     # but better save than sorry
     categories = {
-        "normal": ["\nnormal commands:"],
-        "admin": ["\nadmin commands (yields punishment for non-privileged user):"],
-        "link": ["\npost links for:"],
-        "image": ["\npost image:"],
+        "normal": ["\nnormal commands:\n"],
+        "admin": ["\nadmin commands (yields punishment for non-privileged users):\n"],
+        "link": ["\npost helpful links for:\n"],
+        "image": ["\npost an image:\n"],
     }
-    admin_commands = []
     for subparsers_action in subparsers_actions:
         # get all subparsers and print help
         for dest, choice in subparsers_action.choices.items():
@@ -57,8 +55,19 @@ def build_custom_help():
             else:
                 categories["normal"].append(f"    {dest:<19} {choice.description}")
 
-    help_string += '\n'.join([command for commands in categories.values() for command in commands])
-    return help_string
+    for key, value in categories.items():
+        _sorted = _inline = True if key in ["link", "image"] else False
+        help_string += value[0]  # 0 is always the header and not a command
+
+        category = sorted(value[1:]) if _sorted else value[1:]  # skip 0
+
+        longest_command = len(max(category, key=len))
+        for i, command in enumerate(category, 1):
+            spacing = ' ' * (longest_command - len(command))
+            help_string += f"{command}{spacing}" if _inline and i % 3 != 0 else f"{command}\n"
+
+        help_string += "\n" if _inline and len(category) % 3 != 0 else ""
+        return help_string
 
 
 parser = BotArgParse(prog=">>", usage=">>", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
