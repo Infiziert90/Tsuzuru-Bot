@@ -15,7 +15,7 @@ languages = {
     "en": {
         "win": "And the winner of $question is $winner",
         "draw": "$question is a draw between $winner",
-        "avg": "```c\nThe average is $avg by $votes votes```",
+        "avg": "```c\nThe average is $avg with $votes votes```",
     },
     "de": {
         "win": "Der Sieger von $question ist $winner",
@@ -43,10 +43,11 @@ async def cancel_vote(_, message, args):
 
 @register_command('vote', description='Post a poll.')
 @add_argument('topic', help='Question')
-@add_argument('--time', '-t', type=int, default=60, help='Time [in minutes]')
-@add_argument('--options', '-o', dest='options', required=True, action='append', help='Available options, can be used multiple times')
-@add_argument('--language', '-l', dest='lang', type=str.lower, default="en", choices=languages.keys(), help='Set the language for the end text')
-@add_argument('--show-avg', '-avg', dest='avg', action="store_true", default=False, help='Shows the average for votes like 1-10.')
+@add_argument('--time', '-t', type=int, default=2, help='Time [in minutes]')
+@add_argument('--options', '-o', dest='options', action='append', default=[], help='Available options, can be used multiple times')
+@add_argument('--language', '-l', dest='lang', type=str.lower, default="de", choices=languages.keys(), help='Set the language for the end text')
+@add_argument('--show-avg', '-avg', dest='avg', action="store_true", default=False, help='Shows the average for votes like "2.7 with 7 votes"')
+@add_argument('--generate-options', '-gen', dest='gen_options', type=int, default=0, help='Auto generate N options')
 async def normal_vote(_, message, args):
     return await create_vote(message, args, anon=False)
 
@@ -65,11 +66,17 @@ async def check_message(message, args):
     if len(ongoing_votes) == 5:
         return await private_msg(message, "Too many ongoing votes. Please wait until one is over.")
 
-    if args.time < 5:
-        return await private_msg(message, "Time must be over 5")
+    if args.time < 2:
+        return await private_msg(message, "Time must be over 2")
 
-    if len(args.options) > 10 or len(args.options) < 1:
-        return await private_msg(message, "Options must be between 2 and 10.")
+    if len(args.options) == 0 and args.gen_options == 0:
+        return await private_msg(message, "--options or --generate-options is required.")
+    elif len(args.options) != 0 and args.gen_options != 0:
+        return await private_msg(message, "-o and -gen can't be used together")
+    elif len(args.options) != 0 and (len(args.options) < 2 or len(args.options) > 10):
+        return await private_msg(message, "Insufficient number of options, 2 to 10 options are needed.")
+    elif args.gen_options != 0 and (args.gen_options < 2 or args.gen_options > 10):
+        return await private_msg(message, "Number must be between 2 and 10")
 
     options = [x.lower() for x in args.options]
     if len(set(options)) != len(options):
@@ -90,14 +97,25 @@ async def create_vote(message, args, anon):
                                                         f"by clicking the reactions.", color=0000000)
     embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
     embed.set_footer(text=f"Time left: {args.time} min")
-    for option, number in zip(args.options, range(len(args.options))):
-        embed.add_field(name=f"{emo_dict[number]} {option}", value=f"Votes: 0", inline=False)
+
+    options = args.options if len(args.options) != 0 else [i for i in range(1, args.gen_options + 1)]
+    option_count = len(args.options) if len(args.options) != 0 else args.gen_options
+    for option, number in zip(options, range(option_count)):
+        embed.add_field(
+            name=f"{emo_dict[number]} {option}",
+            value=f"Votes: 0",
+            inline=False if args.gen_options == 0 else True
+        )
+
+    # add an empty field when 2 fields are in the last line, so that the formatting is not broken
+    if args.gen_options != 0 and args.gen_options % 3 == 2:
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
 
     mes = await message.channel.send(embed=embed)
-    handler = VoteHandler(mes, args.options, args.lang, message.author.id, anon=anon, avg=args.avg)
+    handler = VoteHandler(mes, options, args.lang, message.author.id, anon=anon, avg=args.avg)
     ongoing_votes[mes.id] = handler
 
-    for number in range(len(args.options)):
+    for number in range(option_count):
         await mes.add_reaction(emo_dict[number])
 
     asyncio.create_task(handler.vote_timer(args.time))
@@ -241,7 +259,7 @@ class VoteHandler:
         winners = []
         options = self.votes_per_options.items()
         # avg = (A * votes + B * votes ...) / all votes
-        # prevent dividing by zero
+        # prevent division with zero
         vote_count = sum([len(v) for _, v in options])
         avg = sum([(k + 1) * len(v) for k, v in options]) / vote_count if vote_count > 0 else 1
 
