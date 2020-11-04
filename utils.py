@@ -5,7 +5,7 @@ import random
 import logging
 import datetime
 from dateutil import tz
-from config.globals import EX_MOD_LOG_CHANNEL, EX_PRISON_ROLE
+from config.globals import EX_SERVER, EX_MOD_LOG_CHANNEL, EX_PRISON_ROLE
 from handle_messages import private_msg, delete_user_message
 import storage
 
@@ -117,7 +117,7 @@ async def check_and_release(client):
                     logging.info(f"Removing prison for {user_id}")
                     guild = client.get_guild(EX_SERVER)
                     member = guild.get_member(user_id)
-                    prison_role = get_role_by_id(guild, 451076667377582110)
+                    prison_role = get_role_by_id(guild, EX_PRISON_ROLE)
                     try:
                         await member.remove_roles(prison_role)
                     except (discord.Forbidden, discord.HTTPException):
