@@ -20,7 +20,8 @@ uvloop.install()
 loop = uvloop.new_event_loop()
 asyncio.set_event_loop(loop)
 
-client = discord.Client()
+intents = discord.Intents.all()
+client = discord.Client(intents=intents)
 commands.load_commands()
 
 
@@ -127,7 +128,7 @@ async def handle_commands(message: discord.Message):
     if message.author.id == client.user.id:  # own bot
         return
 
-    if message.author.id in prison_inmates:
+    if message.author.id in prison_inmates:  # user in prison are not allowed to use any command
         return
 
     if is_guild and message.guild.id == EX_SERVER:
@@ -138,27 +139,27 @@ async def handle_commands(message: discord.Message):
     if not message.content.startswith(">>") or len(message.content) == 2:  # prevent forwarding '>>' messages
         return
 
-    arg_string = message.clean_content[2:]
-    if not is_guild and arg_string.split(" ")[0] not in ["getnative", "grain", "help"]:
-        return await message.author.send("This command is not allowed in private chat, sorry.")
+    args_string = message.clean_content[2:]
+    if not is_guild and args_string.split(" ")[0] not in ["getnative", "grain", "help"]:
+        return await message.author.send("This command is not allowed in private chat, sorry :(")
 
     if is_guild:
         today = datetime.datetime.today().strftime("%a %d %b %H:%M:%S")
         logging.info(f"Date: {today} User: {message.author} Server: {message.guild.name} "
                      f"Channel: {message.channel.name} Command: {message.content[:50]}")
 
+    arg_list = shlex.split(args_string)
     try:
-        arg_string = shlex.split(arg_string)
-        args = parser.parse_args(arg_string)
+        args = parser.parse_args(arg_list)
     except ValueError as err:
         return await private_msg(message, f"```\n{err}```")
     except HelpException as err:
         await delete_user_message(message)
         return await private_msg(message, f"```\n{err}```")
     except (UnkownCommandException, argparse.ArgumentError) as err:
-        if arg_string[0] in dispatcher.commands:
-            return await private_msg(message, f"```\n{err}```")
-        return
+        if arg_list[0] not in dispatcher.commands:
+            return  # not a valid command, so just ignore it
+        return await private_msg(message, f"```\n{err}```")
 
     return await dispatcher.handle(args.command, client, message, args)
 
