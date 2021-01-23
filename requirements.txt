@@ -3,5 +3,6 @@ matplotlib>=3.1.1
 PyYAML>=5.1.1
 uvloop>=0.12.2
 discord.py>=1.5.1
+PixivPy-Async>=1.2.11
 -e git+https://github.com/strinking/python-duckduckgo@master#egg=duckduckgo-async
 -e git+https://github.com/pfeyz/merriam-webster-api@master#egg=merriam-webster-api
