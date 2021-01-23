@@ -15,6 +15,7 @@ from commands.vote_command import ongoing_votes, Vote
 from commands.role_system import emotes, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import prison_inmates, check_and_release
+from modules.pixiv import handle_pixiv
 
 uvloop.install()
 loop = uvloop.new_event_loop()
@@ -34,6 +35,8 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     await handle_commands(message)
+    if message.author.id != client.user.id:
+        await handle_pixiv(message)
 
 
 @client.event
