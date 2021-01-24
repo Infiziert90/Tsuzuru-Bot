@@ -2,6 +2,7 @@ import datetime
 import io
 import logging
 import re
+import time
 
 import discord
 import pixivpy_async as pixiv
@@ -19,14 +20,16 @@ pixiv_direct_img_pattern = re.compile(r'https://i\.pximg\.net/\S+\.\w+\b')
 
 # global pixiv app-api instance
 _aapi = None
+_expires_at = None
 
 
 async def _assert_pixiv_aapi():
-    global _aapi
+    global _aapi, _expires_at
     if not _aapi:
         aapi = pixiv.AppPixivAPI()
         try:
-            await aapi.login(config.MAIN.pixiv_username, config.MAIN.pixiv_password)
+            req = await aapi.login(config.MAIN.pixiv_username, config.MAIN.pixiv_password)
+            _expires_at = time.time() + req.expires_in - 30
         except pixiv.error.AuthCredentialsError:
             logging.error("bad pixiv credentials")
             return False
@@ -35,6 +38,8 @@ async def _assert_pixiv_aapi():
             return False
         else:
             _aapi = aapi
+    elif time.time() >= _expires_at:
+        await _aapi.login()  # refresh
 
     return _aapi
 
