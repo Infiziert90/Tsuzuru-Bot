@@ -59,6 +59,7 @@ def parse_datetime(time_string: str) -> Optional[datetime]:
 ########################################
 
 NO_MENTIONS = discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=False)
+MAX_DELTA = timedelta(days=31)
 
 data: Dict[str, Any] = {}
 handles: Dict[int, asyncio.Handle] = {}
@@ -148,7 +149,14 @@ async def timer(client, message, args):
 
     if timestamp <= now:
         await message.channel.send(
-            f"This timestamp is in the past (by **{format_timedelta(-delta)}**)",
+            f"This timestamp is in the past (by {format_timedelta(-delta)})",
+            reference=message,
+        )
+        return
+    elif delta > MAX_DELTA:
+        await message.channel.send(
+            "This timestamp is too far in the future"
+            f" (more than {format_timedelta(MAX_DELTA)})",
             reference=message,
         )
         return
