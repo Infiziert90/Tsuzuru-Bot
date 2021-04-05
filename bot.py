@@ -16,6 +16,7 @@ from commands.role_system import emotes, role_handler
 from cmd_manager.filters import EX_SERVER, EX_WELCOME_CHANNEL
 from utils import prison_inmates, check_and_release
 from modules.pixiv import handle_pixiv
+from modules.timer import init as init_timer
 
 uvloop.install()
 loop = uvloop.new_event_loop()
@@ -29,6 +30,7 @@ commands.load_commands()
 @client.event
 async def on_ready():
     logging.info(f'Logged in as\nUsername: {client.user.name}\nID: {client.user.id}\nAPI: {discord.__version__}')
+    await init_timer(client)
     await client.change_presence(activity=discord.Game(name=config.MAIN.get("gameplayed", "Yuri is Love!")))
 
 
