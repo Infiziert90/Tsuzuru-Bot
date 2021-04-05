@@ -116,6 +116,7 @@ async def send_reminder(client, timer: Timer):
         message_id=timer.message_id,
         channel_id=timer.channel_id,
         guild_id=timer.guild_id,
+        fail_if_not_exists=False,
     )
     await channel.send(
         text,
