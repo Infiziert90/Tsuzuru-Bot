@@ -12,14 +12,14 @@ reg = re.compile(r"<:(\w+):(\d+)>")
 async def memefont(client, message, args):
     await delete_user_message(message)
     if len(args.text) > 25:
-        return await private_msg(message, "Max. 25 chars.")
+        return await private_msg(message, "Only 25 characters are allowed.")
 
     emoji = re.search(reg, args.text)
     if emoji:
-        return await private_msg(message, "Emojis not allowed in the text.")
+        return await private_msg(message, "Emotes are not allowed in the text.")
 
     if message.author in user_cooldown:
-        return await private_msg(message, "Cooldown, wait 5min.")
+        return await private_msg(message, "Cooldown is still active, wait 5min.")
 
     set_user_cooldown(message.author, 300)
 
