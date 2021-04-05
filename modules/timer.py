@@ -59,6 +59,7 @@ def parse_datetime(time_string: str) -> Optional[datetime]:
 ########################################
 
 NO_MENTIONS = discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=False)
+NO_EVERYONE_MENTIONS = discord.AllowedMentions(everyone=False)
 MAX_DELTA = timedelta(days=31)
 
 data: Dict[str, Any] = {}
@@ -116,8 +117,14 @@ async def send_reminder(client, timer: Timer):
         channel_id=timer.channel_id,
         guild_id=timer.guild_id,
     )
-    await channel.send(text, reference=reference, mention_author=True)
-    # TODO what about failure? schedule retry? retry on next startup? how often?
+    await channel.send(
+        text,
+        reference=reference,
+        # Generally we want to allow mentions,
+        # but no power abuse through the bot's permissions
+        allowed_mentions=NO_EVERYONE_MENTIONS,
+        mention_author=True,
+    )
 
 
 def schedule(client, timer):
