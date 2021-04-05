@@ -58,7 +58,7 @@ def parse_datetime(time_string: str) -> Optional[datetime]:
 
 ########################################
 
-NO_MENTIONS = discord.AllowedMentions(everyone=False, users=False, roles=False, replied_user=False)
+NO_MENTIONS = discord.AllowedMentions.none()
 NO_EVERYONE_MENTIONS = discord.AllowedMentions(everyone=False)
 MAX_DELTA = timedelta(days=31)
 
