@@ -6,7 +6,7 @@ from dictcc import Dict, AVAILABLE_LANGUAGES
 from config import config
 from collections import defaultdict
 from cmd_manager.decorators import register_command, add_argument
-from merriam_api import CollegiateDictionary, WordNotFoundException
+from merriam_webster.api import CollegiateDictionary, WordNotFoundException
 import duckduckgo
 
 coll_key = config.MAIN.coll_key
