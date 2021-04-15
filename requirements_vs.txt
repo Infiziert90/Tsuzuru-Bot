@@ -1,0 +1,2 @@
+VapourSynth>=45
+getnative>=3.0.0
