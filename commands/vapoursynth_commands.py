@@ -12,6 +12,7 @@ import gc
 import os
 import random
 import asyncio
+import aiohttp
 import inspect
 import argparse
 import tempfile
@@ -47,14 +48,14 @@ class Grain:
         for _ in range(random.randint(1, 10)):
             await asyncio.sleep(0.2)  # give the bot event time
 
-            used["var"].append(random.randint(1000, 10000000))
+            used["var"].append(random.randint(100, 10000))
             used["hcorr"].append(random.uniform(0.1, 1.0))
             used["vcorr"].append(random.uniform(0.1, 1.0))
-            self.src = core.grain.Add(self.src, var=used["var"][-1], hcorr=used["hcorr"][-1], vcorr=used["v.corr"][-1])
+            self.src = core.grain.Add(self.src, var=used["var"][-1], hcorr=used["hcorr"][-1], vcorr=used["vcorr"][-1])
         first_out = imwri.Write(self.src, 'png', f'{self.path}/{self.filename}_grain%d.png')
         first_out.get_frame(0)  # trick vapoursynth into rendering the frame
 
-        return f"var: {used['var']}\n, hcorr: {used['hcorr']}\n, vcorr: {used['vcorr']}"
+        return f"var: {used['var']}\nhcorr: {used['hcorr']}\nvcorr: {used['vcorr']}"
 
 
 def to_float(str_value):
@@ -206,8 +207,14 @@ async def grain(client, message, args):
 
     gc.collect()
     try:
-        await message.channel.send(file=File(f'{path}/{filename}_grain0.png'),
-                                   content=f"Grain <:diGG:302631286118285313>\n{best_value}")
+        await message.channel.send(file=File(f'{path}/{filename}_grain0.png'), content=f"Grain <:diGG:302631286118285313>\n{best_value}")
     except HTTPException:
-        await message.channel.send("Too much grain <:notlikemiya:328621519037005826>")
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://0x0.st/') as resp:
+                if resp.ok:
+                    final_resp = await session.post('https://0x0.st/', data={'file': open(f'{path}/{filename}_grain0.png', 'rb')})
+                    if final_resp.ok:
+                        await message.channel.send(content=f"Grain <:diGG:302631286118285313>\n{best_value}\n{final_resp.content.read_nowait().decode('utf-8')}")
+                    else:
+                        await message.channel.send("Too much grain <:notlikemiya:328621519037005826>")
     await cleanup(message, delete_message, tmp_dir)
