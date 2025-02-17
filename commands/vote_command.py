@@ -95,7 +95,7 @@ async def create_vote(message, args, anon):
 
     embed = discord.Embed(title=args.topic, description=f"Cast a vote {'secretly' if anon else ''} "
                                                         f"by clicking the reactions.", color=0000000)
-    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar)
     embed.set_footer(text=f"Time left: {args.time} min")
 
     options = args.options if len(args.options) != 0 else [i for i in range(1, args.gen_options + 1)]
@@ -281,7 +281,7 @@ class VoteHandler:
             content = content.substitute(question=title, winner=', '.join([f'{winner}' for winner in winners]))
 
         embed = discord.Embed.from_dict(embed)
-        embed = embed.set_footer(text=f"Over!!!", icon_url=discord.Embed.Empty)
+        embed = embed.set_footer(text=f"Over!!!", icon_url=None)
         await self.message.edit(content=content, embed=embed)
 
         return await self.message.channel.send(content)

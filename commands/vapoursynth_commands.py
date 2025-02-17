@@ -24,7 +24,6 @@ from cmd_manager.decorators import register_command, add_argument
 from handle_messages import private_msg, delete_user_message
 
 core = vapoursynth.core
-core.add_cache = False
 imwri = getattr(core, "imwri", getattr(core, "imwrif", None))
 lossy = ["jpg", "jpeg", "gif"]
 user_cooldown = set()
@@ -45,10 +44,10 @@ class Grain:
             "vcorr": [],
         }
 
-        for _ in range(random.randint(1, 10)):
+        for _ in range(random.randint(1, 3)):
             await asyncio.sleep(0.2)  # give the bot event time
 
-            used["var"].append(random.randint(100, 10000))
+            used["var"].append(random.randint(10, 1000))
             used["hcorr"].append(random.uniform(0.1, 1.0))
             used["vcorr"].append(random.uniform(0.1, 1.0))
             self.src = core.grain.Add(self.src, var=used["var"][-1], hcorr=used["hcorr"][-1], vcorr=used["vcorr"][-1])

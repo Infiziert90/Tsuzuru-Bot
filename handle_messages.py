@@ -31,10 +31,10 @@ async def delete_user_message(message):
             logging.debug(f"Exception while deleting a message: {err}")
 
 
-async def send_log_message(client, member, title, desc=discord.Embed.Empty, colour=discord.Colour.green()):
+async def send_log_message(client, member, title, desc=None, colour=discord.Colour.green()):
     channel = client.get_channel(EX_LOG_CHANNEL)
     embed = discord.Embed(title=" ", description=desc, colour=colour)
-    embed.set_author(name=title, icon_url=member.avatar_url)
+    embed.set_author(name=title, icon_url=member.avatar)
     embed.set_footer(text=datetime.datetime.now().strftime('%H:%M:%S %Y-%m-%d'))
     await channel.send(embed=embed)
 

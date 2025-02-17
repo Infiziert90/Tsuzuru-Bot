@@ -21,5 +21,5 @@ async def post_fansub(client, message, args):
         description += f" [{lname}]({link})    "
 
     embed = discord.Embed(title=title, description=description[:-3], color=0x000000)
-    embed.set_author(name=message.author.name, icon_url=message.author.avatar_url)
+    embed.set_author(name=message.author.name, icon_url=message.author.avatar)
     await message.channel.send(embed=embed)
