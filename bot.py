@@ -1,6 +1,5 @@
 import shlex
 import aiohttp
-import uvloop
 import asyncio
 import discord
 import logging
@@ -18,14 +17,15 @@ from utils import prison_inmates, check_and_release
 from modules.pixiv import handle_pixiv
 from modules.timer import init as init_timer
 
-uvloop.install()
-loop = uvloop.new_event_loop()
-asyncio.set_event_loop(loop)
-
 intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+client: discord.Client = discord.Client(intents=intents)
 commands.load_commands()
 
+@client.event
+async def setup_hook():
+    logging.info("Setting up background tasks")
+    # start the prison release task
+    client.loop.create_task(check_and_release(client))
 
 @client.event
 async def on_ready():
@@ -171,8 +171,6 @@ async def handle_commands(message: discord.Message):
 
 def main():
     while True:
-        # start the prison release task
-        loop.create_task(check_and_release(client))
         logging.info("Start discord run")
         try:
             # bot-Bot
